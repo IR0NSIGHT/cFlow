@@ -1,19 +1,18 @@
 ﻿using SkiaSharp;
-using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
 
 public class SimpleFlowMap : IFlowMap
 {
 
-    IFlowMap.Flow[][] flowMap;
-    public SimpleFlowMap(IHeightMap heightMap)
+    private IFlowMap.Flow[][] flowMap;
+
+    public SimpleFlowMap FromHeightMap(IHeightMap heightMap)
     {
-        flowMap = emptyFlowMap(heightMap.Bounds());
         FillWithUnknown(this);
         CalculateFlowFromHeightMap(heightMap, this);
+        return this;
     }
+
 
     public SimpleFlowMap((int x, int y) dimension)
     {

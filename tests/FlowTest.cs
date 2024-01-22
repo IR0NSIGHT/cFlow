@@ -46,8 +46,7 @@ namespace TestProject1
         [TestMethod]
         public void ColorOnFlowMap()
         {
-
-            var flowMap = new SimpleFlowMap(new DummyDimension((16, 7), 13));
+            var flowMap = new SimpleFlowMap((16,7)).FromHeightMap(new DummyDimension((16, 7), 13));
             IFlowMap.Flow[] allFlows = {
                 new IFlowMap.Flow(false, false, false, false, false),
                 new IFlowMap.Flow(false, false, false, false, true),

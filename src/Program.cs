@@ -11,8 +11,8 @@ class EntryClass
 
         SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(filename);
         Console.WriteLine("Loaded bitmap");
-        var heightMap = new Image8BitHeightMap(sKBitmap);
-        SimpleFlowMap fMap = new SimpleFlowMap(heightMap);
+        IHeightMap heightMap = new Image8BitHeightMap(sKBitmap);
+        SimpleFlowMap fMap = new SimpleFlowMap(heightMap.Bounds()).FromHeightMap(heightMap);
 
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
