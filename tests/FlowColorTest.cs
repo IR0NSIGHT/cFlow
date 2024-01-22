@@ -2,7 +2,7 @@
 namespace TestProject1
 {
     [TestClass]
-    public class FlowTest
+    public class FlowColorTest
     {
         [TestMethod]
         public void FlowToColorGray8()

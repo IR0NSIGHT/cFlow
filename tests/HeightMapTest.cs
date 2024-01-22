@@ -1,3 +1,5 @@
+using SkiaSharp;
+
 namespace TestProject1
 {
     [TestClass]
@@ -50,6 +52,22 @@ namespace TestProject1
                 }
                 row ++;
             }
+        }
+
+        [TestMethod]
+        public void FromImage()
+        {
+            var (width, height) = (10, 3);
+            var bitmap = new SKBitmap(width, height, SKColorType.Gray8, SKAlphaType.Opaque);
+            //mark edges top left, top right, bottom right in brighter getting grays
+            bitmap.SetPixel(0, 0, new SKColor(27, 27, 27));
+            bitmap.SetPixel(9, 0, new SKColor(47, 47, 47));
+            bitmap.SetPixel(9, 2, new SKColor(77, 77, 77));
+
+            var heightmap = new Image8BitHeightMap(bitmap);
+            Assert.AreEqual(27, heightmap.GetHeight(0, 0));
+            Assert.AreEqual(47, heightmap.GetHeight(9, 0));
+            Assert.AreEqual(77, heightmap.GetHeight(9, 2));
         }
     }
 }
