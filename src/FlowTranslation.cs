@@ -1,24 +1,8 @@
 ﻿public static class FlowTranslation
 {
-    public static byte FlowToColor(IFlowMap.Flow p)
+    public static byte FlowToGray8(IFlowMap.Flow p)
     {
-        // # FF0000 (Red)
-        // #00FF00 (Green)
-        // #0000FF (Blue)
-        // # FFFF00 (Yellow)
-        // # FF00FF (Magenta)
-        // #00FFFF (Cyan)
-        // # FFA500 (Orange)
-        // #800080 (Purple)
-        // #008000 (Dark Green)
-        // #008080 (Teal)
-        // # FF6347 (Tomato)
-        // #7CFC00 (Lawn Green)
-        // #8A2BE2 (Blue Violet)
-        // # FFD700 (Gold)
-        // #4B0082 (Indigo)
-        // # DC143C (Crimson)
-        // 00CED1 Dark turquois
+       
         if (p.Unknown)
             return (byte)0xFF;
         byte color = 0;
@@ -27,7 +11,72 @@
         color += (byte)(p.Down ? 4 : 0);
         color += (byte)(p.Up ? 8 : 0);
 
-        return (byte)(color*15);
+        return (byte)(color*7);
+    }
+
+    public static uint FlowToColor(IFlowMap.Flow p)
+    {
+        List<uint> colorUIntValues = new List<uint>
+        {
+            0xFF0000FF, // Red
+            0x00FF00FF, // Green
+            0x0000FFFF, // Blue
+            0xFFFF00FF, // Yellow
+            0xFF00FFFF, // Magenta
+            0x00FFFFFF, // Cyan
+            0xFFA500FF, // Orange
+            0x800080FF, // Purple
+            0x008000FF, // Dark Green
+            0x008080FF, // Teal
+            0xFF6347FF, // Tomato
+            0x7CFC00FF, // Lawn Green
+            0x8A2BE2FF, // Blue Violet
+            0xFFD700FF, // Gold
+            0x4B0082FF, // Indigo
+            0xDC143CFF, // Crimson
+            0x00CED1FF  // Dark Turquoise
+        };
+
+        if (p.Unknown)
+            return colorUIntValues[0];
+        switch (p.Up ? 1 : 0, p.Down ? 1 : 0, p.Left ? 1 : 0, p.Right ? 1 : 0)
+        {
+            case (0, 0, 0, 0):
+                return colorUIntValues[0];
+            case (0, 0, 0, 1):
+                return colorUIntValues[1];
+            case (0, 0, 1, 0):
+                return colorUIntValues[2];
+            case (0, 0, 1, 1):
+                return colorUIntValues[3];
+            case (0, 1, 0, 0):
+                return colorUIntValues[4];
+            case (0, 1, 0, 1):
+                return colorUIntValues[5];
+            case (0, 1, 1, 0):
+                return colorUIntValues[6];
+            case (0, 1, 1, 1):  //DLR
+                return colorUIntValues[7];
+            case (1, 0, 0, 0):
+                return colorUIntValues[8];
+            case (1, 0, 0, 1):
+                return colorUIntValues[9];
+            case (1, 0, 1, 0):
+                return colorUIntValues[10];
+            case (1, 0, 1, 1):  //U LR
+                return colorUIntValues[11];
+            case (1, 1, 0, 0):
+                return colorUIntValues[12];
+            case (1, 1, 0, 1):  // UD R
+                return colorUIntValues[13];
+            case (1, 1, 1, 0):  //UP L
+                return colorUIntValues[14];
+            case (1, 1, 1, 1):
+                return colorUIntValues[15];
+            default:
+                throw new Exception("unknown flow");
+        }
+       
     }
     static String FlowToString(IFlowMap.Flow p)
     {

@@ -21,7 +21,7 @@ class Image8BitHeightMap : IHeightMap
 
     public short GetHeight(int x, int y)
     {
-        return bitmap.GetPixel(y,x).Red;
+        return bitmap.GetPixel(x,y).Red;
     }
 
  
@@ -34,6 +34,6 @@ class Image8BitHeightMap : IHeightMap
 
     public void SetHeight(Point point)
     {
-        bitmap.SetPixel(point.Y, point.X, new SKColor((byte)point.height, (byte)point.height, (byte)point.height));
+        bitmap.SetPixel(point.X, point.Y, new SKColor((byte)point.height, (byte)point.height, (byte)point.height));
     }
 }

@@ -204,7 +204,7 @@ public class SimpleFlowMap : IFlowMap
         ApplyNaturalEdgeFlow(heightMap, flowMap);
         Console.WriteLine("expand flow");
 
-        //get all existing flows
+    /*    //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
         foreach (var point in flowMap.GetPoints())
         {
@@ -231,7 +231,7 @@ public class SimpleFlowMap : IFlowMap
             Console.WriteLine($"expanding flowmap at iteration: {i}");
             i++;
         }
-
+    */
 
         Console.WriteLine("done");
     }
@@ -243,11 +243,27 @@ public class SimpleFlowMap : IFlowMap
 
         foreach (var points in flowMap.GetPoints())
         {
-            pixelData[points.Y * width + points.X] = points.Flow.Unknown ? (byte)255
-                : (byte)(FlowTranslation.FlowToColor(points.Flow));
+            pixelData[points.Y * width + points.X] = FlowTranslation.FlowToGray8(points.Flow);
         }
 
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
+        IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
+        bitmap.SetPixels(pixelsPointer);
+        Marshal.FreeHGlobal(pixelsPointer);
+        return bitmap;
+    }
+
+    public static SKBitmap ToColorImage(IFlowMap flowMap)
+    {
+        var (width, height) = flowMap.getDimensions();
+        uint[] pixelData = new uint[width * height];
+
+        foreach (var points in flowMap.GetPoints())
+        {
+            pixelData[points.Y * width + points.X] = FlowTranslation.FlowToColor(points.Flow);
+        }
+
+        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
         IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
         bitmap.SetPixels(pixelsPointer);
         Marshal.FreeHGlobal(pixelsPointer);
@@ -277,7 +293,7 @@ public class SimpleFlowMap : IFlowMap
         return new IFlowMap.Flow(false, up, down, left, right);
     }
 
-    public IEnumerable<IFlowMap.PointFlow> FollowFlow(IFlowMap.PointFlow point)
+    public List<IFlowMap.PointFlow> FollowFlow(IFlowMap.PointFlow point)
     {
         List<IFlowMap.PointFlow> nextFlow = new();
         if (point.Flow.Up)
@@ -289,7 +305,7 @@ public class SimpleFlowMap : IFlowMap
         if (point.Flow.Right)
             nextFlow.Add(GetFlow(Point.Right(point.X, point.Y).x, Point.Right(point.X, point.Y).y));
 
-        return nextFlow.AsEnumerable();
+        return nextFlow;
     }
 
     public (int x, int y) getDimensions()

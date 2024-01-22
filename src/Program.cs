@@ -1,4 +1,5 @@
 ﻿using SkiaSharp;
+using src.Maps.riverMap;
 using System.Diagnostics;
 using System.Text;
 
@@ -6,7 +7,7 @@ class EntryClass
 {
     static void Main(string[] args)
     {
-        var filename = "C:\\Users\\Max1M\\OneDrive\\Bilder\\generatedworld_heightmap.png";
+        var filename = "C:\\Users\\Max1M\\OneDrive\\Bilder\\tiny_heightmap.png";
         var fileOut = "C:\\Users\\Max1M\\OneDrive\\Bilder\\tiny_heightmap_EDIT.png";
 
         SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(filename);
@@ -16,11 +17,17 @@ class EntryClass
 
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        ImageApi.SaveBitmapAsPng(SimpleFlowMap.ToImage(fMap), fileOut);
+        var coloredFlow = SimpleFlowMap.ToColorImage(fMap);
+        ImageApi.SaveBitmapAsPng(coloredFlow, fileOut);
+
+        SaveToFile(FlowMapPrinter.FlowMapToString(fMap, heightMap), false);
 
         stopwatch.Stop();
         TimeSpan elapsed = stopwatch.Elapsed;
         stopwatch.Reset();
+
+        var riverMap = new RiverMap(fMap);
+        riverMap.AddRiverFrom(69, 25);
 
         Console.WriteLine($"Seconds: {elapsed.TotalSeconds}");
 
@@ -34,12 +41,12 @@ class EntryClass
         string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         // Open or create the file and write the content
-        using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "WriteLines.txt"), append, Encoding.UTF8 ))
+        using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "cFlow_Log.txt"), append, Encoding.UTF8 ))
         {
             outputFile.Write(content);
         }
 
-        Console.WriteLine($"Content {(append ? "appended to" : "written to")} WriteLines.txt");
+        Console.WriteLine($"Content {(append ? "appended to" : "written to")} cFlow_Log.txt");
     }
 
     static void RandomizeHeight(IHeightMap d)

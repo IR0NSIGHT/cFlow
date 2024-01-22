@@ -51,7 +51,7 @@
     PointFlow GetFlow(int x, int y);
     void SetFlow(int x, int y, IFlowMap.Flow flow);
     IEnumerable<PointFlow> GetPoints();
-    IEnumerable<PointFlow> FollowFlow(PointFlow point);
+    List<PointFlow> FollowFlow(PointFlow point);
 
     IEnumerable<PointFlow> GetRow(int y);
 
