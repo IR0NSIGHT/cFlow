@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using System.Threading;
 
-class ImageApi
+public class ImageApi
 {
     public static SKBitmap LoadBitmapFromPng(string filePath)
     {

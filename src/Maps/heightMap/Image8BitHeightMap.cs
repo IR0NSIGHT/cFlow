@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-class Image8BitHeightMap : IHeightMap
+public class Image8BitHeightMap : IHeightMap
 {
     private SKBitmap bitmap;
     private Map2dIterator _iterator;
@@ -23,8 +23,6 @@ class Image8BitHeightMap : IHeightMap
     {
         return bitmap.GetPixel(x,y).Red;
     }
-
- 
 
     public bool inBounds(int x, int y)
     {

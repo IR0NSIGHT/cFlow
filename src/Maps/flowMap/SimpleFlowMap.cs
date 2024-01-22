@@ -17,6 +17,7 @@ public class SimpleFlowMap : IFlowMap
     public SimpleFlowMap((int x, int y) dimension)
     {
         flowMap = emptyFlowMap(dimension);
+        FillWithUnknown(this);
     }
 
     private static IFlowMap.Flow[][] emptyFlowMap((int x, int y) dimensions)
