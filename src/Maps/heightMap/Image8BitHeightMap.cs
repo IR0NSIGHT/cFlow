@@ -16,7 +16,7 @@ public class Image8BitHeightMap : IHeightMap
 
     public (int x, int y) Bounds()
     {
-        return (bitmap.Height, bitmap.Width);
+        return (bitmap.Width, bitmap.Height);
     }
 
     public short GetHeight(int x, int y)

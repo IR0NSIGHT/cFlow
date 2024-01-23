@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-class DimensionPrinter
+public class DimensionPrinter
 {
     public static String DimensionToString<T>(
         IEnumerable<IEnumerable<T>> it,
@@ -17,7 +17,7 @@ class DimensionPrinter
 }
 
 
-class FlowMapPrinter
+public class FlowMapPrinter
 {
     public static String FlowMapToString(IFlowMap flowMap, IHeightMap heightMap)
     {

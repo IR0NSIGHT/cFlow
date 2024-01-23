@@ -3,7 +3,7 @@ using src.Maps.riverMap;
 using System.Diagnostics;
 using System.Text;
 
-class EntryClass
+public class EntryClass
 {
     static void Main(string[] args)
     {

@@ -48,7 +48,7 @@ public class SimpleFlowMap : IFlowMap
     /// </summary>
     /// <param name="heightMap"></param>
     /// <param name="flowMap"></param>
-    private static void ApplyNaturalEdgeFlow(IHeightMap heightMap, IFlowMap flowMap)
+    public static void ApplyNaturalEdgeFlow(IHeightMap heightMap, IFlowMap flowMap)
     {
         //set Flow for all natural edges
         foreach (var point in heightMap.iterator().Points())
@@ -205,7 +205,7 @@ public class SimpleFlowMap : IFlowMap
         ApplyNaturalEdgeFlow(heightMap, flowMap);
         Console.WriteLine("expand flow");
 
-    /*    //get all existing flows
+        //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
         foreach (var point in flowMap.GetPoints())
         {
@@ -232,7 +232,7 @@ public class SimpleFlowMap : IFlowMap
             Console.WriteLine($"expanding flowmap at iteration: {i}");
             i++;
         }
-    */
+    
 
         Console.WriteLine("done");
     }
