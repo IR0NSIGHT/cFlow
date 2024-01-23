@@ -1,17 +1,11 @@
-﻿using Microsoft.VisualStudio.TestPlatform.TestHost;
-using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SkiaSharp;
 
 namespace tests
 {
-    [TestClass]
+    [TestFixture]
     public class FlowMapTest
     {
-        [TestMethod]
+        [Test] //FIXME suspected to lead to issues with test runner for some reason?
         public void TestMapOrientation()
         {
             var dims = (10, 3);
@@ -33,11 +27,11 @@ namespace tests
             Assert.IsTrue(fMap.GetFlow(9, 2).Flow.Down);
 
             var bitmap = SimpleFlowMap.ToColorImage(fMap);
-            ImageApi.SaveBitmapAsPng(bitmap, "C:\\Users\\Max1M\\OneDrive\\Bilder\\debug_flowmap.png");
+            //ImageApi.SaveBitmapAsPng(bitmap, "C:\\Users\\Max1M\\OneDrive\\Bilder\\debug_flowmap.png");
 
         }
 
-        [TestMethod]
+        [Test]
         public void NaturalFlow() {
             //test if depressresions in the terrain will cause neighboursing blocks to be marked as natural edge flow
 
@@ -68,7 +62,7 @@ namespace tests
             Console.WriteLine(color2 + " " + color1);
         }
 
-        [TestMethod]
+        [Test]
         public void fromImageToHeightmapToFlowMapToImage()
         {
             //integration test 

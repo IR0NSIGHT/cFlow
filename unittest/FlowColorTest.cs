@@ -1,52 +1,53 @@
-﻿using static FlowTranslation;
-namespace TestProject1
+﻿using System.Drawing;
+using static FlowTranslation;
+namespace namespace_01
 {
-    [TestClass]
+    [TestFixture]
     public class FlowColorTest
     {
-        [TestMethod]
+        [Test]
         public void FlowToColorGray8()
         {
-            Assert.AreEqual(255, FlowToGray8(new IFlowMap.Flow(true, false, false, false, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(true, false, false, false, false)), Is.EqualTo(255));
             //0000
-            Assert.AreEqual(0, FlowToGray8(new IFlowMap.Flow(false, false, false, false, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, false, false, false)), Is.EqualTo(0));
             //0001
-            Assert.AreEqual(1*15, FlowToGray8(new IFlowMap.Flow(false, false, false, false, true)));
+            Assert.AreEqual(1 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, false, true)));
             //0010
-            Assert.AreEqual(2 * 15, FlowToGray8(new IFlowMap.Flow(false, false, false, true, false)));
+            Assert.AreEqual(2 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, true, false)));
             //0011
-            Assert.AreEqual(3 * 15, FlowToGray8(new IFlowMap.Flow(false, false, false, true, true)));
+            Assert.AreEqual(3 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, true, true)));
             //0100
-            Assert.AreEqual(4 * 15, FlowToGray8(new IFlowMap.Flow(false, false, true, false, false)));
+            Assert.AreEqual(4 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, false, false)));
             //0101
-            Assert.AreEqual(5 * 15, FlowToGray8(new IFlowMap.Flow(false, false, true, false, true)));
+            Assert.AreEqual(5 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, false, true)));
             //0110
-            Assert.AreEqual(6 * 15, FlowToGray8(new IFlowMap.Flow(false, false, true, true, false)));
+            Assert.AreEqual(6 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, true, false)));
             //0111
-            Assert.AreEqual(7 * 15, FlowToGray8(new IFlowMap.Flow(false, false, true, true, true)));
+            Assert.AreEqual(7 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, true, true)));
 
             //1000
-            Assert.AreEqual(8 * 15, FlowToGray8(new IFlowMap.Flow(false, true, false, false, false)));
+            Assert.AreEqual(8 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, false, false)));
             //1001
-            Assert.AreEqual(9 * 15, FlowToGray8(new IFlowMap.Flow(false, true, false, false, true)));
+            Assert.AreEqual(9 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, false, true)));
             //1010
-            Assert.AreEqual(10 * 15, FlowToGray8(new IFlowMap.Flow(false, true, false, true, false)));
+            Assert.AreEqual(10 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, true, false)));
             //1011
-            Assert.AreEqual(11 * 15, FlowToGray8(new IFlowMap.Flow(false, true, false, true, true)));
+            Assert.AreEqual(11 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, true, true)));
             //1100
-            Assert.AreEqual(12 * 15, FlowToGray8(new IFlowMap.Flow(false, true, true, false, false)));
+            Assert.AreEqual(12 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, false, false)));
             //1101
-            Assert.AreEqual(13 * 15, FlowToGray8(new IFlowMap.Flow(false, true, true, false, true)));
+            Assert.AreEqual(13 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, false, true)));
             //1110
-            Assert.AreEqual(14 * 15, FlowToGray8(new IFlowMap.Flow(false, true, true, true, false)));
+            Assert.AreEqual(14 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, true, false)));
             //1111
-            Assert.AreEqual(15 * 15, FlowToGray8(new IFlowMap.Flow(false, true, true, true, true)));
+            Assert.AreEqual(15 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, true, true)));
         }
 
-        [TestMethod]
+        [Test]
         public void ColorOnFlowMap()
         {
-            var flowMap = new SimpleFlowMap((16,7)).FromHeightMap(new DummyDimension((16, 7), 13));
+            var flowMap = new SimpleFlowMap((16, 7)).FromHeightMap(new DummyDimension((16, 7), 13));
             IFlowMap.Flow[] allFlows = {
                 new IFlowMap.Flow(false, false, false, false, false),
                 new IFlowMap.Flow(false, false, false, false, true),
@@ -69,7 +70,7 @@ namespace TestProject1
             {
                 flowMap.SetFlow(i, 3, allFlows[i]);
                 var flowOnMap = flowMap.GetFlow(i, 3).Flow;
-                Assert.AreEqual(i * 15,FlowToGray8(flowOnMap));
+                Assert.That(i * 7, Is.EqualTo(FlowToGray8(flowOnMap)));
             }
 
             //check that image get correct colors
@@ -80,7 +81,7 @@ namespace TestProject1
             for (int i = 0; i < 15; i++)
             {
                 var color = image.Bytes[3 * 16 + i];
-                Assert.AreEqual(i*15, color);
+                Assert.That(i * 7, Is.EqualTo(color));
             }
 
 

@@ -2,10 +2,10 @@ using SkiaSharp;
 
 namespace TestProject1
 {
-    [TestClass]
+    [TestFixture]
     public class HeightMapTest
     {
-        [TestMethod]
+        [Test]
         public void InitHeightMap()
         {
             var heightmap = new DummyDimension((8, 12), 17);
@@ -18,7 +18,7 @@ namespace TestProject1
 
 
         }
-        [TestMethod]
+        [Test]
         public void ChangeHeight()
         {
             var heightmap = new DummyDimension((8, 12), 17);
@@ -33,7 +33,7 @@ namespace TestProject1
             }
         }
 
-        [TestMethod]
+        [Test]
         public void IterateLines()
         {
             //iterates lines = increase y
@@ -54,7 +54,7 @@ namespace TestProject1
             }
         }
 
-        [TestMethod]
+        [Test]
         public void FromImage()
         {
             var (width, height) = (10, 3);

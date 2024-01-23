@@ -41,7 +41,7 @@ public class EntryClass
         string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         // Open or create the file and write the content
-        using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "cFlow_Log.txt"), append, Encoding.UTF8 ))
+        using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "cFlow_Log.txt"), append, Encoding.UTF8))
         {
             outputFile.Write(content);
         }
