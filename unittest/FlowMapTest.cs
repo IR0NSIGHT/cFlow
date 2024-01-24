@@ -1,4 +1,6 @@
 ﻿using SkiaSharp;
+using System.Runtime.Intrinsics.X86;
+using System.Threading;
 
 namespace tests
 {
@@ -26,7 +28,7 @@ namespace tests
             fMap.SetFlow(9, 2, new IFlowMap.Flow(false, false, true, false, false));
             Assert.IsTrue(fMap.GetFlow(9, 2).Flow.Down);
 
-            var bitmap = SimpleFlowMap.ToColorImage(fMap);
+            var bitmap = SimpleFlowMap.ToColorImage(fMap, FlowTranslation.FlowToColor);
             //ImageApi.SaveBitmapAsPng(bitmap, "C:\\Users\\Max1M\\OneDrive\\Bilder\\debug_flowmap.png");
 
         }
@@ -181,6 +183,7 @@ namespace tests
             }
 
             SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, flowMap);
+
 
             Func<(int, int), Boolean> insideShape = ((int x, int y) pos) =>
             {

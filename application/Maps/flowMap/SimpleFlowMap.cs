@@ -1,5 +1,8 @@
 ﻿using SkiaSharp;
+using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
+using System.Threading;
 
 public class SimpleFlowMap : IFlowMap
 {
@@ -51,11 +54,11 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="flowMap"></param>
     public static void ApplyNaturalEdgeFlow(IHeightMap heightMap, IFlowMap flowMap)
     {
+        if (flowMap.getDimensions() != heightMap.Bounds())
+            throw new Exception($"map sizes dont match!: fMap:{flowMap.getDimensions()}, hMap:{heightMap.Bounds()}");
         //set Flow for all natural edges
         foreach (var point in heightMap.iterator().Points())
         {
-            if (!flowMap.inBounds(point.x, point.y))
-                throw new Exception($"illegal point!: {point}");
             IFlowMap.Flow flow = pointFlowByHeight(point, heightMap);
             flowMap.SetFlow(point.x, point.y, flow);
         }
@@ -176,7 +179,7 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="heightMap"></param>
     /// <param name="flowMap"></param>
     /// <returns>change occured</returns>
-    private static (bool changed, SimpleFlowMap flowMap, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(SimpleFlowMap flowMap, IHeightMap heightMap, IFlowMap.PointFlow[] previousChanged, bool[][] seen)
+    private static (bool changed, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(SimpleFlowMap flowMap, IHeightMap heightMap, IFlowMap.PointFlow[] previousChanged, bool[][] seen)
     {
         var candidates = collectNeighbours(previousChanged, flowMap, seen);
         var changedCandidates = collectChanged(candidates, flowMap, heightMap);
@@ -191,7 +194,7 @@ public class SimpleFlowMap : IFlowMap
             }
         }
 
-        return (changeOccured, flowMap, changedCandidates);
+        return (changeOccured, changedCandidates);
     }
 
 
@@ -206,6 +209,9 @@ public class SimpleFlowMap : IFlowMap
     {
         ApplyNaturalEdgeFlow(heightMap, flowMap);
 
+        var coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (!p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
+        ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterNatural.png");
+
         //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
         foreach (var point in flowMap.GetPoints())
@@ -215,7 +221,6 @@ public class SimpleFlowMap : IFlowMap
         }
 
         var changed = true;
-        var i = 0;
         var seenMap = new bool[flowMap.getDimensions().x][];
         for (int x = 0; x < flowMap.getDimensions().x; x++)
         {
@@ -230,11 +235,12 @@ public class SimpleFlowMap : IFlowMap
         while (changed)
         {
             var expanded = ExpandExistingFlow(flowMap, heightMap, previousCandidated, seenMap);
-            flowMap.flowMap = expanded.flowMap.flowMap;
             changed = expanded.changed;
             previousCandidated = expanded.changedPoints;
-            i++;
         }
+        coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (!p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
+        ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterExpansion.png");
+
     }
 
     public static SKBitmap ToImage(IFlowMap flowMap)
@@ -253,13 +259,13 @@ public class SimpleFlowMap : IFlowMap
         return bitmap;
     }
 
-    public static SKBitmap ToColorImage(IFlowMap flowMap)
+    public static SKBitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow,SKColor> flowToColor)
     {
         var (width, height) = flowMap.getDimensions();
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
         foreach (var points in flowMap.GetPoints())
         {
-            bitmap.SetPixel(points.X, points.Y, FlowTranslation.FlowToColor(points.Flow));
+            bitmap.SetPixel(points.X, points.Y, flowToColor(points.Flow));
         }
         return bitmap;
     }
