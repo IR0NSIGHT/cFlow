@@ -133,10 +133,10 @@ public class SimpleFlowMap : IFlowMap
             var pointInReducedBounds = safeBounds((x, y));
             foreach (var p in news)
             {
-                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap.isMarked(p.x,p.y))
+                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap.isMarked(p.x, p.y))
                 {
                     candidates[currentIdx++] = (p.x, p.y);
-                    seenMap.setMarked(p.x,p.y);
+                    seenMap.setMarked(p.x, p.y);
                 }
 
             };
@@ -145,13 +145,21 @@ public class SimpleFlowMap : IFlowMap
         return candidates;
     }
 
-    private static IFlowMap.PointFlow[] collectChanged((int x, int y)[] candidates, SimpleFlowMap flowMap, IHeightMap heightMap)
+    /// <summary>
+    /// will expand to neighbours of given origins, flowing towards origins
+    /// only expands if neighbour doesnt have to flow uphill towards origin
+    /// </summary>
+    /// <param name="origins"></param>
+    /// <param name="flowMap"></param>
+    /// <param name="heightMap"></param>
+    /// <returns></returns>
+    private static IFlowMap.PointFlow[] expandAround((int x, int y)[] origins, SimpleFlowMap flowMap, IHeightMap heightMap)
     {
-        var changedCandidates = new IFlowMap.PointFlow[candidates.Length];
+        var changedCandidates = new IFlowMap.PointFlow[origins.Length];
         int changedIdx = 0;
-        for (int i = 0; i < candidates.Length; i++)
+        foreach (var point in origins)
         {
-            var f = flowMap.GetFlow(candidates[i].x, candidates[i].y);
+            var f = flowMap.GetFlow(point.x, point.y);
             var (changed, newFlow) = NeighbourFlowOrDefault(f.X, f.Y, flowMap, heightMap, f.Flow);
             if (changed)
             {
@@ -174,7 +182,7 @@ public class SimpleFlowMap : IFlowMap
     private static (bool changed, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(SimpleFlowMap flowMap, IHeightMap heightMap, IFlowMap.PointFlow[] previousChanged, BooleanMap seenMap)
     {
         var candidates = collectNeighbours(previousChanged, flowMap, seenMap);
-        var changedCandidates = collectChanged(candidates, flowMap, heightMap);
+        var changedCandidates = expandAround(candidates, flowMap, heightMap);
         bool changeOccured = changedCandidates.Length != 0;
 
         //apply all changes to flowmap
@@ -218,13 +226,14 @@ public class SimpleFlowMap : IFlowMap
         //first candidates are the natural edges
         var previousCandidated = edges.ToArray();
         foreach (var candidated in previousCandidated)
-            seenMap.setMarked(candidated.X,candidated.Y);
-
+            seenMap.setMarked(candidated.X, candidated.Y);
+        int debugIdx = 0;
         while (changed)
         {
             var expanded = ExpandExistingFlow(flowMap, heightMap, previousCandidated, seenMap);
             changed = expanded.changed;
             previousCandidated = expanded.changedPoints;
+            debugIdx++;
         }
 
         foreach (var point in seenMap.iterator().Points())
@@ -232,7 +241,7 @@ public class SimpleFlowMap : IFlowMap
             {
                 Console.WriteLine("uh oh");
             }
-    
+
         coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
         ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterExpansion.png");
 
