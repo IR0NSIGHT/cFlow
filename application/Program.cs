@@ -8,7 +8,7 @@ public class EntryClass
     static void Main(string[] args)
     {
         var folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\";
-        var filename = "testmap_height";
+        var filename = "generatedworld_heightmap";
         var fileOut = filename + "_EDIT";
 
         SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(folder + filename + ".png");

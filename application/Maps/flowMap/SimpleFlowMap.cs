@@ -72,7 +72,8 @@ public class SimpleFlowMap : IFlowMap
     private static (bool, IFlowMap.Flow) NeighbourFlowOrDefault(int x, int y, IFlowMap flowMap, IHeightMap heightMap, IFlowMap.Flow defaultF)
     {
         Point thisP = new Point(x, y, -1);
-
+        if ((x, y) == (2, 2))
+            Console.WriteLine("found my point");
         Func<(int x, int y), Boolean> canIFlowTo = (pos) =>
             heightMap.GetHeight(x, y) >= heightMap.GetHeight(pos.x, pos.y);
 
@@ -116,7 +117,7 @@ public class SimpleFlowMap : IFlowMap
         return positive && negative;
     }
 
-    private static (int x, int y)[] collectNeighbours(IFlowMap.PointFlow[] previousChanged, SimpleFlowMap flowMap, BooleanMap seenMap)
+    private static (int x, int y)[] collectNonHigherNeighbours(IFlowMap.PointFlow[] previousChanged, SimpleFlowMap flowMap, BooleanMap seenMap, IHeightMap heightMap)
     {
         //collect all neighbours of the previous run
         var currentIdx = 0;
@@ -131,9 +132,13 @@ public class SimpleFlowMap : IFlowMap
             var (x, y) = (previousPoint.X, previousPoint.Y);
             (int x, int y)[] news = { Point.Up(x, y), Point.Left(x, y), Point.Right(x, y), Point.Down(x, y) };
             var pointInReducedBounds = safeBounds((x, y));
+            Func<(int, int), bool> canFlowTo = ((int x, int y) p) =>
+            {
+                return heightMap.GetHeight(previousPoint.X, previousPoint.Y) <= heightMap.GetHeight(p.x,p.y);
+            };
             foreach (var p in news)
             {
-                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap.isMarked(p.x, p.y))
+                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap.isMarked(p.x, p.y) && canFlowTo((p.x,p.y)))
                 {
                     candidates[currentIdx++] = (p.x, p.y);
                     seenMap.setMarked(p.x, p.y);
@@ -146,14 +151,14 @@ public class SimpleFlowMap : IFlowMap
     }
 
     /// <summary>
-    /// will expand to neighbours of given origins, flowing towards origins
+    /// will find flow for given origins, flowing towards neighbours that have a flow
     /// only expands if neighbour doesnt have to flow uphill towards origin
     /// </summary>
     /// <param name="origins"></param>
     /// <param name="flowMap"></param>
     /// <param name="heightMap"></param>
     /// <returns></returns>
-    private static IFlowMap.PointFlow[] expandAround((int x, int y)[] origins, SimpleFlowMap flowMap, IHeightMap heightMap)
+    private static IFlowMap.PointFlow[] calculateExpandedFlowFor((int x, int y)[] origins, SimpleFlowMap flowMap, IHeightMap heightMap)
     {
         var changedCandidates = new IFlowMap.PointFlow[origins.Length];
         int changedIdx = 0;
@@ -181,8 +186,8 @@ public class SimpleFlowMap : IFlowMap
     /// <returns>change occured</returns>
     private static (bool changed, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(SimpleFlowMap flowMap, IHeightMap heightMap, IFlowMap.PointFlow[] previousChanged, BooleanMap seenMap)
     {
-        var candidates = collectNeighbours(previousChanged, flowMap, seenMap);
-        var changedCandidates = expandAround(candidates, flowMap, heightMap);
+        var candidates = collectNonHigherNeighbours(previousChanged, flowMap, seenMap, heightMap);
+        var changedCandidates = calculateExpandedFlowFor(candidates, flowMap, heightMap);
         bool changeOccured = changedCandidates.Length != 0;
 
         //apply all changes to flowmap
@@ -235,16 +240,6 @@ public class SimpleFlowMap : IFlowMap
             previousCandidated = expanded.changedPoints;
             debugIdx++;
         }
-
-        foreach (var point in seenMap.iterator().Points())
-            if (!seenMap.isMarked(point.x, point.y))
-            {
-                Console.WriteLine("uh oh");
-            }
-
-        coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
-        ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterExpansion.png");
-
     }
 
     public static SKBitmap ToImage(IFlowMap flowMap)
