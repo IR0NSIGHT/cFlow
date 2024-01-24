@@ -6,12 +6,7 @@ public class SimpleFlowMap : IFlowMap
 
     private IFlowMap.Flow[][] flowMap;
 
-    public SimpleFlowMap FromHeightMap(IHeightMap heightMap)
-    {
-        FillWithUnknown(this);
-        CalculateFlowFromHeightMap(heightMap, this);
-        return this;
-    }
+
 
 
     public SimpleFlowMap((int x, int y) dimension)
@@ -30,6 +25,12 @@ public class SimpleFlowMap : IFlowMap
         return flowMap;
     }
 
+    public SimpleFlowMap FromHeightMap(IHeightMap heightMap)
+    {
+        FillWithUnknown(this);
+        CalculateFlowFromHeightMap(heightMap, this);
+        return this;
+    }
     private static void FillWithUnknown(IFlowMap flowMap)
     {
         //set everything to unknown
