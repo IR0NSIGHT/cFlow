@@ -12,36 +12,36 @@ namespace namespace_01
             //0000
             Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, false, false, false)), Is.EqualTo(0));
             //0001
-            Assert.AreEqual(1 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, false, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, false, false, true)), Is.EqualTo(1 * 7));
             //0010
-            Assert.AreEqual(2 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, true, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, false, true, false)), Is.EqualTo(2 * 7));
             //0011
-            Assert.AreEqual(3 * 7, FlowToGray8(new IFlowMap.Flow(false, false, false, true, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, false, true, true)), Is.EqualTo(3 * 7));
             //0100
-            Assert.AreEqual(4 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, false, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, true, false, false)), Is.EqualTo(4 * 7));
             //0101
-            Assert.AreEqual(5 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, false, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, true, false, true)), Is.EqualTo(5 * 7));
             //0110
-            Assert.AreEqual(6 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, true, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, true, true, false)), Is.EqualTo(6 * 7));
             //0111
-            Assert.AreEqual(7 * 7, FlowToGray8(new IFlowMap.Flow(false, false, true, true, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, false, true, true, true)), Is.EqualTo(7 * 7));
 
             //1000
-            Assert.AreEqual(8 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, false, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, false, false, false)), Is.EqualTo(8 * 7));
             //1001
-            Assert.AreEqual(9 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, false, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, false, false, true)), Is.EqualTo(9 * 7));
             //1010
-            Assert.AreEqual(10 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, true, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, false, true, false)), Is.EqualTo(10 * 7));
             //1011
-            Assert.AreEqual(11 * 7, FlowToGray8(new IFlowMap.Flow(false, true, false, true, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, false, true, true)), Is.EqualTo(11 * 7));
             //1100
-            Assert.AreEqual(12 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, false, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, true, false, false)), Is.EqualTo(12 * 7));
             //1101
-            Assert.AreEqual(13 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, false, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, true, false, true)), Is.EqualTo(13 * 7));
             //1110
-            Assert.AreEqual(14 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, true, false)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, true, true, false)), Is.EqualTo(14 * 7));
             //1111
-            Assert.AreEqual(15 * 7, FlowToGray8(new IFlowMap.Flow(false, true, true, true, true)));
+            Assert.That(FlowToGray8(new IFlowMap.Flow(false, true, true, true, true)), Is.EqualTo(15 * 7));
         }
 
         [Test]
