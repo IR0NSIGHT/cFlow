@@ -250,7 +250,6 @@ public class SimpleFlowMap : IFlowMap
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
         IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
         bitmap.SetPixels(pixelsPointer);
-        Marshal.FreeHGlobal(pixelsPointer);
         return bitmap;
     }
 
@@ -267,7 +266,6 @@ public class SimpleFlowMap : IFlowMap
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
         IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
         bitmap.SetPixels(pixelsPointer);
-        Marshal.FreeHGlobal(pixelsPointer);
         return bitmap;
     }
 
