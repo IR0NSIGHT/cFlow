@@ -1,5 +1,29 @@
-﻿public static class FlowTranslation
+﻿using SkiaSharp;
+
+public static class FlowTranslation
 {
+    public static class FlowColorsARGB
+    {
+        public static readonly SKColor Red = 0xFFFF0000;
+        public static readonly SKColor Green = 0xFF00FF00;
+        public static readonly SKColor Blue = 0xFF0000FF;
+        public static readonly SKColor Yellow = 0xFFFFFF00;
+        public static readonly SKColor Magenta = 0xFFFF00FF;
+        public static readonly SKColor Cyan = 0xFF00FFFF;
+        public static readonly SKColor Orange = 0xFFFFA500;
+        public static readonly SKColor Purple = 0xFF800080;
+        public static readonly SKColor DarkGreen = 0xFF008000;
+        public static readonly SKColor Teal = 0xFF008080;
+        public static readonly SKColor Tomato = 0xFFFF6347;
+        public static readonly SKColor LawnGreen = 0xFF7CFC00;
+        public static readonly SKColor BlueViolet = 0xFF8A2BE2;
+        public static readonly SKColor Gold = 0xFFFFD700;
+        public static readonly SKColor Indigo = 0xFF4B0082;
+        public static readonly SKColor Crimson = 0xFFDC143C;
+        public static readonly SKColor DarkTurquoise = 0xFF00CED1;
+    }
+
+
     public static byte FlowToGray8(IFlowMap.Flow p)
     {
        
@@ -14,70 +38,50 @@
         return (byte)(color*7);
     }
 
-    public static uint FlowToColor(IFlowMap.Flow p)
+    public static SKColor FlowToColor(IFlowMap.Flow p)
     {
-        List<uint> colorUIntValues = new List<uint>
-        {
-            0xFF0000FF, // Red
-            0x00FF00FF, // Green
-            0x0000FFFF, // Blue
-            0xFFFF00FF, // Yellow
-            0xFF00FFFF, // Magenta
-            0x00FFFFFF, // Cyan
-            0xFFA500FF, // Orange
-            0x800080FF, // Purple
-            0x008000FF, // Dark Green
-            0x008080FF, // Teal
-            0xFF6347FF, // Tomato
-            0x7CFC00FF, // Lawn Green
-            0x8A2BE2FF, // Blue Violet
-            0xFFD700FF, // Gold
-            0x4B0082FF, // Indigo
-            0xDC143CFF, // Crimson
-            0x00CED1FF  // Dark Turquoise
-        };
-
         if (p.Unknown)
-            return colorUIntValues[0];
+            return FlowColorsARGB.Red;
+
         switch (p.Up ? 1 : 0, p.Down ? 1 : 0, p.Left ? 1 : 0, p.Right ? 1 : 0)
         {
             case (0, 0, 0, 0):
-                return colorUIntValues[0];
+                return FlowColorsARGB.DarkTurquoise;
             case (0, 0, 0, 1):
-                return colorUIntValues[1];
+                return FlowColorsARGB.Green;
             case (0, 0, 1, 0):
-                return colorUIntValues[2];
+                return FlowColorsARGB.Blue;
             case (0, 0, 1, 1):
-                return colorUIntValues[3];
+                return FlowColorsARGB.Yellow;
             case (0, 1, 0, 0):
-                return colorUIntValues[4];
+                return FlowColorsARGB.Magenta;
             case (0, 1, 0, 1):
-                return colorUIntValues[5];
+                return FlowColorsARGB.Cyan;
             case (0, 1, 1, 0):
-                return colorUIntValues[6];
+                return FlowColorsARGB.Orange;
             case (0, 1, 1, 1):  //DLR
-                return colorUIntValues[7];
+                return FlowColorsARGB.Purple;
             case (1, 0, 0, 0):
-                return colorUIntValues[8];
+                return FlowColorsARGB.DarkGreen;
             case (1, 0, 0, 1):
-                return colorUIntValues[9];
+                return FlowColorsARGB.Teal;
             case (1, 0, 1, 0):
-                return colorUIntValues[10];
+                return FlowColorsARGB.Tomato;
             case (1, 0, 1, 1):  //U LR
-                return colorUIntValues[11];
+                return FlowColorsARGB.LawnGreen;
             case (1, 1, 0, 0):
-                return colorUIntValues[12];
+                return FlowColorsARGB.BlueViolet;
             case (1, 1, 0, 1):  // UD R
-                return colorUIntValues[13];
+                return FlowColorsARGB.Gold;
             case (1, 1, 1, 0):  //UP L
-                return colorUIntValues[14];
+                return FlowColorsARGB.Indigo;
             case (1, 1, 1, 1):
-                return colorUIntValues[15];
+                return FlowColorsARGB.Crimson;
             default:
-                throw new Exception("unknown flow");
+                throw new Exception("Unknown flow");
         }
-       
     }
+
     static String FlowToString(IFlowMap.Flow p)
     {
         if (p.Unknown)

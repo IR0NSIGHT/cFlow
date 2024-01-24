@@ -7,31 +7,30 @@ public class EntryClass
 {
     static void Main(string[] args)
     {
-        var filename = "C:\\Users\\Max1M\\OneDrive\\Bilder\\tiny_heightmap.png";
-        var fileOut = "C:\\Users\\Max1M\\OneDrive\\Bilder\\tiny_heightmap_EDIT.png";
+        var folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\";
+        var filename = "testmap_height";
+        var fileOut = filename +"_EDIT";
 
-        SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(filename);
+        SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(folder + filename+".png");
         Console.WriteLine("Loaded bitmap");
         IHeightMap heightMap = new Image8BitHeightMap(sKBitmap);
-        SimpleFlowMap fMap = new SimpleFlowMap(heightMap.Bounds()).FromHeightMap(heightMap);
+        SimpleFlowMap fMap = new SimpleFlowMap(heightMap.Bounds());//. .FromHeightMap(heightMap);
+        SimpleFlowMap.ApplyNaturalEdgeFlow(heightMap, fMap);
 
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
         var coloredFlow = SimpleFlowMap.ToColorImage(fMap);
-        ImageApi.SaveBitmapAsPng(coloredFlow, fileOut);
+    //    var downFlow = fMap.GetFlow(30, 8);
+
+        //    var colorDownFlow = coloredFlow.GetPixel(30, 8);
+        //   var supposedColor = FlowTranslation.FlowToColor(downFlow.Flow);
+        ImageApi.SaveBitmapAsPng(ImageApi.JoinImages(sKBitmap, coloredFlow), folder+ fileOut + ".png");
+        Console.WriteLine($"saved flowmap to {fileOut}");
 
         SaveToFile(FlowMapPrinter.FlowMapToString(fMap, heightMap), false);
+        SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
 
-        stopwatch.Stop();
-        TimeSpan elapsed = stopwatch.Elapsed;
-        stopwatch.Reset();
+    //    var riverMap = new RiverMap(fMap);
+    //   riverMap.AddRiverFrom(69, 25);
 
-        var riverMap = new RiverMap(fMap);
-        riverMap.AddRiverFrom(69, 25);
-
-        Console.WriteLine($"Seconds: {elapsed.TotalSeconds}");
-
-        Console.WriteLine($"saved flowmap to {fileOut}");
 
     }
 

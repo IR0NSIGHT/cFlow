@@ -115,7 +115,9 @@ public class SimpleFlowMap : IFlowMap
 
     private static bool insideReducedBounds((int x, int y) pos, (int x, int y) dims)
     {
-        return pos.x - 1 >= 0 && pos.y - 1 >= 0 && pos.x + 1 < dims.x && pos.y + 1 < dims.y;
+        var positive = pos.x - 1 >= 0 && pos.y - 1 >= 0;
+        var negative = pos.x + 1 < dims.x && pos.y + 1 < dims.y;
+        return positive && negative;
     }
 
     private static (int x, int y)[] collectNeighbours(IFlowMap.PointFlow[] previousChanged, SimpleFlowMap flowMap, bool[][] seenMap)
@@ -123,7 +125,6 @@ public class SimpleFlowMap : IFlowMap
         //collect all neighbours of the previous run
         var currentIdx = 0;
         var candidates = new (int x, int y)[previousChanged.Length * 4];
-
 
         var dims = flowMap.getDimensions();
         Func<(int, int), Boolean> safeBounds = ((int x, int y) pos) => insideReducedBounds(pos, dims);
@@ -167,6 +168,8 @@ public class SimpleFlowMap : IFlowMap
         return changedCandidates;
     }
 
+    private SKBitmap debugImage;
+
     /// <summary>
     /// if a point with unknown flow has neighbours with a flow, the point will flow to these neighbours.
     /// mutates flowMap
@@ -189,6 +192,9 @@ public class SimpleFlowMap : IFlowMap
             }
         }
 
+        flowMap.debugImage = ImageApi.JoinImages(flowMap.debugImage,SimpleFlowMap.ToColorImage(flowMap));
+
+
         return (changeOccured, flowMap, changedCandidates);
     }
 
@@ -205,6 +211,7 @@ public class SimpleFlowMap : IFlowMap
         Console.WriteLine("calculate edge flow");
         ApplyNaturalEdgeFlow(heightMap, flowMap);
         Console.WriteLine("expand flow");
+        EntryClass.SaveToFile($"flowmap after natural edging\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), false);
 
         //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
@@ -227,6 +234,7 @@ public class SimpleFlowMap : IFlowMap
         foreach( var candidated in previousCandidated)
             seenMap[candidated.X][candidated.Y] = true;
 
+        flowMap.debugImage = SimpleFlowMap.ToColorImage(flowMap);
         while (changed)
         {
             //EntryClass.SaveToFile($"iteration {i}:\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), true);
@@ -235,9 +243,12 @@ public class SimpleFlowMap : IFlowMap
             changed = expanded.changed;
             previousCandidated = expanded.changedPoints;
             Console.WriteLine($"expanding flowmap at iteration: {i}");
+            EntryClass.SaveToFile($"expanding flowmap at iteration: {i}\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), true);
             i++;
         }
-    
+
+        ImageApi.SaveBitmapAsPng(flowMap.debugImage, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowmap_progress.png");
+
 
         Console.WriteLine("done");
     }
@@ -261,16 +272,11 @@ public class SimpleFlowMap : IFlowMap
     public static SKBitmap ToColorImage(IFlowMap flowMap)
     {
         var (width, height) = flowMap.getDimensions();
-        uint[] pixelData = new uint[width * height];
-
+        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
         foreach (var points in flowMap.GetPoints())
         {
-            pixelData[points.Y * width + points.X] = FlowTranslation.FlowToColor(points.Flow);
+            bitmap.SetPixel(points.X, points.Y, FlowTranslation.FlowToColor(points.Flow));
         }
-
-        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
-        IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
-        bitmap.SetPixels(pixelsPointer);
         return bitmap;
     }
 
