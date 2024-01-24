@@ -124,5 +124,98 @@ namespace tests
 
         //    ImageApi.SaveBitmapAsPng(flowImageGray8, "./debug_flowtest");
         }
+
+        [Test]
+        public void TestEdgesNaturalFlow()
+        {
+            var heightMap = new DummyDimension((30, 40),17);
+            //make rectangle from 10..20, 15..25 that is raised => water will flow away from triangle
+            for (int x = 10; x <= 20; x++)
+            {
+                for (int y = 15; y <= 25; y++)
+                {
+                    heightMap.SetHeight(new Point(x, y, 37));
+                }
+            }
+            var flowMap = new SimpleFlowMap((30, 40));
+            SimpleFlowMap.ApplyNaturalEdgeFlow(heightMap, flowMap);
+            //check edges
+            Assert.That(flowMap.GetFlow(10, 15).Flow, Is.EqualTo(new IFlowMap.Flow(false, false, true, true, false)));
+            Assert.That(flowMap.GetFlow(20, 15).Flow, Is.EqualTo(new IFlowMap.Flow(false, false, true, false, true)));
+            Assert.That(flowMap.GetFlow(10, 25).Flow, Is.EqualTo(new IFlowMap.Flow(false, true, false, true, false)));
+            Assert.That(flowMap.GetFlow(20, 25).Flow, Is.EqualTo(new IFlowMap.Flow(false, true, false, false, true)));
+
+            //top and bottom lines
+            for (int x = 11; x < 20; x++)
+            {
+                Assert.That(flowMap.GetFlow(x, 15), Is.EqualTo(new IFlowMap.PointFlow(x,15, new IFlowMap.Flow(false, false, true, false, false))));
+                Assert.That(flowMap.GetFlow(x, 25), Is.EqualTo(new IFlowMap.PointFlow(x, 25, new IFlowMap.Flow(false, true, false, false, false))));
+            }
+
+            //left right lines
+            for (int y = 16; y < 25; y++)
+            {
+                Assert.That(flowMap.GetFlow(10, y), Is.EqualTo(new IFlowMap.PointFlow(10, y, new IFlowMap.Flow(false, false, false, true, false))));
+                Assert.That(flowMap.GetFlow(20, y), Is.EqualTo(new IFlowMap.PointFlow(20, y, new IFlowMap.Flow(false, false, false, false, true))));
+            }
+        }
+
+        [Test]
+        public void FlowFromHeightMapSimple()
+        {
+            var flowMap = new SimpleFlowMap((6,6));
+            var someFlow = new IFlowMap.Flow(false, true, false, false, false);
+            var heightMap = new DummyDimension(flowMap.getDimensions(), 17);
+            //all but a 4x4 square in the center has a flow
+            for (int x = 1; x < 5; x++)
+            {
+                for (int y = 1; y <5; y++)
+                {
+                    heightMap.SetHeight(new Point(x, y,77));
+                }
+            }
+
+            foreach (var point in flowMap.GetPoints())
+            {
+                Assert.That(point.Flow.Unknown, Is.True);
+            }
+
+            SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, flowMap);
+
+            Func<(int, int), Boolean> insideShape = ((int x, int y) pos) =>
+            {
+                if (pos.x == 0 || pos.x == 5 || pos.y == 0 || pos.y == 5)
+                    return false;
+                return true;
+            };
+
+            foreach(var point in flowMap.GetPoints())
+            {
+                if (insideShape((point.X, point.Y))) {
+                    Assert.That(point.Flow.Unknown, Is.Not.True);
+                } else
+                {
+                    Assert.That(point.Flow.Unknown, Is.True);
+                }
+            }
+
+            var downLeft = new IFlowMap.Flow(false, false, true, true, false);
+            Assert.That(flowMap.GetFlow(1, 1).Flow, Is.EqualTo(downLeft));
+            Assert.That(flowMap.GetFlow(2,2).Flow, Is.EqualTo(downLeft));
+
+            var downRight = new IFlowMap.Flow(false, false, true, false, true);
+            Assert.That(flowMap.GetFlow(4, 1).Flow, Is.EqualTo(downRight));
+            Assert.That(flowMap.GetFlow(3, 2).Flow, Is.EqualTo(downRight));
+
+
+            var upLeft = new IFlowMap.Flow(false, true, false, true, false);
+            Assert.That(flowMap.GetFlow(1,4).Flow, Is.EqualTo(upLeft));
+            Assert.That(flowMap.GetFlow(2,3).Flow, Is.EqualTo(upLeft));
+
+            var upRight = new IFlowMap.Flow(false, true, false, false, true);
+            Assert.That(flowMap.GetFlow(4, 4).Flow, Is.EqualTo(upRight));
+            Assert.That(flowMap.GetFlow(3, 3).Flow, Is.EqualTo(upRight));
+
+        }
     }
 }
