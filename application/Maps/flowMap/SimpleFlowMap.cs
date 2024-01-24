@@ -9,9 +9,6 @@ public class SimpleFlowMap : IFlowMap
 
     private IFlowMap.Flow[][] flowMap;
 
-
-
-
     public SimpleFlowMap((int x, int y) dimension)
     {
         flowMap = emptyFlowMap(dimension);
@@ -66,20 +63,17 @@ public class SimpleFlowMap : IFlowMap
 
     /// <summary>
     /// point will try to find a neighbour with a flow.
+    /// returns default flow if no valid neighbour was found
     /// </summary>
     /// <param name="point"></param>
     /// <param name="flowMap"></param>
     /// <returns>(changeHappend, newFlow)</returns>
-    private static (bool, IFlowMap.Flow) PointFollowNeighbours(IFlowMap.PointFlow point, IFlowMap flowMap, IHeightMap heightMap)
+    private static (bool, IFlowMap.Flow) NeighbourFlowOrDefault(int x, int y, IFlowMap flowMap, IHeightMap heightMap, IFlowMap.Flow defaultF)
     {
-        if (!point.Flow.Unknown)
-            return (false, point.Flow);
-
-        var (x, y) = (point.X, point.Y);
         Point thisP = new Point(x, y, -1);
 
         Func<(int x, int y), Boolean> canIFlowTo = (pos) =>
-            heightMap.GetHeight(point.X, point.Y) >= heightMap.GetHeight(pos.x, pos.y);
+            heightMap.GetHeight(x, y) >= heightMap.GetHeight(pos.x, pos.y);
 
 
         Func<(int x, int y), Boolean> hasFlow = (pos) =>
@@ -111,9 +105,7 @@ public class SimpleFlowMap : IFlowMap
                 new IFlowMap.Flow(false, flowUp, flowDown, flowLeft, flowRight));
         }
 
-
-        return (false, point.Flow);
-
+        return (false, defaultF);
     }
 
     private static bool insideReducedBounds((int x, int y) pos, (int x, int y) dims)
@@ -158,12 +150,11 @@ public class SimpleFlowMap : IFlowMap
         int changedIdx = 0;
         for (int i = 0; i < candidates.Length; i++)
         {
-            var (x, y) = candidates[i];
-            var f = flowMap.GetFlow(x, y);
-            var (changed, newFlow) = PointFollowNeighbours(f, flowMap, heightMap);
+            var f = flowMap.GetFlow(candidates[i].x, candidates[i].y);
+            var (changed, newFlow) = NeighbourFlowOrDefault(f.X, f.Y, flowMap, heightMap, f.Flow);
             if (changed)
             {
-                changedCandidates[changedIdx++] = new IFlowMap.PointFlow(x, y, newFlow);
+                changedCandidates[changedIdx++] = new IFlowMap.PointFlow(f.X, f.Y, newFlow);
             }
         }
 
@@ -226,10 +217,10 @@ public class SimpleFlowMap : IFlowMap
         {
             seenMap[x] = new bool[flowMap.getDimensions().y];
         }
-        
+
         //first candidates are the natural edges
         var previousCandidated = edges.ToArray();
-        foreach( var candidated in previousCandidated)
+        foreach (var candidated in previousCandidated)
             seenMap[candidated.X][candidated.Y] = true;
 
         while (changed)
@@ -238,7 +229,7 @@ public class SimpleFlowMap : IFlowMap
             changed = expanded.changed;
             previousCandidated = expanded.changedPoints;
         }
-        coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (!p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
+        coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
         ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterExpansion.png");
 
     }
@@ -259,7 +250,7 @@ public class SimpleFlowMap : IFlowMap
         return bitmap;
     }
 
-    public static SKBitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow,SKColor> flowToColor)
+    public static SKBitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow, SKColor> flowToColor)
     {
         var (width, height) = flowMap.getDimensions();
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));

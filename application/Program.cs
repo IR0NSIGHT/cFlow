@@ -9,9 +9,9 @@ public class EntryClass
     {
         var folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\";
         var filename = "generatedworld_heightmap";
-        var fileOut = filename +"_EDIT";
+        var fileOut = filename + "_EDIT";
 
-        SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(folder + filename+".png");
+        SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(folder + filename + ".png");
         Console.WriteLine("Loaded bitmap");
         IHeightMap heightMap = new Image8BitHeightMap(sKBitmap);
         Console.WriteLine("Converted image to heightmap");
@@ -22,15 +22,23 @@ public class EntryClass
         SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
         Console.WriteLine("Calculateed Flow");
 
-        var coloredFlow = SimpleFlowMap.ToColorImage(fMap, p => { if (p.Unknown) return FlowTranslation.FlowToColor(p); else return new SKColor(0, 0, 0, 0); });
+        var coloredFlow = SimpleFlowMap.ToColorImage(fMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
 
-        ImageApi.SaveBitmapAsPng(coloredFlow, folder+ fileOut + ".png");
+        ImageApi.SaveBitmapAsPng(coloredFlow, folder + fileOut + ".png");
+        List<IFlowMap.PointFlow> fuckedPoints = new List<IFlowMap.PointFlow>();
+        foreach (var flow in fMap.GetPoints())
+        {
+            if (flow.Flow.Unknown)
+            {
+                fuckedPoints.Add(flow);
+            }
+        }
         Console.WriteLine($"saved flowmap to {fileOut}");
 
-     //   SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
+        //   SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
 
-    //    var riverMap = new RiverMap(fMap);
-    //   riverMap.AddRiverFrom(69, 25);
+        //    var riverMap = new RiverMap(fMap);
+        //   riverMap.AddRiverFrom(69, 25);
 
 
     }
