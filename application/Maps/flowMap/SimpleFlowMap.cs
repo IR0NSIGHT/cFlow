@@ -168,7 +168,6 @@ public class SimpleFlowMap : IFlowMap
         return changedCandidates;
     }
 
-    private SKBitmap debugImage;
 
     /// <summary>
     /// if a point with unknown flow has neighbours with a flow, the point will flow to these neighbours.
@@ -192,9 +191,6 @@ public class SimpleFlowMap : IFlowMap
             }
         }
 
-        flowMap.debugImage = ImageApi.JoinImages(flowMap.debugImage,SimpleFlowMap.ToColorImage(flowMap));
-
-
         return (changeOccured, flowMap, changedCandidates);
     }
 
@@ -208,10 +204,7 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="flowMap"></param>
     public static void CalculateFlowFromHeightMap(IHeightMap heightMap, SimpleFlowMap flowMap)
     {
-        Console.WriteLine("calculate edge flow");
         ApplyNaturalEdgeFlow(heightMap, flowMap);
-        Console.WriteLine("expand flow");
-        EntryClass.SaveToFile($"flowmap after natural edging\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), false);
 
         //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
@@ -234,23 +227,14 @@ public class SimpleFlowMap : IFlowMap
         foreach( var candidated in previousCandidated)
             seenMap[candidated.X][candidated.Y] = true;
 
-        flowMap.debugImage = SimpleFlowMap.ToColorImage(flowMap);
         while (changed)
         {
-            //EntryClass.SaveToFile($"iteration {i}:\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), true);
             var expanded = ExpandExistingFlow(flowMap, heightMap, previousCandidated, seenMap);
             flowMap.flowMap = expanded.flowMap.flowMap;
             changed = expanded.changed;
             previousCandidated = expanded.changedPoints;
-            Console.WriteLine($"expanding flowmap at iteration: {i}");
-            EntryClass.SaveToFile($"expanding flowmap at iteration: {i}\n" + FlowMapPrinter.FlowMapToString(flowMap, heightMap), true);
             i++;
         }
-
-        ImageApi.SaveBitmapAsPng(flowMap.debugImage, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowmap_progress.png");
-
-
-        Console.WriteLine("done");
     }
 
     public static SKBitmap ToImage(IFlowMap flowMap)
