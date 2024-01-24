@@ -136,10 +136,10 @@ public class SimpleFlowMap : IFlowMap
             var pointInReducedBounds = safeBounds((x, y));
             foreach (var p in news)
             {
-                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap[x][y])
+                if ((pointInReducedBounds || flowMap.inBounds(p.x, p.y)) && !seenMap[p.x][p.y])
                 {
                     candidates[currentIdx++] = (p.x, p.y);
-                    seenMap[x][y] = true;
+                    seenMap[p.x][p.y] = true;
                 }
 
             };
@@ -216,12 +216,16 @@ public class SimpleFlowMap : IFlowMap
 
         var changed = true;
         var i = 0;
-        var previousCandidated = edges.ToArray();
         var seenMap = new bool[flowMap.getDimensions().x][];
         for (int x = 0; x < flowMap.getDimensions().x; x++)
         {
             seenMap[x] = new bool[flowMap.getDimensions().y];
         }
+        
+        //first candidates are the natural edges
+        var previousCandidated = edges.ToArray();
+        foreach( var candidated in previousCandidated)
+            seenMap[candidated.X][candidated.Y] = true;
 
         while (changed)
         {
