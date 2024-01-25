@@ -1,4 +1,6 @@
-﻿namespace src.Maps.riverMap
+﻿using SkiaSharp;
+
+namespace src.Maps.riverMap
 {
     class RiverMap : Map2d
     {
@@ -14,6 +16,16 @@
             {
                 map[i] = new bool[flowMap.getDimensions().y];
             }
+        }
+
+        public SKBitmap ToImage()
+        {
+            SKBitmap bitmap = new SKBitmap(new SKImageInfo(Bounds().x, Bounds().y, SKColorType.Rgba8888, SKAlphaType.Opaque));
+            foreach(var point in iterator().Points())
+            {
+                bitmap.SetPixel(point.x, point.y, IsRiver(point.x, point.y) ? new SKColor(0,0,255) : new SKColor(0,0,0));
+            }
+            return bitmap;
         }
 
         public void SetAsRiver(int x, int y)
