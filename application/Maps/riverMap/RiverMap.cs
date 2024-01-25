@@ -35,6 +35,7 @@
             while (!stopped)
             {
                 var (stop, next) = AdvanceRiver(start, random);
+                start = next;
                 SetAsRiver(next.X, next.Y);
                 stopped = stop;
             }
