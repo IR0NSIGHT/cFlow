@@ -2,6 +2,7 @@
 using src.Maps.riverMap;
 using System.Diagnostics;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 public class EntryClass
 {
@@ -35,11 +36,15 @@ public class EntryClass
         }
         Console.WriteLine($"saved flowmap to {fileOut}");
 
-        //   SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
+        var riverMap = new RiverMap(fMap);
+        Random r = new Random();
+        for (int i = 0;i < 100; i++)
+        {
+            riverMap.AddRiverFrom(r.Next()%riverMap.Bounds().x, r.Next() % riverMap.Bounds().y);
+            
+        }
 
-        //    var riverMap = new RiverMap(fMap);
-        //   riverMap.AddRiverFrom(69, 25);
-
+        ImageApi.SaveBitmapAsPng(riverMap.ToImage(), folder + "rivermap" + ".png");
 
     }
 
