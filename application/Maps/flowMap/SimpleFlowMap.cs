@@ -72,8 +72,6 @@ public class SimpleFlowMap : IFlowMap
     private static (bool, IFlowMap.Flow) NeighbourFlowOrDefault(int x, int y, IFlowMap flowMap, IHeightMap heightMap, IFlowMap.Flow defaultF)
     {
         Point thisP = new Point(x, y, -1);
-        if ((x, y) == (2, 2))
-            Console.WriteLine("found my point");
         Func<(int x, int y), Boolean> canIFlowTo = (pos) =>
             heightMap.GetHeight(x, y) >= heightMap.GetHeight(pos.x, pos.y);
 

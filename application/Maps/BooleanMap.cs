@@ -38,10 +38,6 @@
 
         public void setMarked(int x, int y)
         {
-            if ((x, y) == (2, 2))
-            {
-                Console.WriteLine("marked but not flowed!");
-            }
             seenMap[x][y] = true;
         }
     }
