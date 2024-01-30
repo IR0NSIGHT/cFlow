@@ -35,9 +35,9 @@ public class SimpleFlowMap : IFlowMap
     private static void FillWithUnknown(IFlowMap flowMap)
     {
         //set everything to unknown
-        foreach (var point in flowMap.GetPoints())
+        foreach (var point in flowMap.iterator().Points())
         {
-            flowMap.SetFlow(point.X, point.Y,
+            flowMap.SetFlow(point.x, point.y,
                 new IFlowMap.Flow(
                     true, false, false, false, false
                     ));
@@ -52,8 +52,8 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="flowMap"></param>
     public static void ApplyNaturalEdgeFlow(IHeightMap heightMap, IFlowMap flowMap)
     {
-        if (flowMap.getDimensions() != heightMap.Bounds())
-            throw new Exception($"map sizes dont match!: fMap:{flowMap.getDimensions()}, hMap:{heightMap.Bounds()}");
+        if (flowMap.Bounds() != heightMap.Bounds())
+            throw new Exception($"map sizes dont match!: fMap:{flowMap.Bounds()}, hMap:{heightMap.Bounds()}");
         //set Flow for all natural edges
         foreach (var point in heightMap.iterator().Points())
         {
@@ -85,7 +85,7 @@ public class SimpleFlowMap : IFlowMap
             {
                 return false;
             }
-            var flow = flowMap.GetFlow(pos.x, pos.y).Flow;
+            var flow = flowMap.GetFlow(pos.x, pos.y);
 
             if (flow.Unknown)
                 return false;
@@ -121,7 +121,7 @@ public class SimpleFlowMap : IFlowMap
         var currentIdx = 0;
         var candidates = new (int x, int y)[previousChanged.Length * 4];
 
-        var dims = flowMap.getDimensions();
+        var dims = flowMap.Bounds();
         Func<(int, int), Boolean> safeBounds = ((int x, int y) pos) => insideReducedBounds(pos, dims);
 
         //TODO check if candidate already exists
@@ -163,10 +163,10 @@ public class SimpleFlowMap : IFlowMap
         foreach (var point in origins)
         {
             var f = flowMap.GetFlow(point.x, point.y);
-            var (changed, newFlow) = NeighbourFlowOrDefault(f.X, f.Y, flowMap, heightMap, f.Flow);
+            var (changed, newFlow) = NeighbourFlowOrDefault(point.x, point.y, flowMap, heightMap, f);
             if (changed)
             {
-                changedCandidates[changedIdx++] = new IFlowMap.PointFlow(f.X, f.Y, newFlow);
+                changedCandidates[changedIdx++] = new IFlowMap.PointFlow(point.x, point.y, newFlow);
             }
         }
 
@@ -217,14 +217,14 @@ public class SimpleFlowMap : IFlowMap
 
         //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
-        foreach (var point in flowMap.GetPoints())
+        foreach (var point in flowMap.iterator().Points())
         {
-            if (!point.Flow.Unknown)
-                edges.Add(point);
+            if (!flowMap.GetFlow(point.x, point.y).Unknown)
+                edges.Add(new IFlowMap.PointFlow(point.x,point.y,flowMap.GetFlow(point.x, point.y)));
         }
 
         var changed = true;
-        var seenMap = new BooleanMap(flowMap.getDimensions());
+        var seenMap = new BooleanMap(flowMap.Bounds());
 
         //first candidates are the natural edges
         var previousCandidated = edges.ToArray();
@@ -242,12 +242,12 @@ public class SimpleFlowMap : IFlowMap
 
     public static SKBitmap ToImage(IFlowMap flowMap)
     {
-        var (width, height) = flowMap.getDimensions();
+        var (width, height) = flowMap.Bounds();
         byte[] pixelData = new byte[width * height];
 
-        foreach (var points in flowMap.GetPoints())
+        foreach (var points in flowMap.iterator().Points())
         {
-            pixelData[points.Y * width + points.X] = FlowTranslation.FlowToGray8(points.Flow);
+            pixelData[points.y * width + points.x] = FlowTranslation.FlowToGray8(flowMap.GetFlow(points.x,points.y));
         }
 
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
@@ -258,11 +258,11 @@ public class SimpleFlowMap : IFlowMap
 
     public static SKBitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow, SKColor> flowToColor)
     {
-        var (width, height) = flowMap.getDimensions();
+        var (width, height) = flowMap.Bounds();
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
-        foreach (var points in flowMap.GetPoints())
+        foreach (var points in flowMap.iterator().Points())
         {
-            bitmap.SetPixel(points.X, points.Y, flowToColor(points.Flow));
+            bitmap.SetPixel(points.x, points.y, flowToColor(flowMap.GetFlow(points.x, points.y)));
         }
         return bitmap;
     }
@@ -290,65 +290,46 @@ public class SimpleFlowMap : IFlowMap
         return new IFlowMap.Flow(false, up, down, left, right);
     }
 
-    public List<IFlowMap.PointFlow> FollowFlow(IFlowMap.PointFlow point)
+    public List<(int x, int y)> FollowFlow((int x, int y) point)
     {
-        List<IFlowMap.PointFlow> nextFlow = new();
-        if (point.Flow.Up)
-            nextFlow.Add(GetFlow(Point.Up(point.X, point.Y).x, Point.Up(point.X, point.Y).y));
-        if (point.Flow.Down)
-            nextFlow.Add(GetFlow(Point.Down(point.X, point.Y).x, Point.Down(point.X, point.Y).y));
-        if (point.Flow.Left)
-            nextFlow.Add(GetFlow(Point.Left(point.X, point.Y).x, Point.Left(point.X, point.Y).y));
-        if (point.Flow.Right)
-            nextFlow.Add(GetFlow(Point.Right(point.X, point.Y).x, Point.Right(point.X, point.Y).y));
-
+        IFlowMap.Flow flow = GetFlow(point.x, point.y);
+        List<(int x, int y)> nextFlow = new();
+        if (flow.Up)
+            nextFlow.Add(Point.Up(point.x, point.y));
+        if (flow.Down)
+            nextFlow.Add(Point.Down(point.x, point.y));
+        if (flow.Left)
+            nextFlow.Add(Point.Left(point.x, point.y));
+        if (flow.Right)
+            nextFlow.Add(Point.Right(point.x, point.y));
+        
         return nextFlow;
     }
 
-    public (int x, int y) getDimensions()
+    public (int x, int y) Bounds()
     {
         return (flowMap.Length, flowMap[0].Length);
     }
 
-    public IFlowMap.PointFlow GetFlow(int x, int y)
+    public IFlowMap.Flow GetFlow(int x, int y)
     {
-        return new IFlowMap.PointFlow(x, y, flowMap[x][y]);
+        return flowMap[x][y];
     }
 
-    public IEnumerable<IFlowMap.PointFlow> GetPoints()
-    {
-        for (int y = 0; y < getDimensions().y; y++)
-        {
-            for (int x = 0; x < getDimensions().x; x++)
-            {
-                yield return new IFlowMap.PointFlow(x, y, flowMap[x][y]);
-            }
-        }
-    }
+
 
     public void SetFlow(int x, int y, IFlowMap.Flow flow)
     {
         flowMap[x][y] = flow;
     }
 
-    public IEnumerable<IFlowMap.PointFlow> GetRow(int y)
-    {
-        for (int x = 0; x < getDimensions().x; x++)
-        {
-            yield return GetFlow(x, y);
-        }
-    }
-
-    public IEnumerable<IEnumerable<IFlowMap.PointFlow>> PointsByLine()
-    {
-        for (int y = getDimensions().y - 1; y >= 0; y--)
-        {
-            yield return GetRow(y);
-        }
-    }
-
     public bool inBounds(int x, int y)
     {
-        return x >= 0 && x < getDimensions().x && y >= 0 && y < getDimensions().y; ;
+        return x >= 0 && x < Bounds().x && y >= 0 && y < Bounds().y; ;
+    }
+    
+    public IMapIterator<(int x, int y)> iterator()
+    {
+        return new Map2dIterator(Bounds());
     }
 }

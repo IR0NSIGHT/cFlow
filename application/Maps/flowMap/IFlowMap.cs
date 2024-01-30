@@ -1,7 +1,7 @@
-﻿public interface IFlowMap
+﻿public interface IFlowMap: Map2d
 {
     record PointFlow(int X, int Y, IFlowMap.Flow Flow);
-    (int x, int y) getDimensions();
+
     record Flow(bool Unknown, bool Up, bool Down, bool Left, bool Right)
     {
         public static String FlowToString(IFlowMap.Flow p)
@@ -48,12 +48,9 @@
         }
     }
 
-    PointFlow GetFlow(int x, int y);
+    Flow GetFlow(int x, int y);
     void SetFlow(int x, int y, IFlowMap.Flow flow);
-    IEnumerable<PointFlow> GetPoints();
-    List<PointFlow> FollowFlow(PointFlow point);
 
-    IEnumerable<PointFlow> GetRow(int y);
-
-    bool inBounds(int x, int y);
+    List<(int x, int y)> FollowFlow((int x, int y) point);
+    
 }

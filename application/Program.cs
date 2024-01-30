@@ -26,14 +26,6 @@ public class EntryClass
         var coloredFlow = SimpleFlowMap.ToColorImage(fMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
 
         ImageApi.SaveBitmapAsPng(coloredFlow, folder + fileOut + ".png");
-        List<IFlowMap.PointFlow> fuckedPoints = new List<IFlowMap.PointFlow>();
-        foreach (var flow in fMap.GetPoints())
-        {
-            if (flow.Flow.Unknown)
-            {
-                fuckedPoints.Add(flow);
-            }
-        }
         Console.WriteLine($"saved flowmap to {fileOut}");
 
         var riverMap = new RiverMap(fMap);

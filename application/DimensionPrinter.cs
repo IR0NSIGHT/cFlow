@@ -23,17 +23,17 @@ public class FlowMapPrinter
     {
         StringBuilder all = new StringBuilder();
 
-        for (int y = flowMap.getDimensions().y - 1; y >= 0; y --)
+        for (int y = flowMap.Bounds().y - 1; y >= 0; y --)
         {
             StringBuilder topLine = new StringBuilder();
             StringBuilder middleLine = new StringBuilder();
             StringBuilder bottomLine = new StringBuilder();
 
-            for (int x = 0; x < flowMap.getDimensions().x; x ++) {
+            for (int x = 0; x < flowMap.Bounds().x; x ++) {
                 var flowPoint = flowMap.GetFlow(x, y);
                 var height = heightMap.GetHeight(x, y);
                 String heightS = height.ToString().PadLeft(3);
-                if (flowPoint.Flow.Unknown)
+                if (flowPoint.Unknown)
                 {
                     topLine.Append("     ");
                     middleLine.Append($" {heightS}?");
@@ -41,13 +41,13 @@ public class FlowMapPrinter
                 } else
                 {
 
-                    String up = flowPoint.Flow.Up ? "  ↑  " : "     ";
-                    String down = flowPoint.Flow.Down ? "  ↓  " : "     ";
+                    String up = flowPoint.Up ? "  ↑  " : "     ";
+                    String down = flowPoint.Down ? "  ↓  " : "     ";
                     topLine.Append(up);
                     bottomLine.Append(down);
 
-                    var left = flowPoint.Flow.Left ? '←' : ' ';
-                    var right = flowPoint.Flow.Right ? '→' : ' ';
+                    var left = flowPoint.Left ? '←' : ' ';
+                    var right = flowPoint.Right ? '→' : ' ';
                     String pointS = $"{left}{heightS}{right}";
                     middleLine.Append(pointS);
                 }
