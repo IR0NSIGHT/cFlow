@@ -49,7 +49,13 @@
     }
 
     Flow GetFlow((int x, int y) point);
-    void SetFlow((int x, int y) point, Flow flow);
+
+    void SetFlow((int x, int y) point, Flow flow, int cycle);
+
+    
+    int GetCylce((int x, int y) point);
+    
+    void SetCylce((int x, int y) point, int cycle);
 
     List<(int x, int y)> FollowFlow((int x, int y) point);
     

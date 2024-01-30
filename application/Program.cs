@@ -8,8 +8,8 @@ public class EntryClass
 {
     static void Main(string[] args)
     {
-        var folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\";
-        var filename = "generatedworld_heightmap";
+        var folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\cFlow\\";
+        var filename = "medium_flats";
         var fileOut = filename + "_EDIT";
 
         SKBitmap sKBitmap = ImageApi.LoadBitmapFromPng(folder + filename + ".png");
@@ -23,7 +23,7 @@ public class EntryClass
         SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, fMap);
         Console.WriteLine("Calculateed Flow");
 
-        var coloredFlow = SimpleFlowMap.ToColorImage(fMap, p => { if (p.Unknown) return new SKColor(255, 0, 0); else return new SKColor(0, 0, 0); });
+        var coloredFlow = SimpleFlowMap.ToColorImage(fMap,  FlowTranslation.FlowToColor);
 
         ImageApi.SaveBitmapAsPng(coloredFlow, folder + fileOut + ".png");
         Console.WriteLine($"saved flowmap to {fileOut}");
@@ -37,7 +37,7 @@ public class EntryClass
         }
 
         ImageApi.SaveBitmapAsPng(riverMap.ToImage(), folder + "rivermap" + ".png");
-
+        ImageApi.SaveBitmapAsPng(fMap.ToCycleImage(),folder+"cycles.png");
     }
 
     public static void SaveToFile(string content, bool append)
