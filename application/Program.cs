@@ -38,6 +38,7 @@ public class EntryClass
 
         ImageApi.SaveBitmapAsPng(riverMap.ToImage(), folder + "rivermap" + ".png");
         ImageApi.SaveBitmapAsPng(fMap.ToCycleImage(),folder+"cycles.png");
+        
     }
 
     public static void SaveToFile(string content, bool append)

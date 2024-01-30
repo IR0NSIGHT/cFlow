@@ -68,7 +68,7 @@ namespace namespace_01
             };
             for (int i = 0; i < 15; i++)
             {
-                flowMap.SetFlow((i, 3), allFlows[i]);
+                flowMap.SetFlow((i, 3), allFlows[i],0);
                 var flowOnMap = flowMap.GetFlow((i, 3));
                 Assert.That(i * 7, Is.EqualTo(FlowToGray8(flowOnMap)));
             }

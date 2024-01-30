@@ -1,6 +1,4 @@
 ﻿using SkiaSharp;
-using System.Runtime.Intrinsics.X86;
-using System.Threading;
 
 namespace tests
 {
@@ -15,9 +13,9 @@ namespace tests
 
             //mark y = 0 ==> first column 
 
-            fMap.SetFlow((0, 0), new IFlowMap.Flow(false, true, false, false, false));
+            fMap.SetFlow((0, 0), new IFlowMap.Flow(false, true, false, false, false),0);
             Assert.IsTrue(fMap.GetFlow((0, 0)).Up);
-            fMap.SetFlow((9, 0), new IFlowMap.Flow(false, true, false, false, false));
+            fMap.SetFlow((9, 0), new IFlowMap.Flow(false, true, false, false, false),0);
             Assert.IsTrue(fMap.GetFlow((9, 0)).Up);
 
             //picture origin is top left = 0,0
@@ -25,7 +23,7 @@ namespace tests
             //height = y
 
 
-            fMap.SetFlow((9, 2), new IFlowMap.Flow(false, false, true, false, false));
+            fMap.SetFlow((9, 2), new IFlowMap.Flow(false, false, true, false, false),0);
             Assert.IsTrue(fMap.GetFlow((9, 2)).Down);
 
             var bitmap = SimpleFlowMap.ToColorImage(fMap, FlowTranslation.FlowToColor);
