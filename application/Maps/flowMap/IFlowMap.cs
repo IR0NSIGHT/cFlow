@@ -48,8 +48,8 @@
         }
     }
 
-    Flow GetFlow(int x, int y);
-    void SetFlow(int x, int y, IFlowMap.Flow flow);
+    Flow GetFlow((int x, int y) point);
+    void SetFlow((int x, int y) point, Flow flow);
 
     List<(int x, int y)> FollowFlow((int x, int y) point);
     

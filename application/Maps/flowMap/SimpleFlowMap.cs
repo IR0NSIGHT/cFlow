@@ -37,7 +37,7 @@ public class SimpleFlowMap : IFlowMap
         //set everything to unknown
         foreach (var point in flowMap.iterator().Points())
         {
-            flowMap.SetFlow(point.x, point.y,
+            flowMap.SetFlow(point,
                 new IFlowMap.Flow(
                     true, false, false, false, false
                     ));
@@ -58,7 +58,7 @@ public class SimpleFlowMap : IFlowMap
         foreach (var point in heightMap.iterator().Points())
         {
             IFlowMap.Flow flow = pointFlowByHeight(point, heightMap);
-            flowMap.SetFlow(point.x, point.y, flow);
+            flowMap.SetFlow(point, flow);
         }
     }
 
@@ -85,7 +85,7 @@ public class SimpleFlowMap : IFlowMap
             {
                 return false;
             }
-            var flow = flowMap.GetFlow(pos.x, pos.y);
+            var flow = flowMap.GetFlow(pos);
 
             if (flow.Unknown)
                 return false;
@@ -162,7 +162,7 @@ public class SimpleFlowMap : IFlowMap
         int changedIdx = 0;
         foreach (var point in origins)
         {
-            var f = flowMap.GetFlow(point.x, point.y);
+            var f = flowMap.GetFlow(point);
             var (changed, newFlow) = NeighbourFlowOrDefault(point.x, point.y, flowMap, heightMap, f);
             if (changed)
             {
@@ -193,7 +193,7 @@ public class SimpleFlowMap : IFlowMap
         {
             foreach (var flowPoint in changedCandidates)
             {
-                flowMap.SetFlow(flowPoint.X, flowPoint.Y, flowPoint.Flow);
+                flowMap.SetFlow((flowPoint.X, flowPoint.Y), flowPoint.Flow);
             }
         }
 
@@ -219,8 +219,8 @@ public class SimpleFlowMap : IFlowMap
         var edges = new List<IFlowMap.PointFlow>();
         foreach (var point in flowMap.iterator().Points())
         {
-            if (!flowMap.GetFlow(point.x, point.y).Unknown)
-                edges.Add(new IFlowMap.PointFlow(point.x,point.y,flowMap.GetFlow(point.x, point.y)));
+            if (!flowMap.GetFlow(point).Unknown)
+                edges.Add(new IFlowMap.PointFlow(point.x,point.y,flowMap.GetFlow(point)));
         }
 
         var changed = true;
@@ -247,7 +247,7 @@ public class SimpleFlowMap : IFlowMap
 
         foreach (var points in flowMap.iterator().Points())
         {
-            pixelData[points.y * width + points.x] = FlowTranslation.FlowToGray8(flowMap.GetFlow(points.x,points.y));
+            pixelData[points.y * width + points.x] = FlowTranslation.FlowToGray8(flowMap.GetFlow(points));
         }
 
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
@@ -262,7 +262,7 @@ public class SimpleFlowMap : IFlowMap
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
         foreach (var points in flowMap.iterator().Points())
         {
-            bitmap.SetPixel(points.x, points.y, flowToColor(flowMap.GetFlow(points.x, points.y)));
+            bitmap.SetPixel(points.x, points.y, flowToColor(flowMap.GetFlow(points)));
         }
         return bitmap;
     }
@@ -292,7 +292,7 @@ public class SimpleFlowMap : IFlowMap
 
     public List<(int x, int y)> FollowFlow((int x, int y) point)
     {
-        IFlowMap.Flow flow = GetFlow(point.x, point.y);
+        IFlowMap.Flow flow = GetFlow(point);
         List<(int x, int y)> nextFlow = new();
         if (flow.Up)
             nextFlow.Add(Point.Up(point.x, point.y));
@@ -311,16 +311,16 @@ public class SimpleFlowMap : IFlowMap
         return (flowMap.Length, flowMap[0].Length);
     }
 
-    public IFlowMap.Flow GetFlow(int x, int y)
+    public IFlowMap.Flow GetFlow((int x, int y) point)
     {
-        return flowMap[x][y];
+        return flowMap[point.x][point.y];
     }
 
 
 
-    public void SetFlow(int x, int y, IFlowMap.Flow flow)
+    public void SetFlow((int x, int y) point ,IFlowMap.Flow flow)
     {
-        flowMap[x][y] = flow;
+        flowMap[point.x][point.y] = flow;
     }
 
     public bool inBounds(int x, int y)
