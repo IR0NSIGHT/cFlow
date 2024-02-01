@@ -132,7 +132,7 @@ public class SimpleFlowMap : IFlowMap
     }
 
     private static (int x, int y)[] collectNonHigherNeighbours(IFlowMap.PointFlow[] previousChanged,
-        SimpleFlowMap flowMap, BooleanMap seenMap, IHeightMap heightMap)
+        IFlowMap flowMap, BooleanMap seenMap, IHeightMap heightMap)
     {
         //collect all neighbours of the previous run
         var currentIdx = 0;
@@ -177,7 +177,7 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="flowMap"></param>
     /// <param name="heightMap"></param>
     /// <returns></returns>
-    private static IFlowMap.PointFlow[] calculateExpandedFlowFor((int x, int y)[] origins, SimpleFlowMap flowMap,
+    private static IFlowMap.PointFlow[] calculateExpandedFlowFor((int x, int y)[] origins, IFlowMap flowMap,
         IHeightMap heightMap)
     {
         var changedCandidates = new IFlowMap.PointFlow[origins.Length];
@@ -204,7 +204,7 @@ public class SimpleFlowMap : IFlowMap
     /// <param name="heightMap"></param>
     /// <param name="flowMap"></param>
     /// <returns>change occured</returns>
-    private static (bool changed, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(SimpleFlowMap flowMap,
+    private static (bool changed, IFlowMap.PointFlow[] changedPoints) ExpandExistingFlow(IFlowMap flowMap,
         IHeightMap heightMap, IFlowMap.PointFlow[] previousChanged, BooleanMap seenMap, int cycle)
     {
         var candidates = collectNonHigherNeighbours(previousChanged, flowMap, seenMap, heightMap);
@@ -231,16 +231,9 @@ public class SimpleFlowMap : IFlowMap
     /// </summary>
     /// <param name="heightMap"></param>
     /// <param name="flowMap"></param>
-    public static void CalculateFlowFromHeightMap(IHeightMap heightMap, SimpleFlowMap flowMap)
+    public static void CalculateFlowFromHeightMap(IHeightMap heightMap, IFlowMap flowMap)
     {
         ApplyNaturalEdgeFlow(heightMap, flowMap);
-
-        var coloredFlow = SimpleFlowMap.ToColorImage(flowMap, p =>
-        {
-            if (!p.Unknown) return new SKColor(255, 0, 0);
-            else return new SKColor(0, 0, 0);
-        });
-        ImageApi.SaveBitmapAsPng(coloredFlow, "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\flowAfterNatural.png");
 
         //get all existing flows
         var edges = new List<IFlowMap.PointFlow>();
@@ -267,14 +260,14 @@ public class SimpleFlowMap : IFlowMap
         }
     }
 
-    public SKBitmap ToCycleImage()
+    public static SKBitmap ToCycleImage(IFlowMap flowMap)
     {
-        var (width, height) = Bounds();
+        var (width, height) = flowMap.Bounds();
         SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
-        float ratio = int.MaxValue / Math.Max(Bounds().y, Bounds().x);
-        foreach (var points in iterator().Points())
+        float ratio = int.MaxValue / Math.Max(flowMap.Bounds().y, flowMap.Bounds().x);
+        foreach (var points in flowMap.iterator().Points())
         {
-            bitmap.SetPixel(points.x, points.y, ((uint)(GetCylce(points) * ratio)));
+            bitmap.SetPixel(points.x, points.y, ((uint)(flowMap.GetCylce(points) * ratio)));
         }
 
         return bitmap;

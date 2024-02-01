@@ -1,26 +1,17 @@
-﻿using System;
+﻿using SkiaSharp;
 using System.Drawing;
-using System.Windows.Forms;
-using SkiaSharp;
-using SkiaSharp.Views.Desktop;
 
-namespace cFlowApp
+namespace WinFormsApp1
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        private SKControl skControl;
-        string folder = "C:\\Users\\Max1M\\\\OneDrive\\Bilder\\cFlow\\";
-        string file = "medium_flats.png";
-        public Form1()
+        public MainWindow()
         {
             InitializeComponent();
-            var image = new Bitmap(folder + file);
-            var testString = ClassLibrary1.MyTestClassApi.myString;
-            Console.WriteLine(testString);
-            //var cFlow = new cFlowApi.CFlowGenerator(folder + file);
-
-            ShowMyImage(pictureBox1, image );
-
+            var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
+            var file = "medium_flats.png";
+            var gen = new cFlowApi.CFlowGenerator(path + file);
+            ShowMyImage(pictureBox1, SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.HeightmapImg));
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
@@ -70,25 +61,12 @@ namespace cFlowApp
         /// <param name="oldSize"></param>
         /// <param name="newSize"></param>
         /// <returns>new position of image when using new size</returns>
-        private static Point CenterPosResizedImage(Point oldPos, (int x, int y) oldSize, (int x, int y) newSize)
+        private static System.Drawing.Point CenterPosResizedImage(System.Drawing.Point oldPos, (int x, int y) oldSize, (int x, int y) newSize)
         {
             //center image that might be smaller than box
             int xPosition = (oldSize.x - newSize.x) / 2;
             int yPosition = (oldSize.y - newSize.y) / 2;
-            return new Point(oldPos.X + xPosition, oldPos.Y + yPosition);
-        }
-
-        private void skControl1_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
-        {
-            SKSurface surface = e.Surface;
-            SKCanvas canvas = surface.Canvas;
-
-            // Your SkiaSharp drawing code goes here
-            using (SKPaint paint = new SKPaint())
-            {
-                paint.Color = SKColors.Blue;
-                canvas.DrawRect(new SKRect(10, 10, 500, 500), paint);
-            }
+            return new System.Drawing.Point(oldPos.X + xPosition, oldPos.Y + yPosition);
         }
     }
 }
