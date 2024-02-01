@@ -43,12 +43,10 @@
             pictureBox1.Location = new System.Drawing.Point(91, 12);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(836, 452);
-            pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+        //    pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-            pictureBox1.MouseDown += PictureBox1_MouseDown;
-            pictureBox1.MouseMove += PictureBox1_MouseMove;
-            pictureBox1.MouseUp += PictureBox1_MouseUp;
+
             // 
             // pictureBox2
             // 
