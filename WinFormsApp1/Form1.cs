@@ -5,6 +5,16 @@ namespace WinFormsApp1
 {
     public partial class MainWindow : Form
     {
+        private (int x, int y) currentCenter;
+        private float scale;
+        private bool isDragging;
+        System.Drawing.Point originalMousePos;
+
+        private void SetCurrentCenter((int x, int y) currentCenter)
+        {
+            this.currentCenter = currentCenter;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -12,6 +22,38 @@ namespace WinFormsApp1
             var file = "medium_flats.png";
             var gen = new cFlowApi.CFlowGenerator(path + file);
             ShowMyImage(pictureBox1, SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.HeightmapImg));
+            ShowMyImage(pictureBox2, SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.FlowmapImgColored));
+            ShowMyImage(pictureBox3, SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.RivermapImg));
+        }
+
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = true;
+                originalMousePos = e.Location;
+            }
+        }
+
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = false;
+            }
+        }
+
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                int deltaX = e.X - originalMousePos.X;
+                int deltaY = e.Y - originalMousePos.Y;
+                if (Math.Abs(deltaX) < 5 && Math.Abs(deltaY) < 5)
+                    return;
+
+                SetCurrentCenter((currentCenter.x + deltaX, currentCenter.y + deltaY));
+            }
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
@@ -47,6 +89,7 @@ namespace WinFormsApp1
 
             // Stretches the image to fit the pictureBox.
             box.SizeMode = PictureBoxSizeMode.StretchImage;
+           
             box.ClientSize = new Size(newWidth, newHeight);
 
             box.Image = (Image)skBitmap;
