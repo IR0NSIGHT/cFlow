@@ -7,7 +7,7 @@ namespace WinFormsApp1
     {
         private float scale = 1;
         private float ratio = 1;
-
+        private (int x, int y) position = (0, 0);
         public MainWindow()
         {
             InitializeComponent();
@@ -23,14 +23,20 @@ namespace WinFormsApp1
             pictureBox2.Paint += PictureBox1_Paint;
             pictureBox3.Paint += PictureBox1_Paint;
             this.MouseWheel += MainForm_MouseWheel;
+            this.KeyDown += Form1_KeyDown;
+        }
+
+        private void RedrawMaps()
+        {
+            pictureBox1.Invalidate();
+            pictureBox2.Invalidate();
+            pictureBox3.Invalidate();
         }
 
         private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
         {
             scale += (e.Delta * 1f / 1000);
-            pictureBox1.Invalidate();
-            pictureBox2.Invalidate();
-            pictureBox3.Invalidate();
+            RedrawMaps();
         }
 
         private void PictureBox1_Paint(object? sender, PaintEventArgs e)
@@ -44,9 +50,37 @@ namespace WinFormsApp1
                 e.Graphics.DrawImage(
                     pictureBox.Image,
                     new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
-                    new Rectangle(0, 0, (int)(pictureBox.Image.Width / scale), (int)(pictureBox.Image.Height / scale )),
+                    new Rectangle(position.x, position.y, (int)(pictureBox.Image.Width / scale), (int)(pictureBox.Image.Height / scale)),
                     GraphicsUnit.Pixel);
             }
         }
+
+        private void Form1_KeyDown(object? sender, KeyEventArgs e)
+        {
+            int moveSpeed = 2;
+            if (e.KeyCode == Keys.Up)
+            {
+                // Up arrow key is pressed
+                position = (position.x, position.y + moveSpeed);
+            }
+            else if (e.KeyCode == Keys.Down)
+            {
+                // Down arrow key is pressed
+                position = (position.x, position.y - moveSpeed);
+            }
+            if (e.KeyCode == Keys.Left)
+            {
+                // Left arrow key is pressed
+                position = (position.x - moveSpeed, position.y);
+            }
+            else if (e.KeyCode == Keys.Right)
+            {
+                // Right arrow key is pressed
+                position = (position.x + moveSpeed, position.y);
+            }
+            RedrawMaps();
+
+        }
+
     }
 }

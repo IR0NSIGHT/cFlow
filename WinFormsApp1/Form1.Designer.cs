@@ -43,10 +43,8 @@
             pictureBox1.Location = new System.Drawing.Point(91, 12);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(836, 452);
-        //    pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-
             // 
             // pictureBox2
             // 
@@ -88,7 +86,6 @@
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
