@@ -1,5 +1,7 @@
-﻿using SkiaSharp;
+﻿using cFlowForms;
+using SkiaSharp;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace WinFormsApp1
 {
@@ -8,9 +10,23 @@ namespace WinFormsApp1
         private float scale = 1;
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
+        private MoveMapByMouse mouseMover;
         public MainWindow()
         {
             InitializeComponent();
+            mouseMover = new MoveMapByMouse(pictureBox1, SetCenter, GetCenter); ;
+
+            MouseDown += (p,p1) =>
+            {
+                Console.WriteLine(p1);
+            };
+
+            pictureBox1.Paint += PictureBox1_Paint;
+            pictureBox2.Paint += PictureBox1_Paint;
+            pictureBox3.Paint += PictureBox1_Paint;
+            this.MouseWheel += MainForm_MouseWheel;
+            this.KeyDown += Form1_KeyDown;
+
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
             var file = "medium_flats.png";
             var gen = new cFlowApi.CFlowGenerator(path + file);
@@ -18,12 +34,13 @@ namespace WinFormsApp1
             pictureBox1.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.HeightmapImg);
             pictureBox2.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.FlowmapImgColored);
             pictureBox3.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.RivermapImg);
+        }
 
-            pictureBox1.Paint += PictureBox1_Paint;
-            pictureBox2.Paint += PictureBox1_Paint;
-            pictureBox3.Paint += PictureBox1_Paint;
-            this.MouseWheel += MainForm_MouseWheel;
-            this.KeyDown += Form1_KeyDown;
+        public System.Drawing.Point GetCenter() { return new System.Drawing.Point(position.x, position.y); }
+        public void SetCenter(System.Drawing.Point center)
+        {
+            position = (center.X, center.Y);
+            RedrawMaps();
         }
 
         private void RedrawMaps()
@@ -57,13 +74,20 @@ namespace WinFormsApp1
 
         private void Form1_KeyDown(object? sender, KeyEventArgs e)
         {
+            // Check if both the left and right arrow keys are pressed simultaneously
+            if (e.KeyCode == Keys.Left && (Control.ModifierKeys & Keys.Right) == Keys.Right)
+            {
+                MessageBox.Show("Left and Right arrow keys are pressed simultaneously");
+            }
+
+            Console.WriteLine("KeyData is: " + e.KeyData.ToString());
             int moveSpeed = 2;
-            if (e.KeyCode == Keys.Up)
+            if (e.KeyCode == Keys.Down)
             {
                 // Up arrow key is pressed
                 position = (position.x, position.y + moveSpeed);
             }
-            else if (e.KeyCode == Keys.Down)
+            if (e.KeyCode == Keys.Up)
             {
                 // Down arrow key is pressed
                 position = (position.x, position.y - moveSpeed);
@@ -73,7 +97,7 @@ namespace WinFormsApp1
                 // Left arrow key is pressed
                 position = (position.x - moveSpeed, position.y);
             }
-            else if (e.KeyCode == Keys.Right)
+            if (e.KeyCode == Keys.Right)
             {
                 // Right arrow key is pressed
                 position = (position.x + moveSpeed, position.y);

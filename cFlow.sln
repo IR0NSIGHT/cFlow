@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "unittest", "unittest\unitte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cFlowAPI", "cFlowAPI\cFlowAPI.csproj", "{28D0C0D4-D36D-4073-9B5F-77EC3E6A0061}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinFormsApp1", "WinFormsApp1\WinFormsApp1.csproj", "{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cFlowForms", "WinFormsApp1\cFlowForms.csproj", "{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
