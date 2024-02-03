@@ -11,29 +11,42 @@ namespace WinFormsApp1
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
         private MoveMapByMouse mouseMover;
+        private cFlowApi.CFlowGenerator cFlowApi;
         public MainWindow()
         {
             InitializeComponent();
-            mouseMover = new MoveMapByMouse(pictureBox1, SetCenter, GetCenter); ;
+            riverSpacingNumericChanged(null, null);
 
-            MouseDown += (p,p1) =>
+            mouseMover = new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
+            MouseDown += (p, p1) =>
             {
                 Console.WriteLine(p1);
             };
 
-            pictureBox1.Paint += PictureBox1_Paint;
-            pictureBox2.Paint += PictureBox1_Paint;
-            pictureBox3.Paint += PictureBox1_Paint;
+            heightPictureBox.Paint += PictureBox1_Paint;
+            flowPicturBox.Paint += PictureBox1_Paint;
+            riverPictureBox.Paint += PictureBox1_Paint;
             this.MouseWheel += MainForm_MouseWheel;
             this.KeyDown += Form1_KeyDown;
 
+            numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
+            numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
+            genManyRiverButton.Click += OnGenerateRiverButton;
+
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
-            var file = "medium_flats.png";
-            var gen = new cFlowApi.CFlowGenerator(path + file);
-            ratio = gen.HeightmapImg.Width / gen.HeightmapImg.Height;
-            pictureBox1.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.HeightmapImg);
-            pictureBox2.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.FlowmapImgColored);
-            pictureBox3.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(gen.RivermapImg);
+            var file = "large_circle.png";
+            cFlowApi = new cFlowApi.CFlowGenerator(path + file);
+            ratio = cFlowApi.HeightmapImg.Width / cFlowApi.HeightmapImg.Height;
+            heightPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.HeightmapImg);
+
+        }
+
+        private void OnGenerateRiverButton(object? sender, EventArgs e)
+        {
+            cFlowApi.SpamRivers(riverSpacing.x, riverSpacing.y);
+            riverPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.RivermapImg);
+
+            RedrawMaps();
         }
 
         public System.Drawing.Point GetCenter() { return new System.Drawing.Point(position.x, position.y); }
@@ -45,9 +58,9 @@ namespace WinFormsApp1
 
         private void RedrawMaps()
         {
-            pictureBox1.Invalidate();
-            pictureBox2.Invalidate();
-            pictureBox3.Invalidate();
+            heightPictureBox.Invalidate();
+            flowPicturBox.Invalidate();
+            riverPictureBox.Invalidate();
         }
 
         private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
@@ -106,5 +119,20 @@ namespace WinFormsApp1
 
         }
 
+        private void onGenerateFlowButton(object sender, EventArgs e)
+        {
+            cFlowApi.GenerateFlow();
+            flowPicturBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.FlowmapImgColored);
+
+
+            RedrawMaps();
+        }
+
+        private (int x, int y) riverSpacing = (10, 10);
+
+        private void riverSpacingNumericChanged(object? sender, EventArgs e)
+        {
+            riverSpacing = (decimal.ToInt32(numericRiverSpacingX.Value), decimal.ToInt32(numericRiverSpacingY.Value));
+        }
     }
 }

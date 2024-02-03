@@ -1,4 +1,6 @@
-﻿namespace WinFormsApp1
+﻿using System.Windows.Forms;
+
+namespace WinFormsApp1
 {
     partial class MainWindow
     {
@@ -28,71 +30,141 @@
         /// </summary>
         private void InitializeComponent()
         {
-            pictureBox1 = new PictureBox();
-            pictureBox2 = new PictureBox();
-            pictureBox3 = new PictureBox();
-            pictureBox4 = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
+            heightPictureBox = new PictureBox();
+            flowPicturBox = new PictureBox();
+            riverPictureBox = new PictureBox();
+            genFlowButton = new Button();
+            genManyRiverButton = new Button();
+            numericRiverSpacingX = new NumericUpDown();
+            numericRiverSpacingY = new NumericUpDown();
+            xRiverSpacing = new Label();
+            label1 = new Label();
+            ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)flowPicturBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)riverPictureBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
             SuspendLayout();
             // 
-            // pictureBox1
+            // heightPictureBox
             // 
-            pictureBox1.Location = new System.Drawing.Point(91, 12);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(836, 452);
-            pictureBox1.TabIndex = 0;
-            pictureBox1.TabStop = false;
+            heightPictureBox.Location = new System.Drawing.Point(91, 12);
+            heightPictureBox.Name = "heightPictureBox";
+            heightPictureBox.Size = new Size(836, 452);
+            heightPictureBox.TabIndex = 0;
+            heightPictureBox.TabStop = false;
             // 
-            // pictureBox2
+            // flowPicturBox
             // 
-            pictureBox2.Location = new System.Drawing.Point(933, 12);
-            pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(836, 452);
-            pictureBox2.TabIndex = 1;
-            pictureBox2.TabStop = false;
+            flowPicturBox.Location = new System.Drawing.Point(933, 12);
+            flowPicturBox.Name = "flowPicturBox";
+            flowPicturBox.Size = new Size(836, 452);
+            flowPicturBox.TabIndex = 1;
+            flowPicturBox.TabStop = false;
             // 
-            // pictureBox3
+            // riverPictureBox
             // 
-            pictureBox3.Location = new System.Drawing.Point(91, 470);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(836, 452);
-            pictureBox3.TabIndex = 2;
-            pictureBox3.TabStop = false;
+            riverPictureBox.Location = new System.Drawing.Point(91, 470);
+            riverPictureBox.Name = "riverPictureBox";
+            riverPictureBox.Size = new Size(836, 452);
+            riverPictureBox.TabIndex = 2;
+            riverPictureBox.TabStop = false;
             // 
-            // pictureBox4
+            // genFlowButton
             // 
-            pictureBox4.Location = new System.Drawing.Point(933, 470);
-            pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(836, 452);
-            pictureBox4.TabIndex = 3;
-            pictureBox4.TabStop = false;
+            genFlowButton.Location = new System.Drawing.Point(933, 470);
+            genFlowButton.Name = "genFlowButton";
+            genFlowButton.Size = new Size(160, 90);
+            genFlowButton.TabIndex = 4;
+            genFlowButton.Text = "Generate Flow";
+            genFlowButton.UseVisualStyleBackColor = true;
+            genFlowButton.Click += onGenerateFlowButton;
+            // 
+            // genManyRiverButton
+            // 
+            genManyRiverButton.Location = new System.Drawing.Point(933, 566);
+            genManyRiverButton.Name = "genManyRiverButton";
+            genManyRiverButton.Size = new Size(160, 90);
+            genManyRiverButton.TabIndex = 5;
+            genManyRiverButton.Text = "Generate Rivers";
+            genManyRiverButton.UseVisualStyleBackColor = true;
+            // 
+            // numericRiverSpacingX
+            // 
+            numericRiverSpacingX.Location = new System.Drawing.Point(1099, 566);
+            numericRiverSpacingX.Name = "numericRiverSpacingX";
+            numericRiverSpacingX.Size = new Size(107, 23);
+            numericRiverSpacingX.TabIndex = 6;
+            numericRiverSpacingX.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            numericRiverSpacingX.Maximum = 100000;
+            numericRiverSpacingX.Minimum = 1;
+            numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
+            // 
+            // numericRiverSpacingY
+            // 
+            numericRiverSpacingY.Location = new System.Drawing.Point(1099, 595);
+            numericRiverSpacingY.Name = "numericRiverSpacingY";
+            numericRiverSpacingY.Size = new Size(107, 23);
+            numericRiverSpacingY.TabIndex = 7;
+            numericRiverSpacingY.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            numericRiverSpacingY.Maximum = 100000;
+            numericRiverSpacingY.Minimum = 1;
+            numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
+
+            // 
+            // xRiverSpacing
+            // 
+            xRiverSpacing.AutoSize = true;
+            xRiverSpacing.Location = new System.Drawing.Point(1212, 568);
+            xRiverSpacing.Name = "xRiverSpacing";
+            xRiverSpacing.Size = new Size(74, 15);
+            xRiverSpacing.TabIndex = 8;
+            xRiverSpacing.Text = "spacing on x";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(1212, 597);
+            label1.Name = "label1";
+            label1.Size = new Size(74, 15);
+            label1.TabIndex = 9;
+            label1.Text = "spacing on y";
             // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
-            Controls.Add(pictureBox4);
-            Controls.Add(pictureBox3);
-            Controls.Add(pictureBox2);
-            Controls.Add(pictureBox1);
+            Controls.Add(label1);
+            Controls.Add(xRiverSpacing);
+            Controls.Add(numericRiverSpacingY);
+            Controls.Add(numericRiverSpacingX);
+            Controls.Add(genManyRiverButton);
+            Controls.Add(genFlowButton);
+            Controls.Add(riverPictureBox);
+            Controls.Add(flowPicturBox);
+            Controls.Add(heightPictureBox);
             Name = "MainWindow";
             Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
+            ((System.ComponentModel.ISupportInitialize)heightPictureBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)flowPicturBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)riverPictureBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private PictureBox pictureBox1;
-        private PictureBox pictureBox2;
-        private PictureBox pictureBox3;
-        private PictureBox pictureBox4;
+        private PictureBox heightPictureBox;
+        private PictureBox flowPicturBox;
+        private PictureBox riverPictureBox;
+        private Button genFlowButton;
+        private Button genManyRiverButton;
+        private NumericUpDown numericRiverSpacingX;
+        private NumericUpDown numericRiverSpacingY;
+        private Label xRiverSpacing;
+        private Label label1;
     }
 }

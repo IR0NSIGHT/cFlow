@@ -23,6 +23,11 @@ namespace cFlowApi
             _heightmap = new Image8BitHeightMap(_heightmapImg);
             Console.WriteLine("Converted image to heightmap");
 
+           
+        }
+
+        public void GenerateFlow()
+        {
             _flowMap = new SimpleFlowMap(_heightmap.Bounds());
             Console.WriteLine("Inited flowmap");
 
@@ -31,15 +36,23 @@ namespace cFlowApi
 
             _flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
 
+
+        }
+
+        public void SpamRivers(int xSpacing, int ySpacing)
+        {
             var riverMap = new RiverMap(_flowMap);
             Random r = new Random();
-            for (int i = 0; i < 100; i++)
+            for (int x = 0; x < riverMap.Bounds().x; x+= xSpacing)
             {
-                riverMap.AddRiverFrom(r.Next() % riverMap.Bounds().x, r.Next() % riverMap.Bounds().y);
+                for (int y = 0; y < riverMap.Bounds().y; y+= ySpacing)
+                {
+                    riverMap.AddRiverFrom(x,y);
+
+                }
             }
             _rivermapImg = riverMap.ToImage();
         }
-
         public static void SaveToFile(string content, bool append)
         {
             // Set a variable to the Documents path.
