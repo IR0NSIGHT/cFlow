@@ -89,7 +89,7 @@ public class SimpleFlowMap : IFlowMap
     {
         var thisP = (x, y);
         Func<(int x, int y), Boolean> canIFlowTo = (pos) =>
-            heightMap.GetHeight(x, y) >= heightMap.GetHeight(pos.x, pos.y);
+            heightMap.GetHeight(thisP) >= heightMap.GetHeight(pos);
 
 
         Func<(int x, int y), Boolean> hasFlow = (pos) =>
@@ -149,7 +149,7 @@ public class SimpleFlowMap : IFlowMap
             var pointInReducedBounds = safeBounds((point));
             Func<(int, int), bool> canFlowTo = ((int x, int y) p) =>
             {
-                return heightMap.GetHeight(previousPoint.X, previousPoint.Y) <= heightMap.GetHeight(p.x, p.y);
+                return heightMap.GetHeight((previousPoint.X, previousPoint.Y)) <= heightMap.GetHeight(p);
             };
             foreach (var p in news)
             {
@@ -303,7 +303,7 @@ public class SimpleFlowMap : IFlowMap
 
     private static bool isLowerThan((int x, int y) pos, IHeightMap heightMap, short height, bool safeBounds)
     {
-        return (safeBounds || heightMap.inBounds(pos.x, pos.y)) && heightMap.GetHeight(pos.x, pos.y) < height;
+        return (safeBounds || heightMap.inBounds(pos.x, pos.y)) && heightMap.GetHeight(pos) < height;
     }
 
     /// <summary>
@@ -314,7 +314,7 @@ public class SimpleFlowMap : IFlowMap
     /// <returns></returns>
     private static IFlowMap.Flow pointFlowByHeight((int X, int Y) p, IHeightMap heightMap)
     {
-        short height = heightMap.GetHeight(p.X, p.Y);
+        short height = heightMap.GetHeight(p);
         bool safeBounds = insideReducedBounds((p.X, p.Y), heightMap.Bounds());
         bool left = isLowerThan(Point.Left(p), heightMap, height, safeBounds);
         bool right = isLowerThan(Point.Right(p), heightMap, height, safeBounds);

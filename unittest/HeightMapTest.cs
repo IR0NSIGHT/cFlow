@@ -13,7 +13,7 @@ namespace TestProject1
 
             foreach (var point in heightmap.iterator().Points())
             {
-                Assert.AreEqual(17, heightmap.GetHeight(point.x, point.y));
+                Assert.AreEqual(17, heightmap.GetHeight(point));
             }
 
 
@@ -23,13 +23,13 @@ namespace TestProject1
         {
             var heightmap = new DummyDimension((8, 12), 17);
             heightmap.SetHeight((7, 5), 3);
-            Assert.AreEqual(3, heightmap.GetHeight(7, 5));
+            Assert.AreEqual(3, heightmap.GetHeight((7, 5)));
 
             //only changed height of that single point
             foreach(var point in heightmap.iterator().Points())
             {
                 if (!(point.x == 7 && point.y == 5))
-                    Assert.AreEqual(17, heightmap.GetHeight(point.x, point.y));
+                    Assert.AreEqual(17, heightmap.GetHeight(point));
             }
         }
 
@@ -65,9 +65,9 @@ namespace TestProject1
             bitmap.SetPixel(9, 2, new SKColor(77, 77, 77));
 
             var heightmap = new Image8BitHeightMap(bitmap);
-            Assert.AreEqual(27, heightmap.GetHeight(0, 0));
-            Assert.AreEqual(47, heightmap.GetHeight(9, 0));
-            Assert.AreEqual(77, heightmap.GetHeight(9, 2));
+            Assert.AreEqual(27, heightmap.GetHeight((0, 0)));
+            Assert.AreEqual(47, heightmap.GetHeight((9, 0)));
+            Assert.AreEqual(77, heightmap.GetHeight((9, 2)));
         }
     }
 }

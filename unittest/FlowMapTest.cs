@@ -85,9 +85,9 @@ namespace tests
             bitmap.SetPixel(9, 2, new SKColor(77, 77, 77));
 
             var heightmap = new Image8BitHeightMap(bitmap);
-            Assert.That(heightmap.GetHeight(0, 0), Is.EqualTo(27));
-            Assert.That(heightmap.GetHeight(9, 0), Is.EqualTo(47));
-            Assert.That(heightmap.GetHeight(9, 2), Is.EqualTo(77));
+            Assert.That(heightmap.GetHeight((0, 0)), Is.EqualTo(27));
+            Assert.That(heightmap.GetHeight((9, 0)), Is.EqualTo(47));
+            Assert.That(heightmap.GetHeight((9, 2)), Is.EqualTo(77));
 
             var flowMap = new SimpleFlowMap(heightmap.Bounds()).FromHeightMap(heightmap);
             Assert.That(heightmap.Bounds(), Is.EqualTo(flowMap.Bounds()));

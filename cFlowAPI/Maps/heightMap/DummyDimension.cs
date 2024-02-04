@@ -28,9 +28,9 @@
         return (x, y);
     }
 
-    public short GetHeight(int x, int y)
+    public short GetHeight((int x, int y) pos)
     {
-        return heightMap[x][y];
+        return heightMap[pos.x][pos.y];
     }
 
     public void SetHeight((int x, int y) pos, short z)

@@ -31,7 +31,7 @@ public class FlowMapPrinter
 
             for (int x = 0; x < flowMap.Bounds().x; x ++) {
                 var flowPoint = flowMap.GetFlow((x, y));
-                var height = heightMap.GetHeight(x, y);
+                var height = heightMap.GetHeight((x, y));
                 String heightS = height.ToString().PadLeft(3);
                 if (flowPoint.Unknown)
                 {
