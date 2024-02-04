@@ -18,13 +18,15 @@ namespace cFlowApi
 
         public CFlowGenerator(string imagePath)
         {
-            _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
+            var _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
             Console.WriteLine("Loaded bitmap");
             _heightmap = new Image8BitHeightMap(_heightmapImg);
             Console.WriteLine("Converted image to heightmap");
 
-           
+            this._heightmapImg = ((Image8BitHeightMap)_heightmap).ContourLinesOverlay();
         }
+
+
 
         public void GenerateFlow()
         {
@@ -41,7 +43,7 @@ namespace cFlowApi
 
         public void SpamRivers(int xSpacing, int ySpacing)
         {
-            var riverMap = new RiverMap(_flowMap);
+            var riverMap = new RiverMap(_flowMap,_heightmap);
             Random r = new Random();
             for (int x = 0; x < riverMap.Bounds().x; x+= xSpacing)
             {

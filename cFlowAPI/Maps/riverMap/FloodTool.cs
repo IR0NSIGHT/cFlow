@@ -1,21 +1,30 @@
 ﻿
 using application.Maps;
+using src.Maps.riverMap;
 using static Point;
 
 namespace cFlowAPI.Maps.riverMap
 {
     public class FloodTool
     {
-        private IHeightMap _heightMap;
+        private readonly IHeightMap _heightMap;
         public FloodTool(IHeightMap heightMap)
         {
             _heightMap = heightMap;
         }
 
-        public void FloodArea((int x, int y) start)
+        public void FloodArea((int x, int y) start, RiverMap targetRiverMap)
         {
             int startZ = _heightMap.GetHeight(start);
-
+            var maxZ = startZ + 3;//hardcoded
+            var (outerMost, seen, exceeded) = collectPlaneAtOrBelow([start], maxZ, 100000);
+            if (!exceeded)
+            {
+                foreach (var p in seen.IterateMarked())
+                {
+                    targetRiverMap.SetAsRiver(p.x, p.y);
+                }
+            }
         }
 
         /// <summary>
@@ -25,11 +34,12 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="pos"></param>
         /// <param name="isBelowZ"></param>
         /// <returns></returns>
-        private bool isBorderPoint((int x, int y) pos, Func<(int x, int y), bool> isBelowZ) {
+        private bool isBorderPoint((int x, int y) pos, Func<(int x, int y), bool> isBelowZ)
+        {
             var neighs = new (int x, int y)[] { Up(pos), Down(pos), Left(pos), Right(pos) };
             foreach (var neigh in neighs)
             {
-                if (_heightMap.inBounds(neigh.x, neigh.y) &&  !isBelowZ(neigh))
+                if (_heightMap.inBounds(neigh.x, neigh.y) && !isBelowZ(neigh))
                 {
                     return true;
                 }
@@ -50,19 +60,19 @@ namespace cFlowAPI.Maps.riverMap
             Func<(int x, int y), bool> isBelowZ = pos =>
                 _heightMap.GetHeight(pos) <= maxZ;
 
-            List<(int x, int y)> outerMostRing = new List<(int x, int y)>();
+            List<(int x, int y)> outerMostRing = [];
 
             var nextPositions = startingPositions;
-            foreach (var pos in startingPositions)
+            foreach (var (x, y) in startingPositions)
             {
-                seenMap.setMarked(pos.x, pos.y);
+                seenMap.setMarked(x, y);
             }
 
             while (true)
             {
                 var nextRing = GetTouchingUnseen(nextPositions, isBelowZ, seenMap);
                 //ring has found everything, nothing more to do
-                if (nextRing.Count() == 0)
+                if (nextRing.Count == 0)
                     break;
 
                 nextPositions = nextRing;

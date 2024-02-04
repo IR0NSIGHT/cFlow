@@ -1,15 +1,18 @@
-﻿using SkiaSharp;
+﻿using cFlowAPI.Maps.riverMap;
+using SkiaSharp;
 
 namespace src.Maps.riverMap
 {
-    class RiverMap : Map2d
+    public class RiverMap : Map2d
     {
-        private bool[][] map;
-        private IFlowMap flowMap;
+        private readonly bool[][] map;
+        private readonly IFlowMap flowMap;
         private Map2dIterator _iterator;
-        public RiverMap(IFlowMap flowMap)
+        private IHeightMap _heightMap;
+        public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
         {
             this.flowMap = flowMap;
+            this._heightMap = heightMap;
             map = new bool[flowMap.Bounds().x][];
             _iterator = new Map2dIterator(flowMap.Bounds());
             for (int i = 0; i < flowMap.Bounds().x; i++)
@@ -51,6 +54,8 @@ namespace src.Maps.riverMap
                 SetAsRiver(next.x, next.y);
                 stopped = stop;
             }
+            //FIXME smart way to escape flooded area an continue river
+            new FloodTool(_heightMap).FloodArea(start, this);
         }
 
         /// <summary>

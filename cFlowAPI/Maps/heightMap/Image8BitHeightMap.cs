@@ -9,6 +9,18 @@ public class Image8BitHeightMap : IHeightMap
         _iterator = new Map2dIterator((bitmap.Width, bitmap.Height));
         this.bitmap = bitmap;
     }
+
+    public SKBitmap ContourLinesOverlay()
+    {
+        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Alpha8,SKAlphaType.Premul);
+        foreach (var (x,y) in iterator().Points())
+        {
+            if (GetHeight((x,y))%10 == 0) 
+                contourMap.SetPixel(x,y,new SKColor(255,255,255,255));
+        }
+        return contourMap;
+    }
+
     public IMapIterator<(int,int)> iterator()
     {
         return _iterator;

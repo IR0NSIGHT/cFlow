@@ -34,7 +34,7 @@ namespace WinFormsApp1
             genManyRiverButton.Click += OnGenerateRiverButton;
 
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
-            var file = "large_circle.png";
+            var file = "medium_flats.png";
             cFlowApi = new cFlowApi.CFlowGenerator(path + file);
             ratio = cFlowApi.HeightmapImg.Width / cFlowApi.HeightmapImg.Height;
             heightPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.HeightmapImg);

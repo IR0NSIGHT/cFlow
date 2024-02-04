@@ -6,10 +6,13 @@
         private (int x, int y) _bounds;
         private bool[][] seenMap;
         private int marked = 0;
+        private (int x, int y) lowerBoundsMarked = (0, 0);
+        private (int x, int y) upperBoundsMarked = (int.MaxValue, int.MaxValue);
         public BooleanMap((int x, int y) bounds)
         {
             this._bounds = bounds;
             this._iterator = new Map2dIterator(bounds);
+            upperBoundsMarked = bounds;
             seenMap = new bool[bounds.x][];
             for (int x = 0; x < bounds.x; x++)
             {
@@ -40,7 +43,7 @@
 
         public IMapIterator<(int x, int y)> iterator()
         {
-            return _iterator; 
+            return _iterator;
         }
 
         public bool isMarked(int x, int y)
@@ -56,11 +59,33 @@
             }
             marked++;
             seenMap[x][y] = true;
+
+            if (x < lowerBoundsMarked.x)
+                lowerBoundsMarked.x = x;
+            if (x > upperBoundsMarked.x)
+                upperBoundsMarked.x = x;
+
+            if (y < lowerBoundsMarked.y)
+                lowerBoundsMarked.y = y;
+            if (y > upperBoundsMarked.y)
+                upperBoundsMarked.y = y;
         }
 
         public int getMarkedAmount()
         {
             return marked;
+        }
+
+        public IEnumerable<(int x, int y)> IterateMarked()
+        {
+            for (var x = lowerBoundsMarked.x; x < upperBoundsMarked.x; x++)
+            {
+                for (var y = lowerBoundsMarked.y; y < upperBoundsMarked.y; y++)
+                {
+                    if (isMarked(x, y))
+                        yield return (x, y);
+                }
+            }
         }
     }
 }
