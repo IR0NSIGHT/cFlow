@@ -1,10 +1,11 @@
 ﻿namespace application.Maps
 {
-    internal class BooleanMap : Map2d
+    public class BooleanMap : Map2d
     {
         private IMapIterator<(int x, int y)> _iterator;
         private (int x, int y) _bounds;
         private bool[][] seenMap;
+        private int marked = 0;
         public BooleanMap((int x, int y) bounds)
         {
             this._bounds = bounds;
@@ -13,6 +14,17 @@
             for (int x = 0; x < bounds.x; x++)
             {
                 seenMap[x] = new bool[bounds.y];
+            }
+        }
+
+        /// <summary>
+        /// clears all values from the map
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var subArr in seenMap)
+            {
+                Array.Clear(subArr);
             }
         }
 
@@ -38,7 +50,17 @@
 
         public void setMarked(int x, int y)
         {
+            if (isMarked(x, y))
+            {
+                return;
+            }
+            marked++;
             seenMap[x][y] = true;
+        }
+
+        public int getMarkedAmount()
+        {
+            return marked;
         }
     }
 }
