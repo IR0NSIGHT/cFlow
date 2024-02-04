@@ -22,7 +22,7 @@ namespace TestProject1
         public void ChangeHeight()
         {
             var heightmap = new DummyDimension((8, 12), 17);
-            heightmap.SetHeight(new Point(7, 5, 3));
+            heightmap.SetHeight((7, 5), 3);
             Assert.AreEqual(3, heightmap.GetHeight(7, 5));
 
             //only changed height of that single point

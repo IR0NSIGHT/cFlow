@@ -33,10 +33,9 @@
         return heightMap[x][y];
     }
 
-    public void SetHeight(Point point)
+    public void SetHeight((int x, int y) pos, short z)
     {
-        heightMap[point.X][point.Y] = point.height;
-
+        heightMap[pos.x][pos.y] = z;
     }
 
     public bool inBounds(int x, int y) =>

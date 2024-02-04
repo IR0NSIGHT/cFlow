@@ -29,9 +29,8 @@ public class Image8BitHeightMap : IHeightMap
        return x >= 0 && y >= 0 && x < Bounds().x && y < Bounds().y;
     }
 
-
-    public void SetHeight(Point point)
+    public void SetHeight((int x, int y) pos, short z)
     {
-        bitmap.SetPixel(point.X, point.Y, new SKColor((byte)point.height, (byte)point.height, (byte)point.height));
+        bitmap.SetPixel(pos.x, pos.y, new SKColor((byte)z, (byte)z, (byte)z));
     }
 }

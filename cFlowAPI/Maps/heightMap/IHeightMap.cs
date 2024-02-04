@@ -1,7 +1,7 @@
 ﻿public interface IHeightMap: Map2d
 {
     short GetHeight(int x, int y);
-    void SetHeight(Point point);
+    void SetHeight((int x, int y) pos, short z);
 }
 
 public interface Map2d

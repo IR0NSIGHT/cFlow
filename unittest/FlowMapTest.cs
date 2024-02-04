@@ -36,7 +36,7 @@ namespace tests
             //test if depressresions in the terrain will cause neighboursing blocks to be marked as natural edge flow
 
             var heightmap = new DummyDimension((10, 3), 17);
-            heightmap.SetHeight(new Point(0, 0, 5));
+            heightmap.SetHeight((0, 0), 5);
 
             var flowMap = new SimpleFlowMap(heightmap.Bounds());
             SimpleFlowMap.ApplyNaturalEdgeFlow(heightmap, flowMap);
@@ -134,7 +134,7 @@ namespace tests
             {
                 for (int y = 15; y <= 25; y++)
                 {
-                    heightMap.SetHeight(new Point(x, y, 37));
+                    heightMap.SetHeight((x, y), 37);
                 }
             }
             var flowMap = new SimpleFlowMap((30, 40));
@@ -171,7 +171,7 @@ namespace tests
             {
                 for (int y = 1; y <5; y++)
                 {
-                    heightMap.SetHeight(new Point(x, y,77));
+                    heightMap.SetHeight((x, y),77);
                 }
             }
 
