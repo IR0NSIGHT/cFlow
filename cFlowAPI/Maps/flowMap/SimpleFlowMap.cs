@@ -87,7 +87,7 @@ public class SimpleFlowMap : IFlowMap
     private static (bool, IFlowMap.Flow) NeighbourFlowOrDefault(int x, int y, IFlowMap flowMap, IHeightMap heightMap,
         IFlowMap.Flow defaultF)
     {
-        Point thisP = new Point(x, y, -1);
+        var thisP = (x, y);
         Func<(int x, int y), Boolean> canIFlowTo = (pos) =>
             heightMap.GetHeight(x, y) >= heightMap.GetHeight(pos.x, pos.y);
 
@@ -110,10 +110,10 @@ public class SimpleFlowMap : IFlowMap
 
 
         //check if neighbours in specific direction have flow
-        bool flowLeft = hasFlow(thisP.Left());
-        bool flowRight = hasFlow(thisP.Right());
-        bool flowUp = hasFlow(thisP.Up());
-        bool flowDown = hasFlow(thisP.Down());
+        bool flowLeft = hasFlow(Point.Left(thisP));
+        bool flowRight = hasFlow(Point.Right(thisP));
+        bool flowUp = hasFlow(Point.Up(thisP));
+        bool flowDown = hasFlow(Point.Down(thisP));
         if (flowLeft || flowRight || flowUp || flowDown)
         {
             return (
@@ -144,9 +144,9 @@ public class SimpleFlowMap : IFlowMap
         //TODO check if candidate already exists
         foreach (var previousPoint in previousChanged)
         {
-            var (x, y) = (previousPoint.X, previousPoint.Y);
-            (int x, int y)[] news = { Point.Up(x, y), Point.Left(x, y), Point.Right(x, y), Point.Down(x, y) };
-            var pointInReducedBounds = safeBounds((x, y));
+            var point = (previousPoint.X, previousPoint.Y);
+            (int x, int y)[] news = { Point.Up(point), Point.Left(point), Point.Right(point), Point.Down(point) };
+            var pointInReducedBounds = safeBounds((point));
             Func<(int, int), bool> canFlowTo = ((int x, int y) p) =>
             {
                 return heightMap.GetHeight(previousPoint.X, previousPoint.Y) <= heightMap.GetHeight(p.x, p.y);
@@ -316,10 +316,10 @@ public class SimpleFlowMap : IFlowMap
     {
         short height = heightMap.GetHeight(p.X, p.Y);
         bool safeBounds = insideReducedBounds((p.X, p.Y), heightMap.Bounds());
-        bool left = isLowerThan(Point.Left(p.X, p.Y), heightMap, height, safeBounds);
-        bool right = isLowerThan(Point.Right(p.X, p.Y), heightMap, height, safeBounds);
-        bool up = isLowerThan(Point.Up(p.X, p.Y), heightMap, height, safeBounds);
-        bool down = isLowerThan(Point.Down(p.X, p.Y), heightMap, height, safeBounds);
+        bool left = isLowerThan(Point.Left(p), heightMap, height, safeBounds);
+        bool right = isLowerThan(Point.Right(p), heightMap, height, safeBounds);
+        bool up = isLowerThan(Point.Up(p), heightMap, height, safeBounds);
+        bool down = isLowerThan(Point.Down(p), heightMap, height, safeBounds);
         if (!(left || right || up || down))
             return new IFlowMap.Flow(true, false, false, false, false);
         return new IFlowMap.Flow(false, up, down, left, right);
@@ -335,13 +335,13 @@ public class SimpleFlowMap : IFlowMap
         IFlowMap.Flow flow = GetFlow(point);
         List<(int x, int y)> nextFlow = new();
         if (flow.Up)
-            nextFlow.Add(Point.Up(point.x, point.y));
+            nextFlow.Add(Point.Up(point));
         if (flow.Down)
-            nextFlow.Add(Point.Down(point.x, point.y));
+            nextFlow.Add(Point.Down(point));
         if (flow.Left)
-            nextFlow.Add(Point.Left(point.x, point.y));
+            nextFlow.Add(Point.Left(point));
         if (flow.Right)
-            nextFlow.Add(Point.Right(point.x, point.y));
+            nextFlow.Add(Point.Right(point));
 
         return nextFlow;
     }
