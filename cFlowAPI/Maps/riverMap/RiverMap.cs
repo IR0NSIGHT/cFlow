@@ -41,17 +41,19 @@ namespace src.Maps.riverMap
             return map[x][y];
         }
 
-        public void AddRiverFrom(int x, int y)
+        public void AddRiverFrom((int x, int y) pos)
         {
-            SetAsRiver(x, y);
             Random random = new Random();
-            var start = (x, y);
+            var start = pos;
             var stopped = false;
             while (!stopped)
             {
+                if (IsRiver(start.x, start.y))
+                    break;
+                SetAsRiver(start.x, start.y);
+
                 var (stop, next) = AdvanceRiver(start, random);
                 start = next;
-                SetAsRiver(next.x, next.y);
                 stopped = stop;
             }
             //FIXME smart way to escape flooded area an continue river

@@ -1,7 +1,5 @@
 ﻿using cFlowForms;
-using SkiaSharp;
-using System.Drawing;
-using System.Windows.Forms;
+using SkiaSharp.Views.Desktop;
 
 namespace WinFormsApp1
 {
@@ -32,12 +30,14 @@ namespace WinFormsApp1
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
             genManyRiverButton.Click += OnGenerateRiverButton;
+            heightPictureBox.Click += handleSpawnRiverMouseClick;
 
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
             var file = "medium_flats.png";
             cFlowApi = new cFlowApi.CFlowGenerator(path + file);
             ratio = cFlowApi.HeightmapImg.Width / cFlowApi.HeightmapImg.Height;
             heightPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.HeightmapImg);
+
 
         }
 
@@ -66,6 +66,7 @@ namespace WinFormsApp1
         private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
         {
             scale += (e.Delta * 1f / 1000);
+            labelCurrentScale.Text = scale.ToString();
             RedrawMaps();
         }
 
@@ -80,7 +81,7 @@ namespace WinFormsApp1
                 e.Graphics.DrawImage(
                     pictureBox.Image,
                     new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
-                    new Rectangle(position.x, position.y, (int)(pictureBox.Image.Width / scale), (int)(pictureBox.Image.Height / scale)),
+                    new Rectangle(position.x, position.y, (int)(pictureBox.Width / scale), (int)((pictureBox.Width * ratio) / scale)),
                     GraphicsUnit.Pixel);
             }
         }
@@ -122,17 +123,40 @@ namespace WinFormsApp1
         private void onGenerateFlowButton(object sender, EventArgs e)
         {
             cFlowApi.GenerateFlow();
-            flowPicturBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.FlowmapImgColored);
+            flowPicturBox.Image = cFlowApi.FlowmapImgColored.ToBitmap();
 
 
             RedrawMaps();
         }
+
+        private void handleSpawnRiverMouseClick(object? sender, EventArgs e)
+        {
+            if (e is not MouseEventArgs { Button: MouseButtons.Left } mouseArgs)
+                return;
+            if (!spawnRiverMode)
+                return;
+            (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y )); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
+            (int x, int y)  deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
+            var clickedMapPos = (GetCenter().X + deltaPos.x, GetCenter().Y + deltaPos.y);
+            cFlowApi.RiverMap.AddRiverFrom(clickedMapPos);
+            riverPictureBox.Image = cFlowApi.RiverMap.ToImage().ToBitmap();
+            RedrawMaps();
+        }
+
 
         private (int x, int y) riverSpacing = (10, 10);
 
         private void riverSpacingNumericChanged(object? sender, EventArgs e)
         {
             riverSpacing = (decimal.ToInt32(numericRiverSpacingX.Value), decimal.ToInt32(numericRiverSpacingY.Value));
+        }
+
+        private bool spawnRiverMode = false;
+        private void OnSpawnRiverButtonClick(object sender, EventArgs e)
+        {
+            spawnRiverMode = !spawnRiverMode;
+            spawnSingleRiverButton.BackColor = spawnRiverMode ? Color.DeepSkyBlue : Color.LightGray;
+            spawnSingleRiverButton.Text = spawnRiverMode ? "Spawn single river: Active" : "Spawn single river";
         }
     }
 }

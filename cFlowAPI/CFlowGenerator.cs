@@ -16,6 +16,8 @@ namespace cFlowApi
         public SKBitmap FlowmapImgColored { get => _flowmapImgColored; }
         public SKBitmap RivermapImg { get => _rivermapImg; }
 
+        public RiverMap RiverMap;
+
         public CFlowGenerator(string imagePath)
         {
             var _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
@@ -24,36 +26,28 @@ namespace cFlowApi
             Console.WriteLine("Converted image to heightmap");
 
             this._heightmapImg = ((Image8BitHeightMap)_heightmap).ContourLinesOverlay();
+            _flowMap = new SimpleFlowMap(_heightmap.Bounds());
+            RiverMap = new RiverMap(_flowMap, _heightmap);
         }
-
-
 
         public void GenerateFlow()
         {
-            _flowMap = new SimpleFlowMap(_heightmap.Bounds());
-            Console.WriteLine("Inited flowmap");
-
             SimpleFlowMap.CalculateFlowFromHeightMap(_heightmap, _flowMap);
-            Console.WriteLine("Calculateed Flow");
-
             _flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
-
-
         }
 
         public void SpamRivers(int xSpacing, int ySpacing)
         {
-            var riverMap = new RiverMap(_flowMap,_heightmap);
             Random r = new Random();
-            for (int x = 0; x < riverMap.Bounds().x; x+= xSpacing)
+            for (int x = 0; x < RiverMap.Bounds().x; x += xSpacing)
             {
-                for (int y = 0; y < riverMap.Bounds().y; y+= ySpacing)
+                for (int y = 0; y < RiverMap.Bounds().y; y += ySpacing)
                 {
-                    riverMap.AddRiverFrom(x,y);
+                    RiverMap.AddRiverFrom((x, y));
 
                 }
             }
-            _rivermapImg = riverMap.ToImage();
+            _rivermapImg = RiverMap.ToImage();
         }
         public static void SaveToFile(string content, bool append)
         {

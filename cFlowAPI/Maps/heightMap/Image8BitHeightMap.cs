@@ -12,16 +12,27 @@ public class Image8BitHeightMap : IHeightMap
 
     public SKBitmap ContourLinesOverlay()
     {
-        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Alpha8,SKAlphaType.Premul);
-        foreach (var (x,y) in iterator().Points())
+        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Alpha8, SKAlphaType.Premul);
+        foreach (var (x, y) in iterator().Points())
         {
-            if (GetHeight((x,y))%10 == 0) 
-                contourMap.SetPixel(x,y,new SKColor(255,255,255,255));
+            if (GetHeight((x, y)) % 10 == 0)
+                contourMap.SetPixel(x, y, new SKColor(255, 255, 255, 255));
+        }
+
+        for (var x = 0; x < bitmap.Width; x++)
+        {
+            contourMap.SetPixel(x, 0, new SKColor(255, 255, 255, 255));
+            contourMap.SetPixel(x, bitmap.Height - 1, new SKColor(255, 255, 255, 255));
+        }
+        for (var y = 0; y < bitmap.Height; y++)
+        {
+            contourMap.SetPixel(0, y, new SKColor(255, 255, 255, 255));
+            contourMap.SetPixel(bitmap.Width - 1, y, new SKColor(255, 255, 255, 255));
         }
         return contourMap;
     }
 
-    public IMapIterator<(int,int)> iterator()
+    public IMapIterator<(int, int)> iterator()
     {
         return _iterator;
     }
@@ -33,12 +44,12 @@ public class Image8BitHeightMap : IHeightMap
 
     public short GetHeight((int x, int y) pos)
     {
-        return bitmap.GetPixel(pos.x,pos.y).Red;
+        return bitmap.GetPixel(pos.x, pos.y).Red;
     }
 
     public bool inBounds(int x, int y)
     {
-       return x >= 0 && y >= 0 && x < Bounds().x && y < Bounds().y;
+        return x >= 0 && y >= 0 && x < Bounds().x && y < Bounds().y;
     }
 
     public void SetHeight((int x, int y) pos, short z)
