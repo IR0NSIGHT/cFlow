@@ -66,15 +66,5 @@ namespace cFlowApi
 
             Console.WriteLine($"Content {(append ? "appended to" : "written to")} cFlow_Log.txt");
         }
-
-        static void RandomizeHeight(IHeightMap d)
-        {
-            Random rand = new Random();
-            foreach (var point in d.iterator().Points())
-            {
-                if (rand.NextDouble() < 0.01d)
-                    d.SetHeight(new Point(point.x, point.y, (short)(d.GetHeight(point.x, point.y) + rand.NextSingle() * 2)));
-            }
-        }
     }
 }
