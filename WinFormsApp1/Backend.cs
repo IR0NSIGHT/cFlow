@@ -1,5 +1,7 @@
 ﻿using cFlowApi;
+using SkiaSharp;
 using System;
+using WinFormsApp1;
 using static cFlowForms.GuiEvents;
 
 namespace cFlowForms;
@@ -13,6 +15,13 @@ public class Backend
     public event EventHandler<MessageEventArgs>? MessageRaised; 
 
     private CFlowGenerator? heightmapApi;
+
+    public Backend(EventChannel channel)
+    {
+        channel.RiverChangeRequestHandler += OnRiverChangeRequested;
+        channel.LoadHeightmapRequestHandler += OnHeightmapPathSelected;
+        channel.FlowCalculationRequestHandler += OnFlowGenerationRequested;
+    }
 
     private void FireLoadingEvent(bool loading)
     {
@@ -50,7 +59,7 @@ public class Backend
         FireLoadingEvent(false);
     }
 
-    public async void OnRiverChangeRequested(object? sender, RiverChangeRequestEventArgs e)
+    public void OnRiverChangeRequested(object? sender, RiverChangeRequestEventArgs e)
     {
         if (e.ChangeType == RiverChangeType.Add)
         {
@@ -60,13 +69,10 @@ public class Backend
                 return;
             }
             FireLoadingEvent(true);
-            await Task.Run(() =>
-            {
-                Task.Delay(10000);
-                heightmapApi.RiverMap.AddRiverFrom(e.pos);
-                RivermapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
-                FireLoadingEvent(false);
-            });
+
+            heightmapApi.RiverMap.AddRiverFrom(e.pos);
+            RivermapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
+            FireLoadingEvent(false);
 
 
         }

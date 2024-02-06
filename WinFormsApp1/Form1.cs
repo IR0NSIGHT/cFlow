@@ -6,8 +6,6 @@ namespace WinFormsApp1
 {
     public partial class MainWindow : Form
     {
-        public EventHandler? FlowCalculationRequestHandler;
-        public EventHandler<RiverChangeRequestEventArgs>? RiverChangeRequestHandler;
 
 
         private float scale = 1;
@@ -15,8 +13,18 @@ namespace WinFormsApp1
         private (int x, int y) position = (0, 0);
         private MoveMapByMouse mouseMover;
         private cFlowApi.CFlowGenerator cFlowApi;
-        public MainWindow()
+        private EventChannel channel;
+        public MainWindow(EventChannel eventChannel, Backend backend)
         {
+            this.channel = eventChannel;
+
+            //connect both via events
+            backend.FlowmapChanged += OnFlowmapChanged;
+            backend.HeightmapChanged += OnHeightmapChanged;
+            backend.RivermapChanged += OnRivermapChanged;
+            backend.MessageRaised += OnMessageRaised;
+            backend.LoadingStateChanged += OnLoadingStateChanged;
+
             InitializeComponent();
             riverSpacingNumericChanged(null, null);
 
@@ -110,8 +118,7 @@ namespace WinFormsApp1
 
         private void onGenerateFlowButton(object sender, EventArgs e)
         {
-            //TODO use events
-            FlowCalculationRequestHandler?.Invoke(this, EventArgs.Empty);
+            channel.RequestCalculateFlow();
         }
 
         private void handleSpawnRiverMouseClick(object? sender, EventArgs e)
@@ -123,9 +130,8 @@ namespace WinFormsApp1
             (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y )); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
             (int x, int y)  deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
             var clickedMapPos = (GetCenter().X + deltaPos.x, GetCenter().Y + deltaPos.y);
-            //TODO use events
-            RiverChangeRequestHandler?.Invoke(this,
-                new RiverChangeRequestEventArgs(clickedMapPos, RiverChangeType.Add));
+
+            channel.RequestRiverChange(new RiverChangeRequestEventArgs(clickedMapPos, RiverChangeType.Add));
         }
 
         private (int x, int y) riverSpacing = (10, 10);
