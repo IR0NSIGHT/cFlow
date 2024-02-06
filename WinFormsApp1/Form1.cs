@@ -1,10 +1,15 @@
 ﻿using cFlowForms;
 using SkiaSharp.Views.Desktop;
+using static cFlowForms.GuiEvents;
 
 namespace WinFormsApp1
 {
     public partial class MainWindow : Form
     {
+        public EventHandler? FlowCalculationRequestHandler;
+        public EventHandler<RiverChangeRequestEventArgs>? RiverChangeRequestHandler;
+
+
         private float scale = 1;
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
@@ -16,37 +21,54 @@ namespace WinFormsApp1
             riverSpacingNumericChanged(null, null);
 
             mouseMover = new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
-            MouseDown += (p, p1) =>
-            {
-                Console.WriteLine(p1);
-            };
 
             heightPictureBox.Paint += PictureBox1_Paint;
             flowPicturBox.Paint += PictureBox1_Paint;
             riverPictureBox.Paint += PictureBox1_Paint;
             this.MouseWheel += MainForm_MouseWheel;
-            this.KeyDown += Form1_KeyDown;
 
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
-            genManyRiverButton.Click += OnGenerateRiverButton;
+            
+            genManyRiverButton.Click += OnGenerateMassRiverButton;
             heightPictureBox.Click += handleSpawnRiverMouseClick;
-
-            var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
-            var file = "medium_flats.png";
-            cFlowApi = new cFlowApi.CFlowGenerator(path + file);
-            ratio = cFlowApi.HeightmapImg.Width / cFlowApi.HeightmapImg.Height;
-            heightPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.HeightmapImg);
-
-
         }
 
-        private void OnGenerateRiverButton(object? sender, EventArgs e)
-        {
-            cFlowApi.SpamRivers(riverSpacing.x, riverSpacing.y);
-            riverPictureBox.Image = SkiaSharp.Views.Desktop.Extensions.ToBitmap(cFlowApi.RivermapImg);
 
-            RedrawMaps();
+        public void OnMessageRaised(object? sender, MessageEventArgs e)
+        {
+            MessageBox.Show(e.Message, e.Type.ToString());
+        }
+
+        public void OnLoadingStateChanged(object? sender, LoadingStateEventArgs e)
+        {
+            //TODO loadingspinner
+        }
+
+        public void OnHeightmapChanged(object? sender, ImageEventArgs e)
+        {
+            heightPictureBox.Image = e.Image;
+            ratio = e.Image.Height * 1f / e.Image.Width;
+            heightPictureBox.Invalidate();
+        }
+
+        public void OnFlowmapChanged(object? sender, ImageEventArgs e)
+        {
+            flowPicturBox.Image = e.Image;
+            flowPicturBox.Invalidate();
+        }
+
+        public void OnRivermapChanged(object? sender, ImageEventArgs e)
+        {
+            riverPictureBox.Image = e.Image;
+            riverPictureBox.Invalidate();
+        }
+
+
+        private void OnGenerateMassRiverButton(object? sender, EventArgs e)
+        {
+            //TODO use events
+            MessageBox.Show("not implemented");
         }
 
         public System.Drawing.Point GetCenter() { return new System.Drawing.Point(position.x, position.y); }
@@ -86,47 +108,10 @@ namespace WinFormsApp1
             }
         }
 
-        private void Form1_KeyDown(object? sender, KeyEventArgs e)
-        {
-            // Check if both the left and right arrow keys are pressed simultaneously
-            if (e.KeyCode == Keys.Left && (Control.ModifierKeys & Keys.Right) == Keys.Right)
-            {
-                MessageBox.Show("Left and Right arrow keys are pressed simultaneously");
-            }
-
-            Console.WriteLine("KeyData is: " + e.KeyData.ToString());
-            int moveSpeed = 2;
-            if (e.KeyCode == Keys.Down)
-            {
-                // Up arrow key is pressed
-                position = (position.x, position.y + moveSpeed);
-            }
-            if (e.KeyCode == Keys.Up)
-            {
-                // Down arrow key is pressed
-                position = (position.x, position.y - moveSpeed);
-            }
-            if (e.KeyCode == Keys.Left)
-            {
-                // Left arrow key is pressed
-                position = (position.x - moveSpeed, position.y);
-            }
-            if (e.KeyCode == Keys.Right)
-            {
-                // Right arrow key is pressed
-                position = (position.x + moveSpeed, position.y);
-            }
-            RedrawMaps();
-
-        }
-
         private void onGenerateFlowButton(object sender, EventArgs e)
         {
-            cFlowApi.GenerateFlow();
-            flowPicturBox.Image = cFlowApi.FlowmapImgColored.ToBitmap();
-
-
-            RedrawMaps();
+            //TODO use events
+            FlowCalculationRequestHandler?.Invoke(this, EventArgs.Empty);
         }
 
         private void handleSpawnRiverMouseClick(object? sender, EventArgs e)
@@ -138,11 +123,10 @@ namespace WinFormsApp1
             (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y )); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
             (int x, int y)  deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
             var clickedMapPos = (GetCenter().X + deltaPos.x, GetCenter().Y + deltaPos.y);
-            cFlowApi.RiverMap.AddRiverFrom(clickedMapPos);
-            riverPictureBox.Image = cFlowApi.RiverMap.ToImage().ToBitmap();
-            RedrawMaps();
+            //TODO use events
+            RiverChangeRequestHandler?.Invoke(this,
+                new RiverChangeRequestEventArgs(clickedMapPos, RiverChangeType.Add));
         }
-
 
         private (int x, int y) riverSpacing = (10, 10);
 

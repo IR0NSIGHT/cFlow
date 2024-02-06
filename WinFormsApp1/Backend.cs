@@ -1,5 +1,6 @@
 ﻿using cFlowApi;
 using System;
+using static cFlowForms.GuiEvents;
 
 namespace cFlowForms;
 
@@ -27,7 +28,7 @@ public class Backend
     /// load new heightmap from this filepath
     /// </summary>
     /// <param name="e"></param>
-    protected void OnHeightmapPathSelected(FileEventArgs e)
+    public void OnHeightmapPathSelected(object? sender, FileEventArgs e)
     {
         FireLoadingEvent(true);
         heightmapApi = new CFlowGenerator(e.FilePath);
@@ -35,7 +36,7 @@ public class Backend
         FireLoadingEvent(false);
     }
 
-    protected void OnFlowGenerationRequested()
+    public void OnFlowGenerationRequested(object? sender, EventArgs e)
     {
         if (heightmapApi == null)
         {
@@ -47,6 +48,24 @@ public class Backend
 
         FlowmapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.FlowmapImgColored)));
         FireLoadingEvent(false);
+    }
+
+    public void OnRiverChangeRequested(object? sender, RiverChangeRequestEventArgs e)
+    {
+        if (e.ChangeType == RiverChangeType.Add)
+        {
+            if (heightmapApi == null)
+            {
+                FireWarning("no heightmap is active.");
+                return;
+            }
+            FireLoadingEvent(true);
+            Thread.Sleep(10000);
+            heightmapApi.RiverMap.AddRiverFrom(e.pos);
+
+            RivermapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
+            FireLoadingEvent(false);
+        }
     }
 
 }
