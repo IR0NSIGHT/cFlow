@@ -50,7 +50,7 @@ public class Backend
         FireLoadingEvent(false);
     }
 
-    public void OnRiverChangeRequested(object? sender, RiverChangeRequestEventArgs e)
+    public async void OnRiverChangeRequested(object? sender, RiverChangeRequestEventArgs e)
     {
         if (e.ChangeType == RiverChangeType.Add)
         {
@@ -60,11 +60,15 @@ public class Backend
                 return;
             }
             FireLoadingEvent(true);
-            Thread.Sleep(10000);
-            heightmapApi.RiverMap.AddRiverFrom(e.pos);
+            await Task.Run(() =>
+            {
+                Task.Delay(10000);
+                heightmapApi.RiverMap.AddRiverFrom(e.pos);
+                RivermapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
+                FireLoadingEvent(false);
+            });
 
-            RivermapChanged?.Invoke(this, new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
-            FireLoadingEvent(false);
+
         }
     }
 
