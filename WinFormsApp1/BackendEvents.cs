@@ -1,9 +1,9 @@
 ﻿namespace cFlowForms;
 
-public readonly struct LoadingStateEventArgs(bool isLoading, float loadingProgress)
+public readonly struct LoadingStateEventArgs(bool isLoading, int loadingProgress)
 {
     public bool IsLoading { get; } = isLoading;
-    public float LoadingProgress { get; } = loadingProgress;
+    public int LoadingProgress { get; } = loadingProgress;
 }
 
 

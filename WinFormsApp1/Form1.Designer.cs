@@ -42,6 +42,7 @@ namespace WinFormsApp1
             spawnSingleRiverButton = new Button();
             labelCurrentScale = new Label();
             label2 = new Label();
+            progressBar1 = new ProgressBar();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)flowPicturBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)riverPictureBox).BeginInit();
@@ -161,11 +162,19 @@ namespace WinFormsApp1
             label2.TabIndex = 11;
             label2.Text = "spacing on y";
             // 
+            // progressBar1
+            // 
+            progressBar1.Location = new System.Drawing.Point(1099, 470);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(670, 90);
+            progressBar1.TabIndex = 13;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(progressBar1);
             Controls.Add(labelCurrentScale);
             Controls.Add(label2);
             Controls.Add(spawnSingleRiverButton);
@@ -203,5 +212,6 @@ namespace WinFormsApp1
         private Button spawnSingleRiverButton;
         private Label labelCurrentScale;
         private Label label2;
+        private ProgressBar progressBar1;
     }
 }

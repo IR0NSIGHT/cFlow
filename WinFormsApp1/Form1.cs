@@ -6,30 +6,18 @@ namespace WinFormsApp1
 {
     public partial class MainWindow : Form
     {
-
-
         private float scale = 1;
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
-        private MoveMapByMouse mouseMover;
-        private cFlowApi.CFlowGenerator cFlowApi;
-        private EventChannel channel;
-        public MainWindow(EventChannel eventChannel, Backend backend)
+        private GuiEventChannel channel;
+        public MainWindow()
         {
-            this.channel = eventChannel;
-
-            //connect both via events
-            backend.FlowmapChanged += OnFlowmapChanged;
-            backend.HeightmapChanged += OnHeightmapChanged;
-            backend.RivermapChanged += OnRivermapChanged;
-            backend.MessageRaised += OnMessageRaised;
-            backend.LoadingStateChanged += OnLoadingStateChanged;
-
             InitializeComponent();
-            riverSpacingNumericChanged(null, null);
 
-            mouseMover = new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
+            new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
 
+
+            //connect own buttons and controls
             heightPictureBox.Paint += PictureBox1_Paint;
             flowPicturBox.Paint += PictureBox1_Paint;
             riverPictureBox.Paint += PictureBox1_Paint;
@@ -37,11 +25,24 @@ namespace WinFormsApp1
 
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
-            
+
             genManyRiverButton.Click += OnGenerateMassRiverButton;
             heightPictureBox.Click += handleSpawnRiverMouseClick;
         }
 
+        public MainWindow Populate(GuiEventChannel guiEventChannel, Backend backend, BackendEventChannel backendChannel)
+        {
+            this.channel = guiEventChannel;
+
+            //connect to backend callbacks
+            backend.FlowmapChanged += OnFlowmapChanged;
+            backend.HeightmapChanged += OnHeightmapChanged;
+            backend.RivermapChanged += OnRivermapChanged;
+            backend.MessageRaised += OnMessageRaised;
+            backend.LoadingStateChanged += OnLoadingStateChanged;
+
+            return this;
+        }
 
         public void OnMessageRaised(object? sender, MessageEventArgs e)
         {
@@ -51,6 +52,10 @@ namespace WinFormsApp1
         public void OnLoadingStateChanged(object? sender, LoadingStateEventArgs e)
         {
             //TODO loadingspinner
+            progressBar1.Maximum = 100;
+            progressBar1.Minimum = 0;
+            
+            progressBar1.Value = e.IsLoading ? e.LoadingProgress : 100;
         }
 
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
@@ -127,8 +132,8 @@ namespace WinFormsApp1
                 return;
             if (!spawnRiverMode)
                 return;
-            (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y )); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
-            (int x, int y)  deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
+            (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y)); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
+            (int x, int y) deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
             var clickedMapPos = (GetCenter().X + deltaPos.x, GetCenter().Y + deltaPos.y);
 
             channel.RequestRiverChange(new RiverChangeRequestEventArgs(clickedMapPos, RiverChangeType.Add));

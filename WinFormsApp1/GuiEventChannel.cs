@@ -10,7 +10,7 @@ namespace cFlowForms;
 /// => gui doesnt get stalled by event invoking
 /// => backend is one thread consuming events on after another
 /// </summary>
-public class EventChannel
+public class GuiEventChannel
 {
     //gui wants to spawn river
     private ConcurrentQueue<Action> queue = new();
@@ -22,7 +22,7 @@ public class EventChannel
     public EventHandler? FlowCalculationRequestHandler;
     public EventHandler<FileEventArgs>? LoadHeightmapRequestHandler;
 
-    public EventChannel()
+    public GuiEventChannel()
     {
         Task.Run(ConsumerLoop);
     }   

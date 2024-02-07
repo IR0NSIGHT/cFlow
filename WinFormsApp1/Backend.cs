@@ -3,6 +3,7 @@ using SkiaSharp;
 using System;
 using WinFormsApp1;
 using static cFlowForms.GuiEvents;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace cFlowForms;
 
@@ -12,20 +13,31 @@ public class Backend
     public event EventHandler<ImageEventArgs>? RivermapChanged;
     public event EventHandler<ImageEventArgs>? FlowmapChanged;
     public event EventHandler<LoadingStateEventArgs>? LoadingStateChanged;
-    public event EventHandler<MessageEventArgs>? MessageRaised; 
+    public event EventHandler<MessageEventArgs>? MessageRaised;
 
     private CFlowGenerator? heightmapApi;
+    private BackendEventChannel backendChannel;
+    private MainWindow gui;
 
-    public Backend(EventChannel channel)
+
+    public Backend Populate(GuiEventChannel guiChannel, BackendEventChannel backendChannel, MainWindow gui)
     {
-        channel.RiverChangeRequestHandler += OnRiverChangeRequested;
-        channel.LoadHeightmapRequestHandler += OnHeightmapPathSelected;
-        channel.FlowCalculationRequestHandler += OnFlowGenerationRequested;
+        this.gui = gui;
+        this.backendChannel = backendChannel;
+
+        guiChannel.RiverChangeRequestHandler += OnRiverChangeRequested;
+        guiChannel.LoadHeightmapRequestHandler += OnHeightmapPathSelected;
+        guiChannel.FlowCalculationRequestHandler += OnFlowGenerationRequested;
+
+        return this;
     }
 
     private void FireLoadingEvent(bool loading)
     {
-        LoadingStateChanged?.Invoke(this, new LoadingStateEventArgs(loading, loading ? 100 : 0));
+        Action safeLoadingStateUpdate = delegate
+        {
+            gui.OnLoadingStateChanged(this, new LoadingStateEventArgs(loading, loading ? 0 : 100)); };
+        gui.Invoke(safeLoadingStateUpdate);
     }
 
     private void FireWarning(string message)
