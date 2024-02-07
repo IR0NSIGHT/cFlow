@@ -165,20 +165,44 @@ namespace WinFormsApp1
             spawnSingleRiverButton.Text = spawnRiverMode ? "Spawn single river: Active" : "Spawn single river";
         }
 
+        private struct ApplicationState
+        {
+            public string? lastFileDir;
+            public string? currentHeightmapFile;
+        }
 
+        private ApplicationState state = new ApplicationState();
         private void OnImportHeightmapButtonClick(object sender, EventArgs e)
         {
             var openFileDialog1 = new OpenFileDialog()
             {
                 FileName = "Select a PNG file",
                 Filter = "PNG files (*.png)|*.png",
-                Title = "Open PNG file"
+                Title = "Open PNG file",
+            //    RestoreDirectory = true
             };
+            if (state.lastFileDir != null)
+                openFileDialog1.InitialDirectory = state.lastFileDir;
+            if (state.currentHeightmapFile != null)
+                openFileDialog1.FileName = state.currentHeightmapFile;
 
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            var diag = openFileDialog1.ShowDialog();
+            if (diag == DialogResult.OK)
             {
                 try
                 {
+                    string selectedDirectory = System.IO.Path.GetDirectoryName(openFileDialog1.FileName);
+                    string fileName = System.IO.Path.GetFileName(openFileDialog1.FileName);
+                    if (selectedDirectory != null)
+                    {
+                        state.lastFileDir = selectedDirectory;
+                    }
+
+                    if (fileName != null)
+                    {
+                        state.currentHeightmapFile = fileName;
+                    }
+
                     channel.RequestLoadHeightmap(new FileEventArgs(openFileDialog1.FileName));
                 }
                 catch (SecurityException ex)
