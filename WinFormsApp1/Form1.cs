@@ -1,7 +1,5 @@
 ﻿using System.Security;
-using System.Windows.Forms;
 using cFlowForms;
-using SkiaSharp.Views.Desktop;
 using static cFlowForms.GuiEvents;
 
 namespace WinFormsApp1
@@ -22,8 +20,6 @@ namespace WinFormsApp1
 
             //connect own buttons and controls
             heightPictureBox.Paint += MapPictureBox_Paint;
-            flowPicturBox.Paint += MapPictureBox_Paint;
-            riverPictureBox.Paint += MapPictureBox_Paint;
             this.MouseWheel += MainForm_MouseWheel;
 
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
@@ -116,8 +112,6 @@ namespace WinFormsApp1
         private void RedrawMaps()
         {
             heightPictureBox.Invalidate();
-            flowPicturBox.Invalidate();
-            riverPictureBox.Invalidate();
         }
 
         private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
