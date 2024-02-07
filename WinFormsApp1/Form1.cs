@@ -10,10 +10,13 @@ namespace WinFormsApp1
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
         private GuiEventChannel channel;
-
+        private LayerProvider layerProvider;
         public MainWindow()
         {
             InitializeComponent();
+
+            layerProvider = new LayerProvider();
+
 
             new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
 
@@ -65,19 +68,13 @@ namespace WinFormsApp1
 
         }
 
-        private Bitmap? heightmap;
-        private Bitmap? contours;
-        private Bitmap? rivermap;
-        private Bitmap? flowmap;
-
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
         {
             if (e.MapType == MapType.Heightmap)
-            {
-                heightmap = e.Image;
-            }
+                layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, e.Image);
             else if (e.MapType == MapType.ContourLines)
-                contours = e.Image;
+                layerProvider.UpdateLayerBitmap(LayerProvider.ContourLayer, e.Image);
+
 
             ratio = e.Image.Height * 1f / e.Image.Width;
             heightPictureBox.Invalidate();
@@ -85,13 +82,13 @@ namespace WinFormsApp1
 
         public void OnFlowmapChanged(object? sender, ImageEventArgs e)
         {
-            flowmap = e.Image;
+            layerProvider.UpdateLayerBitmap(LayerProvider.FlowLayer, e.Image);
             heightPictureBox.Invalidate();
         }
 
         public void OnRivermapChanged(object? sender, ImageEventArgs e)
         {
-            rivermap = e.Image;
+            layerProvider.UpdateLayerBitmap(LayerProvider.RiverLayer, e.Image);
             heightPictureBox.Invalidate();
         }
 
@@ -127,10 +124,8 @@ namespace WinFormsApp1
             {
                 e.Graphics.FillRectangle(new SolidBrush(Color.Orange), 0, 0, pictureBox.Width, pictureBox.Height);
 
-                foreach (var layerImg in new Bitmap?[] { this.heightmap, this.rivermap, this.contours })
+                foreach (var layerImg in layerProvider.ActiveLayers())
                 {
-                    if (layerImg == null)
-                        continue;
                     e.Graphics.DrawImage(
                         layerImg,
                         new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
