@@ -14,13 +14,14 @@ namespace WinFormsApp1
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            var channel = new GuiEventChannel();
-            var backendChannel = new BackendEventChannel();
+            var guiChannel = new GuiEventChannel();
             var backend = new Backend();
             //create backend and gui
             var gui = new MainWindow();
-            gui.Populate(channel, backend, backendChannel);
-            backend.Populate(channel, backendChannel, gui);
+            var backendChannel = new BackendEventChannel(gui);
+
+            gui.Populate(guiChannel, backendChannel);
+            backend.Populate(guiChannel, backendChannel);
 
             //start gui thread
             new Thread(p => Application.Run(gui)).Start();

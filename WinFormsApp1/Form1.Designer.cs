@@ -30,6 +30,7 @@ namespace WinFormsApp1
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             heightPictureBox = new PictureBox();
             flowPicturBox = new PictureBox();
             riverPictureBox = new PictureBox();
@@ -43,11 +44,13 @@ namespace WinFormsApp1
             labelCurrentScale = new Label();
             label2 = new Label();
             progressBar1 = new ProgressBar();
+            loading_spinner_box = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)flowPicturBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)riverPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)loading_spinner_box).BeginInit();
             SuspendLayout();
             // 
             // heightPictureBox
@@ -169,11 +172,22 @@ namespace WinFormsApp1
             progressBar1.Size = new Size(670, 90);
             progressBar1.TabIndex = 13;
             // 
+            // loading_spinner_box
+            // 
+            loading_spinner_box.Image = (Image)resources.GetObject("loading_spinner_box.Image");
+            loading_spinner_box.Location = new System.Drawing.Point(1099, 762);
+            loading_spinner_box.Name = "loading_spinner_box";
+            loading_spinner_box.Size = new Size(160, 160);
+            loading_spinner_box.SizeMode = PictureBoxSizeMode.StretchImage;
+            loading_spinner_box.TabIndex = 14;
+            loading_spinner_box.TabStop = false;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(loading_spinner_box);
             Controls.Add(progressBar1);
             Controls.Add(labelCurrentScale);
             Controls.Add(label2);
@@ -194,6 +208,7 @@ namespace WinFormsApp1
             ((System.ComponentModel.ISupportInitialize)riverPictureBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).EndInit();
+            ((System.ComponentModel.ISupportInitialize)loading_spinner_box).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -213,5 +228,6 @@ namespace WinFormsApp1
         private Label labelCurrentScale;
         private Label label2;
         private ProgressBar progressBar1;
+        private PictureBox loading_spinner_box;
     }
 }

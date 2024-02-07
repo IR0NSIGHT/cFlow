@@ -1,29 +1,56 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using WinFormsApp1;
 
 namespace cFlowForms;
-
+/// <summary>
+/// event channel that will invoke all EventHandlers on the graphics thread
+/// => backend requests event to be fired, channel fires it on the graphics thread
+/// </summary>
 public class BackendEventChannel
 {
-    //gui wants to spawn river
-    private ConcurrentQueue<Action> queue = new();
+    private MainWindow gui;
+    public event EventHandler<ImageEventArgs>? HeightmapChanged;
+    public event EventHandler<ImageEventArgs>? RivermapChanged;
+    public event EventHandler<ImageEventArgs>? FlowmapChanged;
+    public event EventHandler<MessageEventArgs>? MessageRaised;
+    public event EventHandler<LoadingStateEventArgs>? LoadingStateChanged;
 
-    public void Enqueue(Action a)
+    public BackendEventChannel(MainWindow gui)
     {
-        queue.Enqueue(a);
+        this.gui = gui;
     }
 
-    public void Next()
+    public void RaiseHeightmapChanged(ImageEventArgs args)
     {
-        if (queue.Count <= 0) return;
-        // Peek at the first element.
-        if (!queue.TryDequeue(out var nextTask))
+        RunOnGuiThread(() => HeightmapChanged?.Invoke(this, args));
+    }
+
+    public void RaiseFlowmapChanged(ImageEventArgs args)
+    {
+        RunOnGuiThread(() => FlowmapChanged?.Invoke(this, args));
+    }
+
+    public void RaiseRivermapChanged(ImageEventArgs args)
+    {
+        RunOnGuiThread(() => RivermapChanged?.Invoke(this, args));
+    }
+
+    public void RaiseMessage(MessageEventArgs args)
+    {
+        RunOnGuiThread(() => MessageRaised?.Invoke(this, args));
+    }
+
+    public void RaiseLoadingState(LoadingStateEventArgs args)
+    {
+        RunOnGuiThread(() => LoadingStateChanged?.Invoke(this, args));
+    }
+
+    private void RunOnGuiThread(Action action)
+    {
+        //will execute the Event listeners on the graphics thread
+        Action safeLoadingStateUpdate = delegate
         {
-            Debug.WriteLine("CQ: TryPeek failed when it should have succeeded");
-        }
-        else
-        {
-            nextTask();
-        }
+            action();
+        };
+        gui.Invoke(safeLoadingStateUpdate);
     }
 }

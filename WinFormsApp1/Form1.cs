@@ -30,16 +30,16 @@ namespace WinFormsApp1
             heightPictureBox.Click += handleSpawnRiverMouseClick;
         }
 
-        public MainWindow Populate(GuiEventChannel guiEventChannel, Backend backend, BackendEventChannel backendChannel)
+        public MainWindow Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendChannel)
         {
             this.channel = guiEventChannel;
 
             //connect to backend callbacks
-            backend.FlowmapChanged += OnFlowmapChanged;
-            backend.HeightmapChanged += OnHeightmapChanged;
-            backend.RivermapChanged += OnRivermapChanged;
-            backend.MessageRaised += OnMessageRaised;
-            backend.LoadingStateChanged += OnLoadingStateChanged;
+            backendChannel.FlowmapChanged += OnFlowmapChanged;
+            backendChannel.HeightmapChanged += OnHeightmapChanged;
+            backendChannel.RivermapChanged += OnRivermapChanged;
+            backendChannel.MessageRaised += OnMessageRaised;
+            backendChannel.LoadingStateChanged += OnLoadingStateChanged;
 
             return this;
         }
@@ -51,11 +51,19 @@ namespace WinFormsApp1
 
         public void OnLoadingStateChanged(object? sender, LoadingStateEventArgs e)
         {
-            //TODO loadingspinner
             progressBar1.Maximum = 100;
             progressBar1.Minimum = 0;
-            
-            progressBar1.Value = e.IsLoading ? e.LoadingProgress : 100;
+            progressBar1.Value = e.LoadingProgress;
+
+            if (e.IsLoading)
+            {
+                loading_spinner_box.Visible = true;
+            }
+            else
+            {
+                loading_spinner_box.Visible = false;
+            }
+
         }
 
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
