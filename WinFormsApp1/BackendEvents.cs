@@ -6,10 +6,18 @@ public readonly struct LoadingStateEventArgs(bool isLoading, int loadingProgress
     public int LoadingProgress { get; } = loadingProgress;
 }
 
+public enum MapType
+{
+    Heightmap,
+    RiverMap,
+    FlowMap,
+    ContourLines
+}
 
-public class ImageEventArgs(Bitmap image) : EventArgs
+public class ImageEventArgs(Bitmap image, MapType mapType) : EventArgs
 {
     public Bitmap Image { get; } = image;
+    public MapType MapType { get; } = mapType;
 }
 
 public readonly struct FileEventArgs(string filePath)

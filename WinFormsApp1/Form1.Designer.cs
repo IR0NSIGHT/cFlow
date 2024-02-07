@@ -189,7 +189,7 @@ namespace WinFormsApp1
             ImportHeightmapButton.Name = "ImportHeightmapButton";
             ImportHeightmapButton.Size = new Size(160, 90);
             ImportHeightmapButton.TabIndex = 15;
-            ImportHeightmapButton.Text = "Import heightmap";
+            ImportHeightmapButton.Text = "Import Heightmap";
             ImportHeightmapButton.UseVisualStyleBackColor = true;
             ImportHeightmapButton.Click += OnImportHeightmapButtonClick;
             // 

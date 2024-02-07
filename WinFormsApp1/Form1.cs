@@ -21,9 +21,9 @@ namespace WinFormsApp1
 
 
             //connect own buttons and controls
-            heightPictureBox.Paint += PictureBox1_Paint;
-            flowPicturBox.Paint += PictureBox1_Paint;
-            riverPictureBox.Paint += PictureBox1_Paint;
+            heightPictureBox.Paint += MapPictureBox_Paint;
+            flowPicturBox.Paint += MapPictureBox_Paint;
+            riverPictureBox.Paint += MapPictureBox_Paint;
             this.MouseWheel += MainForm_MouseWheel;
 
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
@@ -69,23 +69,34 @@ namespace WinFormsApp1
 
         }
 
+        private Bitmap? heightmap;
+        private Bitmap? contours;
+        private Bitmap? rivermap;
+        private Bitmap? flowmap;
+
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
         {
-            heightPictureBox.Image = e.Image;
+            if (e.MapType == MapType.Heightmap)
+            {
+                heightmap = e.Image;
+            }
+            else if (e.MapType == MapType.ContourLines)
+                contours = e.Image;
+
             ratio = e.Image.Height * 1f / e.Image.Width;
             heightPictureBox.Invalidate();
         }
 
         public void OnFlowmapChanged(object? sender, ImageEventArgs e)
         {
-            flowPicturBox.Image = e.Image;
-            flowPicturBox.Invalidate();
+            flowmap = e.Image;
+            heightPictureBox.Invalidate();
         }
 
         public void OnRivermapChanged(object? sender, ImageEventArgs e)
         {
-            riverPictureBox.Image = e.Image;
-            riverPictureBox.Invalidate();
+            rivermap = e.Image;
+            heightPictureBox.Invalidate();
         }
 
 
@@ -116,19 +127,22 @@ namespace WinFormsApp1
             RedrawMaps();
         }
 
-        private void PictureBox1_Paint(object? sender, PaintEventArgs e)
+        private void MapPictureBox_Paint(object? sender, PaintEventArgs e)
         {
-            if (sender is PictureBox pictureBox && pictureBox.Image != null)
+            if (sender is PictureBox pictureBox)
             {
-
                 e.Graphics.FillRectangle(new SolidBrush(Color.Orange), 0, 0, pictureBox.Width, pictureBox.Height);
 
-                // Draw the portion of the image within the calculated rectangle
-                e.Graphics.DrawImage(
-                    pictureBox.Image,
-                    new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
-                    new Rectangle(position.x, position.y, (int)(pictureBox.Width / scale), (int)((pictureBox.Width * ratio) / scale)),
-                    GraphicsUnit.Pixel);
+                foreach (var layerImg in new Bitmap?[] { this.heightmap, this.rivermap, this.contours })
+                {
+                    if (layerImg == null)
+                        continue;
+                    e.Graphics.DrawImage(
+                        layerImg,
+                        new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
+                        new Rectangle(position.x, position.y, (int)(pictureBox.Width / scale), (int)((pictureBox.Width * ratio) / scale)),
+                        GraphicsUnit.Pixel);
+                }
             }
         }
 
@@ -179,7 +193,7 @@ namespace WinFormsApp1
                 FileName = "Select a PNG file",
                 Filter = "PNG files (*.png)|*.png",
                 Title = "Open PNG file",
-            //    RestoreDirectory = true
+                //    RestoreDirectory = true
             };
             if (state.lastFileDir != null)
                 openFileDialog1.InitialDirectory = state.lastFileDir;
