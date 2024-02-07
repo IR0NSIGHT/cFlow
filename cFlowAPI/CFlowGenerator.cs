@@ -25,7 +25,7 @@ namespace cFlowApi
             _heightmap = new Image8BitHeightMap(_heightmapImg);
             Console.WriteLine("Converted image to heightmap");
 
-            this._heightmapImg = ((Image8BitHeightMap)_heightmap).ContourLinesOverlay();
+            this._heightmapImg = ((Image8BitHeightMap)_heightmap).ShadedHeightmap();
             _flowMap = new SimpleFlowMap(_heightmap.Bounds());
             RiverMap = new RiverMap(_flowMap, _heightmap);
         }

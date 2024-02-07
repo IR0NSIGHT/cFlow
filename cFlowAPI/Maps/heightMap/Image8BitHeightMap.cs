@@ -32,6 +32,34 @@ public class Image8BitHeightMap : IHeightMap
         return contourMap;
     }
 
+    public SKBitmap ShadedHeightmap()
+    {
+        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Gray8, SKAlphaType.Premul);
+        var flowMap = new SimpleFlowMap(Bounds());
+        SimpleFlowMap.ApplyNaturalEdgeFlow(this, flowMap);
+
+        foreach (var (x, y) in flowMap.iterator().Points())
+        {
+            var flow = flowMap.GetFlow((x, y));
+            byte val = 127;
+            if (flow.Up)
+                val += 50;
+            if (flow.Left)
+                val += 50;
+
+
+            if (flow.Down)
+                val -= 50;
+            if (flow.Right)
+                val -= 50;
+
+            contourMap.SetPixel(x, y, new SKColor(val, val, val));
+
+        }
+
+        return contourMap;
+    }
+
     public IMapIterator<(int, int)> iterator()
     {
         return _iterator;
