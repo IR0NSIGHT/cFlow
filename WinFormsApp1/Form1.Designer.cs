@@ -44,6 +44,7 @@ namespace WinFormsApp1
             progressBar1 = new ProgressBar();
             loading_spinner_box = new PictureBox();
             ImportHeightmapButton = new Button();
+            LayerTogglePanel = new FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
@@ -173,11 +174,19 @@ namespace WinFormsApp1
             ImportHeightmapButton.UseVisualStyleBackColor = true;
             ImportHeightmapButton.Click += OnImportHeightmapButtonClick;
             // 
+            // LayerTogglePanel
+            // 
+            LayerTogglePanel.Location = new System.Drawing.Point(1541, 113);
+            LayerTogglePanel.Name = "LayerTogglePanel";
+            LayerTogglePanel.Size = new Size(351, 365);
+            LayerTogglePanel.TabIndex = 17;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(LayerTogglePanel);
             Controls.Add(ImportHeightmapButton);
             Controls.Add(loading_spinner_box);
             Controls.Add(progressBar1);
@@ -216,5 +225,6 @@ namespace WinFormsApp1
         private ProgressBar progressBar1;
         private PictureBox loading_spinner_box;
         private Button ImportHeightmapButton;
+        private FlowLayoutPanel LayerTogglePanel;
     }
 }

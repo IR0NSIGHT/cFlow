@@ -16,7 +16,7 @@ namespace WinFormsApp1
             InitializeComponent();
 
             layerProvider = new LayerProvider();
-
+            layerProvider.LayerToggledEventHandler += OnLayerToggled;
 
             new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
 
@@ -30,6 +30,13 @@ namespace WinFormsApp1
 
             genManyRiverButton.Click += OnGenerateMassRiverButton;
             heightPictureBox.Click += handleSpawnRiverMouseClick;
+
+            BuildLayerToggleButtons();
+        }
+
+        private void OnLayerToggled(object? sender, EventArgs e)
+        {
+            RedrawMaps();
         }
 
         public MainWindow Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendChannel)
@@ -68,6 +75,57 @@ namespace WinFormsApp1
 
         }
 
+        private void BuildLayerToggleButtons()
+        {
+  
+            while (LayerTogglePanel.Controls.Count > 0)
+            {
+                var button = LayerTogglePanel.Controls[0];
+                if (button is Button)
+                {
+                    button.Click -= OnLayerToggleButtonClick;
+                }
+                button.Dispose();
+            }
+
+            // Sample list of strings (you can replace this with your dynamic list)
+            List<string> stringList = new List<string> { "Button 1", "Button 2", "Button 3" };
+
+            // Create buttons dynamically for each string in the list
+            foreach (var x in layerProvider.AllLayers())
+            {
+                Button newButton = new Button();
+                newButton.Text = x.name;
+                newButton.Name = x.name;
+                newButton.Size = new System.Drawing.Size(100, 30);
+                newButton.BackColor = x.active ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+                newButton.Click += OnLayerToggleButtonClick;
+                LayerTogglePanel.Controls.Add(newButton);
+            }
+        }
+
+        private void OnLayerToggleButtonClick(object? sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                int idx = -1; 
+                foreach (var xLayer in layerProvider.AllLayers())
+                {
+                    if (button.Name == xLayer.name)
+                    {
+                        idx = xLayer.idx;
+                        break;
+                    }
+                }
+
+                if (idx == -1)
+                    return;
+                layerProvider.ToggleLayer(idx);
+                button.BackColor = layerProvider.IsLayerActive(idx) ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+
+            }
+        }
+
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
         {
             if (e.MapType == MapType.Heightmap)
@@ -78,18 +136,21 @@ namespace WinFormsApp1
 
             ratio = e.Image.Height * 1f / e.Image.Width;
             heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
         public void OnFlowmapChanged(object? sender, ImageEventArgs e)
         {
             layerProvider.UpdateLayerBitmap(LayerProvider.FlowLayer, e.Image);
             heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
         public void OnRivermapChanged(object? sender, ImageEventArgs e)
         {
             layerProvider.UpdateLayerBitmap(LayerProvider.RiverLayer, e.Image);
             heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
 
