@@ -4,6 +4,7 @@ namespace WinFormsApp1
 {
     internal static class Program
     {
+        private static MainWindow gui;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -17,14 +18,14 @@ namespace WinFormsApp1
             var guiChannel = new GuiEventChannel();
             var backend = new Backend();
             //create backend and gui
-            var gui = new MainWindow();
+            gui = new MainWindow();
             var backendChannel = new BackendEventChannel(gui);
 
             gui.Populate(guiChannel, backendChannel);
             backend.Populate(guiChannel, backendChannel);
 
             //start gui thread
-            new Thread(p => Application.Run(gui)).Start();
+            Application.Run(gui);
 
             //load heightmap
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
@@ -32,9 +33,5 @@ namespace WinFormsApp1
             backend.OnHeightmapPathSelected(null, new FileEventArgs(path + file));
 
         }
-
-
-
-
     }
 }
