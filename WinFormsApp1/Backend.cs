@@ -1,4 +1,5 @@
 ﻿using cFlowApi;
+using cFlowAPI.Maps.riverMap;
 using SkiaSharp;
 using System;
 using WinFormsApp1;
@@ -23,7 +24,7 @@ public class Backend
         guiChannel.RiverChangeRequestHandler += OnRiverChangeRequested;
         guiChannel.LoadHeightmapRequestHandler += OnHeightmapPathSelected;
         guiChannel.FlowCalculationRequestHandler += OnFlowGenerationRequested;
-
+        guiChannel.FloodChangeRequestHandler += OnFloodChangeRequested; 
         return this;
     }
 
@@ -83,5 +84,26 @@ public class Backend
             FireLoadingEvent(false);
         }
     }
+    public void OnFloodChangeRequested(object? sender, FloodChangeRequestEventArgs e)
+    {
+        if (e.ChangeType == FloodChangeType.Add)
+        {
+            if (heightmapApi == null)
+            {
+                FireWarning("no Heightmap is active.");
+                return;
+            }
+            FireLoadingEvent(true);
 
+            new FloodTool(heightmapApi.Heightmap).FloodArea(
+                e.pos, 
+                heightmapApi.RiverMap,
+                e.MaxDepth,
+                e.MaxSurface
+                );
+
+            backendChannel.RaiseRivermapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage()), MapType.RiverMap));
+            FireLoadingEvent(false);
+        }
+    }
 }

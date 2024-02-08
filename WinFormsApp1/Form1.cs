@@ -1,6 +1,10 @@
 ﻿using System.Security;
 using cFlowForms;
+using Xamarin.Forms;
 using static cFlowForms.GuiEvents;
+using Button = System.Windows.Forms.Button;
+using Color = System.Drawing.Color;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace WinFormsApp1
 {
@@ -28,8 +32,11 @@ namespace WinFormsApp1
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
 
+            maxLakeDepthNumeric.ValueChanged += maxLakeDepthNumericChanged;
+            maxLakeSurfaceNumeric.ValueChanged += maxLakeSurfaceNumericChanged;
+
             genManyRiverButton.Click += OnGenerateMassRiverButton;
-            heightPictureBox.Click += handleSpawnRiverMouseClick;
+            heightPictureBox.Click += handleMouseClickOnMap;
 
             BuildLayerToggleButtons();
         }
@@ -77,7 +84,7 @@ namespace WinFormsApp1
 
         private void BuildLayerToggleButtons()
         {
-  
+
             while (LayerTogglePanel.Controls.Count > 0)
             {
                 var button = LayerTogglePanel.Controls[0];
@@ -108,7 +115,7 @@ namespace WinFormsApp1
         {
             if (sender is Button button)
             {
-                int idx = -1; 
+                int idx = -1;
                 foreach (var xLayer in layerProvider.AllLayers())
                 {
                     if (button.Name == xLayer.name)
@@ -201,17 +208,30 @@ namespace WinFormsApp1
             channel.RequestCalculateFlow();
         }
 
-        private void handleSpawnRiverMouseClick(object? sender, EventArgs e)
+        private void handleMouseClickOnMap(object? sender, EventArgs e)
         {
-            if (e is not MouseEventArgs { Button: MouseButtons.Left } mouseArgs)
+            if (e is not MouseEventArgs mouseArgs)
                 return;
-            if (!spawnRiverMode)
-                return;
+
             (int x, int y) deltaPixel = ((int)(mouseArgs.X), (int)(mouseArgs.Y)); //(mouseArgs.X - heightPictureBox.Location.X, mouseArgs.Y - heightPictureBox.Location.Y);
             (int x, int y) deltaPos = ((int)(deltaPixel.x / scale), (int)(deltaPixel.y / scale));
             var clickedMapPos = (GetCenter().X + deltaPos.x, GetCenter().Y + deltaPos.y);
+            handleSpawnRiverOnMap(clickedMapPos, this.riverToolActive);
+            handleFloodAreaOnMap(clickedMapPos, this.floodToolActive);
+        }
 
-            channel.RequestRiverChange(new RiverChangeRequestEventArgs(clickedMapPos, RiverChangeType.Add));
+        private void handleSpawnRiverOnMap((int x, int y) mapPos, bool doUse)
+        {
+            if (!doUse)
+                return;
+            channel.RequestRiverChange(new RiverChangeRequestEventArgs(mapPos, RiverChangeType.Add));
+        }
+
+        private void handleFloodAreaOnMap((int x, int y) mapPos, bool doUse)
+        {
+            if (!doUse)
+                return;
+            channel.RequestFloodChange(new FloodChangeRequestEventArgs(mapPos, FloodChangeType.Add){MaxDepth = this.maxLakeDepth, MaxSurface = this.maxLakeSurface*this.maxLakeSurface});
         }
 
         private (int x, int y) riverSpacing = (10, 10);
@@ -221,12 +241,26 @@ namespace WinFormsApp1
             riverSpacing = (decimal.ToInt32(numericRiverSpacingX.Value), decimal.ToInt32(numericRiverSpacingY.Value));
         }
 
-        private bool spawnRiverMode = false;
+        private int maxLakeSurface = 100;
+        private void maxLakeSurfaceNumericChanged(object? sender, EventArgs e)
+        {
+            if (sender is NumericUpDown numeric)
+            maxLakeSurface = decimal.ToInt32(numeric.Value);
+            maxLakeSurfaceLabel.Text = $"x {maxLakeSurface} m";
+        }
+        private int maxLakeDepth = 10;
+        private void maxLakeDepthNumericChanged(object? sender, EventArgs e)
+        {
+            maxLakeDepth = decimal.ToInt32(numericRiverSpacingX.Value);
+        }
+
+
+        private bool riverToolActive = false;
         private void OnSpawnRiverButtonClick(object sender, EventArgs e)
         {
-            spawnRiverMode = !spawnRiverMode;
-            spawnSingleRiverButton.BackColor = spawnRiverMode ? Color.DeepSkyBlue : Color.LightGray;
-            spawnSingleRiverButton.Text = spawnRiverMode ? "Spawn single river: Active" : "Spawn single river";
+            riverToolActive = !riverToolActive;
+            spawnSingleRiverButton.BackColor = riverToolActive ? Color.DeepSkyBlue : Color.LightGray;
+            spawnSingleRiverButton.Text = riverToolActive ? "Spawn single river: Active" : "Spawn single river";
         }
 
         private struct ApplicationState
@@ -274,6 +308,17 @@ namespace WinFormsApp1
                     MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
                                     $"Details:\n\n{ex.StackTrace}");
                 }
+            }
+        }
+
+        private bool floodToolActive = false;
+
+        private void OnToggleFloodToolButtonClick(object sender, EventArgs e)
+        {
+            floodToolActive = !floodToolActive;
+            if (sender is Button b)
+            {
+                b.BackColor = floodToolActive ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
             }
         }
     }

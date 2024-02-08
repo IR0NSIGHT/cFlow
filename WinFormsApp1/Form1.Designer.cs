@@ -45,10 +45,19 @@ namespace WinFormsApp1
             loading_spinner_box = new PictureBox();
             ImportHeightmapButton = new Button();
             LayerTogglePanel = new FlowLayoutPanel();
+            button_toogle_floodTool = new Button();
+            maxLakeSurfaceInfo = new Label();
+            maxLakeSurfaceNumeric = new NumericUpDown();
+            maxLakeSurfaceLabel = new Label();
+            maxLakeDepthInfoLabel = new Label();
+            maxLakeDepthNumeric = new NumericUpDown();
+            maxLakeDepthText = new Label();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).BeginInit();
             SuspendLayout();
             // 
             // heightPictureBox
@@ -61,7 +70,7 @@ namespace WinFormsApp1
             // 
             // genFlowButton
             // 
-            genFlowButton.Location = new System.Drawing.Point(1541, 747);
+            genFlowButton.Location = new System.Drawing.Point(1541, 398);
             genFlowButton.Name = "genFlowButton";
             genFlowButton.Size = new Size(160, 90);
             genFlowButton.TabIndex = 4;
@@ -71,7 +80,7 @@ namespace WinFormsApp1
             // 
             // genManyRiverButton
             // 
-            genManyRiverButton.Location = new System.Drawing.Point(1541, 843);
+            genManyRiverButton.Location = new System.Drawing.Point(1541, 494);
             genManyRiverButton.Name = "genManyRiverButton";
             genManyRiverButton.Size = new Size(160, 90);
             genManyRiverButton.TabIndex = 5;
@@ -80,7 +89,7 @@ namespace WinFormsApp1
             // 
             // numericRiverSpacingX
             // 
-            numericRiverSpacingX.Location = new System.Drawing.Point(1707, 843);
+            numericRiverSpacingX.Location = new System.Drawing.Point(1707, 494);
             numericRiverSpacingX.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             numericRiverSpacingX.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericRiverSpacingX.Name = "numericRiverSpacingX";
@@ -91,7 +100,7 @@ namespace WinFormsApp1
             // 
             // numericRiverSpacingY
             // 
-            numericRiverSpacingY.Location = new System.Drawing.Point(1707, 872);
+            numericRiverSpacingY.Location = new System.Drawing.Point(1707, 523);
             numericRiverSpacingY.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             numericRiverSpacingY.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericRiverSpacingY.Name = "numericRiverSpacingY";
@@ -103,7 +112,7 @@ namespace WinFormsApp1
             // xRiverSpacing
             // 
             xRiverSpacing.AutoSize = true;
-            xRiverSpacing.Location = new System.Drawing.Point(1820, 845);
+            xRiverSpacing.Location = new System.Drawing.Point(1820, 496);
             xRiverSpacing.Name = "xRiverSpacing";
             xRiverSpacing.Size = new Size(74, 15);
             xRiverSpacing.TabIndex = 8;
@@ -121,7 +130,7 @@ namespace WinFormsApp1
             // spawnSingleRiverButton
             // 
             spawnSingleRiverButton.BackColor = SystemColors.Control;
-            spawnSingleRiverButton.Location = new System.Drawing.Point(1541, 939);
+            spawnSingleRiverButton.Location = new System.Drawing.Point(1541, 590);
             spawnSingleRiverButton.Name = "spawnSingleRiverButton";
             spawnSingleRiverButton.Size = new Size(160, 90);
             spawnSingleRiverButton.TabIndex = 10;
@@ -141,7 +150,7 @@ namespace WinFormsApp1
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(1820, 874);
+            label2.Location = new System.Drawing.Point(1820, 525);
             label2.Name = "label2";
             label2.Size = new Size(74, 15);
             label2.TabIndex = 11;
@@ -149,9 +158,9 @@ namespace WinFormsApp1
             // 
             // progressBar1
             // 
-            progressBar1.Location = new System.Drawing.Point(1541, 622);
+            progressBar1.Location = new System.Drawing.Point(1541, 273);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(160, 23);
+            progressBar1.Size = new Size(353, 23);
             progressBar1.TabIndex = 13;
             // 
             // loading_spinner_box
@@ -166,7 +175,7 @@ namespace WinFormsApp1
             // 
             // ImportHeightmapButton
             // 
-            ImportHeightmapButton.Location = new System.Drawing.Point(1541, 651);
+            ImportHeightmapButton.Location = new System.Drawing.Point(1541, 302);
             ImportHeightmapButton.Name = "ImportHeightmapButton";
             ImportHeightmapButton.Size = new Size(160, 90);
             ImportHeightmapButton.TabIndex = 15;
@@ -178,14 +187,88 @@ namespace WinFormsApp1
             // 
             LayerTogglePanel.Location = new System.Drawing.Point(1541, 113);
             LayerTogglePanel.Name = "LayerTogglePanel";
-            LayerTogglePanel.Size = new Size(351, 365);
+            LayerTogglePanel.Size = new Size(351, 154);
             LayerTogglePanel.TabIndex = 17;
+            // 
+            // button_toogle_floodTool
+            // 
+            button_toogle_floodTool.BackColor = SystemColors.Control;
+            button_toogle_floodTool.Location = new System.Drawing.Point(1541, 686);
+            button_toogle_floodTool.Name = "button_toogle_floodTool";
+            button_toogle_floodTool.Size = new Size(160, 90);
+            button_toogle_floodTool.TabIndex = 18;
+            button_toogle_floodTool.Text = "Flood Tool";
+            button_toogle_floodTool.UseVisualStyleBackColor = false;
+            button_toogle_floodTool.Click += OnToggleFloodToolButtonClick;
+            // 
+            // maxLakeSurfaceInfo
+            // 
+            maxLakeSurfaceInfo.AutoSize = true;
+            maxLakeSurfaceInfo.Location = new System.Drawing.Point(1707, 686);
+            maxLakeSurfaceInfo.Name = "maxLakeSurfaceInfo";
+            maxLakeSurfaceInfo.Size = new Size(95, 15);
+            maxLakeSurfaceInfo.TabIndex = 20;
+            maxLakeSurfaceInfo.Text = "max lake surface";
+            // 
+            // maxLakeSurfaceNumeric
+            // 
+            maxLakeSurfaceNumeric.Location = new System.Drawing.Point(1707, 704);
+            maxLakeSurfaceNumeric.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            maxLakeSurfaceNumeric.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            maxLakeSurfaceNumeric.Name = "maxLakeSurfaceNumeric";
+            maxLakeSurfaceNumeric.Size = new Size(49, 23);
+            maxLakeSurfaceNumeric.TabIndex = 19;
+            maxLakeSurfaceNumeric.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            // 
+            // maxLakeSurfaceLabel
+            // 
+            maxLakeSurfaceLabel.AutoSize = true;
+            maxLakeSurfaceLabel.Location = new System.Drawing.Point(1762, 706);
+            maxLakeSurfaceLabel.Name = "maxLakeSurfaceLabel";
+            maxLakeSurfaceLabel.Size = new Size(48, 15);
+            maxLakeSurfaceLabel.TabIndex = 21;
+            maxLakeSurfaceLabel.Text = "x 100 m";
+            // 
+            // maxLakeDepthInfoLabel
+            // 
+            maxLakeDepthInfoLabel.AutoSize = true;
+            maxLakeDepthInfoLabel.Location = new System.Drawing.Point(1707, 735);
+            maxLakeDepthInfoLabel.Name = "maxLakeDepthInfoLabel";
+            maxLakeDepthInfoLabel.Size = new Size(88, 15);
+            maxLakeDepthInfoLabel.TabIndex = 23;
+            maxLakeDepthInfoLabel.Text = "max lake depth";
+            // 
+            // maxLakeDepthNumeric
+            // 
+            maxLakeDepthNumeric.Location = new System.Drawing.Point(1707, 753);
+            maxLakeDepthNumeric.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            maxLakeDepthNumeric.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            maxLakeDepthNumeric.Name = "maxLakeDepthNumeric";
+            maxLakeDepthNumeric.Size = new Size(49, 23);
+            maxLakeDepthNumeric.TabIndex = 22;
+            maxLakeDepthNumeric.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
+            // maxLakeDepthText
+            // 
+            maxLakeDepthText.AutoSize = true;
+            maxLakeDepthText.Location = new System.Drawing.Point(1762, 755);
+            maxLakeDepthText.Name = "maxLakeDepthText";
+            maxLakeDepthText.Size = new Size(18, 15);
+            maxLakeDepthText.TabIndex = 24;
+            maxLakeDepthText.Text = "m";
             // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(maxLakeDepthText);
+            Controls.Add(maxLakeDepthInfoLabel);
+            Controls.Add(maxLakeDepthNumeric);
+            Controls.Add(maxLakeSurfaceLabel);
+            Controls.Add(maxLakeSurfaceInfo);
+            Controls.Add(maxLakeSurfaceNumeric);
+            Controls.Add(button_toogle_floodTool);
             Controls.Add(LayerTogglePanel);
             Controls.Add(ImportHeightmapButton);
             Controls.Add(loading_spinner_box);
@@ -206,6 +289,8 @@ namespace WinFormsApp1
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).EndInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -226,5 +311,13 @@ namespace WinFormsApp1
         private PictureBox loading_spinner_box;
         private Button ImportHeightmapButton;
         private FlowLayoutPanel LayerTogglePanel;
+        private Button button_toogle_floodTool;
+        private Label maxLakeSurfaceInfo;
+        private NumericUpDown maxLakeSurfaceNumeric;
+        private Label maxLakeSurfaceLabel;
+        private Label label1;
+        private Label maxLakeDepthInfoLabel;
+        private NumericUpDown maxLakeDepthNumeric;
+        private Label maxLakeDepthText;
     }
 }
