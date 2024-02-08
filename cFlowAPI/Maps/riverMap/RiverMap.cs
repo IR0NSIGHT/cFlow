@@ -32,7 +32,7 @@ namespace src.Maps.riverMap
         public void SetAsRiver(int x, int y)
         {
             map[x][y] = true;
-            riverOverlay.SetPixel(x,y, new SKColor(0, 0, 255));
+            riverOverlay.SetPixel(x, y, new SKColor(0, 0, 255));
         }
 
         public bool IsRiver(int x, int y)
@@ -40,23 +40,38 @@ namespace src.Maps.riverMap
             return map[x][y];
         }
 
-        public void AddRiverFrom((int x, int y) pos)
+        public void AddRiverFrom((int x, int y) pos, int branchEveryX = 100)
         {
             Random random = new Random();
             var start = pos;
             var stopped = false;
+            var doSplitNow = false;
             while (!stopped)
             {
                 if (IsRiver(start.x, start.y))
                     break;
                 SetAsRiver(start.x, start.y);
 
-                var (stop, next) = AdvanceRiver(start, random);
-                start = next;
+                if (!doSplitNow && branchEveryX != -1)
+                {
+                    //perform a split every x blocks on average
+                    doSplitNow = (random.Next() % branchEveryX) == 0;
+                }
+
+                var (stop, next) = AdvanceRiver(start, random, doSplitNow ? 2 : 1);
+                if (doSplitNow && next.Count > 1)
+                {
+                    AddRiverFrom(next[0], branchEveryX);
+                    AddRiverFrom(next[1], branchEveryX);
+                    break;
+                }
+                start = next[0];
                 stopped = stop;
             }
+
             //FIXME smart way to escape flooded area an continue river
-            new FloodTool(_heightMap).FloodArea(start, this);
+            if (stopped)
+                new FloodTool(_heightMap).FloodArea(start, this);
         }
 
         /// <summary>
@@ -65,12 +80,22 @@ namespace src.Maps.riverMap
         /// </summary>
         /// <param name="startFlow"></param>
         /// <returns></returns>
-        private (bool stopped, (int x, int y) next) AdvanceRiver((int x, int y) startFlow, Random random)
+        private (bool stopped, List<(int x, int y)> next) AdvanceRiver((int x, int y) startFlow, Random random, int branches = 1)
         {
             var candidates = flowMap.FollowFlow(startFlow);
             if (candidates.Count == 0)
-                return (true, startFlow);
-            return (false, candidates[random.Next() % candidates.Count]);
+                return (true, [startFlow]);
+            var outList = new List<(int x, int y)>();
+
+            //randomly take from candidates list until enough branches are collected or no more candidates remain
+            while (outList.Count < branches && candidates.Count != 0)
+            {
+                var randomIdx = random.Next() % candidates.Count;
+                var taken = candidates[randomIdx];
+                candidates.RemoveAt(randomIdx);
+                outList.Add(taken);
+            }
+            return (false, outList);
         }
 
 

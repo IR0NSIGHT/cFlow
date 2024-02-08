@@ -7,11 +7,11 @@ public class GuiEvents
         Add,
         Remove
     }
-    public readonly record struct RiverChangeRequestEventArgs((int x, int y) pos, RiverChangeType ChangeType)
+    public record struct RiverChangeRequestEventArgs((int x, int y) pos, RiverChangeType ChangeType)
     {
         public (int x, int y) Position { get; } = pos;
         public RiverChangeType ChangeType { get; } = ChangeType;
-
+        public int splitEveryXBlocks;
     }
 
 
