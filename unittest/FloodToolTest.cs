@@ -1,4 +1,7 @@
-﻿namespace unittest
+﻿using application.Maps;
+using src.Maps.riverMap;
+
+namespace unittest
 {
     [TestFixture]
     public class FloodToolTest
@@ -32,7 +35,7 @@
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
-                17
+                17, p => false
                 );
 
             Assert.That(exceeded, Is.False);
@@ -71,7 +74,7 @@
             *   h h h h
             *   h l l h
             *   h h h h
-            */ 
+            */
 
 
             IHeightMap heightMap = new DummyDimension((50, 50), 74);
@@ -84,7 +87,8 @@
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
-                34  //not z of bottom plain, but higher but still below rest of map
+                34,  //not z of bottom plain, but higher but still below rest of map,
+                p => false
                 );
 
             Assert.That(exceeded, Is.False);
@@ -138,15 +142,16 @@
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
-                new List<(int x, int y)> { (0,0) },
-                74  //map is all 74 or lower => flood all
+                new List<(int x, int y)> { (0, 0) },
+                74, //map is all 74 or lower => flood all
+                p => false
                 );
 
             Assert.That(exceeded, Is.False);
             //all points on map were flooded
             foreach (var point in heightMap.iterator().Points())
             {
-                  Assert.That(seenMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
+                Assert.That(seenMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
             }
 
             //no border exists, map is flooded
@@ -177,10 +182,66 @@
             var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25,25) },
                 74,  
+                p => false,
                 13
                 );
 
             Assert.That(exceeded, Is.True);
+        }
+
+        [Test]
+        public void ExceededMultiLevelLake()
+        {
+            /** high/medium/low map sketch
+            *   h h h h h
+            *   h m m m h
+            *   h m l m h
+             *  h m m m h
+             *  h h h h h
+            */
+
+
+            IHeightMap heightMap = new DummyDimension((1000, 1000), 74);
+            (int x, int y) rectStart = (30, 20);
+            (int x, int y) rectEnd = (40, 30);
+
+            //make a large hole: 100x100 size
+            foreach (var point in iterateRect((10, 10), (110, 110)))
+            {
+                heightMap.SetHeight(point, 25);
+            }
+
+            //make hole in the middle: 10x10 size
+            foreach (var point in iterateRect(rectStart, rectEnd))
+                heightMap.SetHeight(point, 17);
+
+
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var riverMap = new RiverMap(new SimpleFlowMap(heightMap.Bounds()), heightMap);
+            flood.FloodArea(
+                (35, 25),
+                riverMap, 
+                100,
+                500 //big enough for small hole, to small for middle hole
+                );
+
+            bool IsInHole((int x, int y) p) => isInRect(p, rectStart, rectEnd);
+
+            //check that map was correctly marked
+            foreach (var point in heightMap.iterator().Points())
+            {
+                if (IsInHole(point))
+                {
+                    Assert.That(riverMap.IsRiver(point.x, point.y), Is.True);
+                }
+                else
+                {
+                    Assert.That(riverMap.IsRiver(point.x, point.y), Is.False, $"incorreclty marked point: {point}");
+                }
+            }
+
+            bool IsHoleEdge((int x, int y) p) => IsInHole(p) && !isInRect(p, (rectStart.x + 1, rectStart.y + 1), (rectEnd.x - 1, rectEnd.y - 1));
         }
     }
 }

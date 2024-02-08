@@ -6,8 +6,8 @@
         private (int x, int y) _bounds;
         private bool[][] seenMap;
         private int marked = 0;
-        private (int x, int y) lowerBoundsMarked = (0, 0);
-        private (int x, int y) upperBoundsMarked = (int.MaxValue, int.MaxValue);
+        private (int x, int y) lowerBoundsMarked = (int.MaxValue, int.MaxValue);
+        private (int x, int y) upperBoundsMarked = (0, 0);
         public BooleanMap((int x, int y) bounds)
         {
             this._bounds = bounds;
