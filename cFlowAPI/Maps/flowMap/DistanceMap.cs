@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using SkiaSharp;
 
 namespace application.Maps.flowMap;
 
@@ -137,6 +138,37 @@ public class DistanceMap : Map2d
         return GetDistanceOf(point).isSet;
     }
 
+    public SKBitmap ToCycleImage()
+    {
+        var (width, height) = Bounds();
+        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
+        //float ratio = int.MaxValue / Math.Max(Bounds().y, Bounds().x);
+        var max = 0;
+
+        foreach (var points in iterator().Points())
+        {
+            var dist = GetDistanceOf(points).DistanceSquared;
+            bitmap.SetPixel(points.x, points.y, ((uint)(dist) | 0xFF000000));
+            if (dist > max)
+                max = dist;
+        }
+
+        return bitmap;
+    }
+
+    public List<(int x, int y)> FlowFrom((int x, int y) point)
+    {
+        var pointDistance = GetDistanceOf(point).DistanceSquared;
+        List<(int x, int y)> outList = new();
+        foreach (var n in Point.Neighbours(point))
+        {
+            if (inBounds(n.x, n.y) && GetDistanceOf(n).DistanceSquared < pointDistance)
+            {
+                outList.Add(n);
+            }
+        }
+        return outList;
+    }
 
     public void SetDistanceToEdge((int x, int y) point, DistancePoint distance)
     {

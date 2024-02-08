@@ -1,4 +1,5 @@
-﻿using cFlowAPI.Maps.riverMap;
+﻿using application.Maps.flowMap;
+using cFlowAPI.Maps.riverMap;
 using SkiaSharp;
 
 namespace src.Maps.riverMap
@@ -6,19 +7,19 @@ namespace src.Maps.riverMap
     public class RiverMap : Map2d
     {
         private readonly bool[][] map;
-        private readonly IFlowMap flowMap;
+        private readonly DistanceMap distanceMap;
         private Map2dIterator _iterator;
         private IHeightMap _heightMap;
         private SKBitmap riverOverlay;
-        public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
+        public RiverMap(DistanceMap distanceMap, IHeightMap heightMap)
         {
-            this.flowMap = flowMap;
+            this.distanceMap = distanceMap;
             this._heightMap = heightMap;
-            map = new bool[flowMap.Bounds().x][];
-            _iterator = new Map2dIterator(flowMap.Bounds());
-            for (int i = 0; i < flowMap.Bounds().x; i++)
+            map = new bool[distanceMap.Bounds().x][];
+            _iterator = new Map2dIterator(distanceMap.Bounds());
+            for (int i = 0; i < distanceMap.Bounds().x; i++)
             {
-                map[i] = new bool[flowMap.Bounds().y];
+                map[i] = new bool[distanceMap.Bounds().y];
             }
             riverOverlay = new SKBitmap(new SKImageInfo(Bounds().x, Bounds().y, SKColorType.Rgba8888, SKAlphaType.Opaque));
 
@@ -82,7 +83,7 @@ namespace src.Maps.riverMap
         /// <returns></returns>
         private (bool stopped, List<(int x, int y)> next) AdvanceRiver((int x, int y) startFlow, Random random, int branches = 1)
         {
-            var candidates = flowMap.FollowFlow(startFlow);
+            var candidates = distanceMap.FlowFrom(startFlow);
             if (candidates.Count == 0)
                 return (true, [startFlow]);
             var outList = new List<(int x, int y)>();
@@ -102,12 +103,12 @@ namespace src.Maps.riverMap
 
         public (int x, int y) Bounds()
         {
-            return flowMap.Bounds();
+            return distanceMap.Bounds();
         }
 
         public bool inBounds(int x, int y)
         {
-            return flowMap.inBounds(x, y);
+            return distanceMap.inBounds(x, y);
         }
 
         public IMapIterator<(int x, int y)> iterator()

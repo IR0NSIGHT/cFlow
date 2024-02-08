@@ -1,6 +1,7 @@
 ﻿using SkiaSharp;
 using src.Maps.riverMap;
 using System.Text;
+using application.Maps.flowMap;
 
 namespace cFlowApi
 {
@@ -10,7 +11,7 @@ namespace cFlowApi
         private SKBitmap _rivermapImg;
 
         public IHeightMap Heightmap { get; }
-        private IFlowMap _flowMap;
+        private DistanceMap _flowMap;
         public SKBitmap FlowmapImgColored { get => _flowmapImgColored; }
         public SKBitmap RivermapImg { get => _rivermapImg; }
 
@@ -23,14 +24,16 @@ namespace cFlowApi
             Heightmap = new Image8BitHeightMap(_heightmapImg);
             Console.WriteLine("Converted image to heightmap");
 
-            _flowMap = new SimpleFlowMap(Heightmap.Bounds());
+            _flowMap = new DistanceMap(Heightmap);
             RiverMap = new RiverMap(_flowMap, Heightmap);
         }
         
         public void GenerateFlow()
         {
-            SimpleFlowMap.CalculateFlowFromHeightMap(Heightmap, _flowMap);
-            _flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
+            _flowMap.CalculateFromHeightmap();
+            //TODO: image
+            _flowmapImgColored = _flowMap.ToCycleImage();
+            //_flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
         }
 
         public void SpamRivers(int xSpacing, int ySpacing)

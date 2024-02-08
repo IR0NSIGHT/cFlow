@@ -64,6 +64,7 @@ public class Backend
         FireLoadingEvent(true);
         heightmapApi.GenerateFlow();
 
+        //TODO image
         backendChannel.RaiseFlowmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.FlowmapImgColored), MapType.FlowMap));
         FireLoadingEvent(false);
     }
