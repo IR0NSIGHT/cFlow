@@ -21,6 +21,8 @@ public class GuiEventChannel
     public EventHandler<RiverChangeRequestEventArgs>? RiverChangeRequestHandler;
     public EventHandler? FlowCalculationRequestHandler;
     public EventHandler<FileEventArgs>? LoadHeightmapRequestHandler;
+    public EventHandler<FloodChangeRequestEventArgs>? FloodChangeRequestHandler;
+
 
     public GuiEventChannel()
     {
@@ -72,6 +74,14 @@ public class GuiEventChannel
         queue.Enqueue(() =>
         {
             FlowCalculationRequestHandler?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
+    public void RequestFloodChange(FloodChangeRequestEventArgs e)
+    {
+        queue.Enqueue(() =>
+        {
+            FloodChangeRequestHandler?.Invoke(this, e);
         });
     }
 }
