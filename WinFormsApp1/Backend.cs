@@ -38,14 +38,18 @@ public class Backend
     }
 
     /// <summary>
-    /// load new heightmap from this filepath
+    /// load new Heightmap from this filepath
     /// </summary>
     /// <param name="e"></param>
     public void OnHeightmapPathSelected(object? sender, FileEventArgs e)
     {
         FireLoadingEvent(true);
         heightmapApi = new CFlowGenerator(e.FilePath);
-        backendChannel.RaiseHeightmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.HeightmapImg)));
+        var (shadedMap, contours) = ((Image8BitHeightMap)heightmapApi.Heightmap).ShadedHeightmap();
+
+        backendChannel.RaiseHeightmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(shadedMap), MapType.Heightmap));
+        backendChannel.RaiseHeightmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(contours), MapType.ContourLines));
+
         FireLoadingEvent(false);
     }
 
@@ -53,13 +57,13 @@ public class Backend
     {
         if (heightmapApi == null)
         {
-            FireWarning("no heightmap is active.");
+            FireWarning("no Heightmap is active.");
             return;
         }
         FireLoadingEvent(true);
         heightmapApi.GenerateFlow();
 
-        backendChannel.RaiseFlowmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.FlowmapImgColored)));
+        backendChannel.RaiseFlowmapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.FlowmapImgColored), MapType.FlowMap));
         FireLoadingEvent(false);
     }
 
@@ -69,13 +73,13 @@ public class Backend
         {
             if (heightmapApi == null)
             {
-                FireWarning("no heightmap is active.");
+                FireWarning("no Heightmap is active.");
                 return;
             }
             FireLoadingEvent(true);
 
             heightmapApi.RiverMap.AddRiverFrom(e.pos);
-            backendChannel.RaiseRivermapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage())));
+            backendChannel.RaiseRivermapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage()), MapType.RiverMap));
             FireLoadingEvent(false);
         }
     }

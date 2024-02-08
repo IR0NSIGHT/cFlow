@@ -27,7 +27,7 @@ namespace WinFormsApp1
             //start gui thread
             Application.Run(gui);
 
-            //load heightmap
+            //load Heightmap
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
             var file = "medium_flats.png";
             backend.OnHeightmapPathSelected(null, new FileEventArgs(path + file));

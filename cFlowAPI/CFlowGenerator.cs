@@ -6,13 +6,11 @@ namespace cFlowApi
 {
     public class CFlowGenerator
     {
-        private SKBitmap _heightmapImg;
         private SKBitmap _flowmapImgColored;
         private SKBitmap _rivermapImg;
 
-        private IHeightMap _heightmap;
+        public IHeightMap Heightmap { get; }
         private IFlowMap _flowMap;
-        public SKBitmap HeightmapImg { get => _heightmapImg; }
         public SKBitmap FlowmapImgColored { get => _flowmapImgColored; }
         public SKBitmap RivermapImg { get => _rivermapImg; }
 
@@ -22,17 +20,16 @@ namespace cFlowApi
         {
             var _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
             Console.WriteLine("Loaded bitmap");
-            _heightmap = new Image8BitHeightMap(_heightmapImg);
+            Heightmap = new Image8BitHeightMap(_heightmapImg);
             Console.WriteLine("Converted image to heightmap");
 
-            this._heightmapImg = ((Image8BitHeightMap)_heightmap).ContourLinesOverlay();
-            _flowMap = new SimpleFlowMap(_heightmap.Bounds());
-            RiverMap = new RiverMap(_flowMap, _heightmap);
+            _flowMap = new SimpleFlowMap(Heightmap.Bounds());
+            RiverMap = new RiverMap(_flowMap, Heightmap);
         }
-
+        
         public void GenerateFlow()
         {
-            SimpleFlowMap.CalculateFlowFromHeightMap(_heightmap, _flowMap);
+            SimpleFlowMap.CalculateFlowFromHeightMap(Heightmap, _flowMap);
             _flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
         }
 

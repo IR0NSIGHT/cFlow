@@ -1,7 +1,5 @@
 ﻿using System.Security;
-using System.Windows.Forms;
 using cFlowForms;
-using SkiaSharp.Views.Desktop;
 using static cFlowForms.GuiEvents;
 
 namespace WinFormsApp1
@@ -12,18 +10,19 @@ namespace WinFormsApp1
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
         private GuiEventChannel channel;
-
+        private LayerProvider layerProvider;
         public MainWindow()
         {
             InitializeComponent();
+
+            layerProvider = new LayerProvider();
+            layerProvider.LayerToggledEventHandler += OnLayerToggled;
 
             new MoveMapByMouse(heightPictureBox, SetCenter, GetCenter); ;
 
 
             //connect own buttons and controls
-            heightPictureBox.Paint += PictureBox1_Paint;
-            flowPicturBox.Paint += PictureBox1_Paint;
-            riverPictureBox.Paint += PictureBox1_Paint;
+            heightPictureBox.Paint += MapPictureBox_Paint;
             this.MouseWheel += MainForm_MouseWheel;
 
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
@@ -31,6 +30,13 @@ namespace WinFormsApp1
 
             genManyRiverButton.Click += OnGenerateMassRiverButton;
             heightPictureBox.Click += handleSpawnRiverMouseClick;
+
+            BuildLayerToggleButtons();
+        }
+
+        private void OnLayerToggled(object? sender, EventArgs e)
+        {
+            RedrawMaps();
         }
 
         public MainWindow Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendChannel)
@@ -69,23 +75,82 @@ namespace WinFormsApp1
 
         }
 
+        private void BuildLayerToggleButtons()
+        {
+  
+            while (LayerTogglePanel.Controls.Count > 0)
+            {
+                var button = LayerTogglePanel.Controls[0];
+                if (button is Button)
+                {
+                    button.Click -= OnLayerToggleButtonClick;
+                }
+                button.Dispose();
+            }
+
+            // Sample list of strings (you can replace this with your dynamic list)
+            List<string> stringList = new List<string> { "Button 1", "Button 2", "Button 3" };
+
+            // Create buttons dynamically for each string in the list
+            foreach (var x in layerProvider.AllLayers())
+            {
+                Button newButton = new Button();
+                newButton.Text = x.name;
+                newButton.Name = x.name;
+                newButton.Size = new System.Drawing.Size(100, 30);
+                newButton.BackColor = x.active ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+                newButton.Click += OnLayerToggleButtonClick;
+                LayerTogglePanel.Controls.Add(newButton);
+            }
+        }
+
+        private void OnLayerToggleButtonClick(object? sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                int idx = -1; 
+                foreach (var xLayer in layerProvider.AllLayers())
+                {
+                    if (button.Name == xLayer.name)
+                    {
+                        idx = xLayer.idx;
+                        break;
+                    }
+                }
+
+                if (idx == -1)
+                    return;
+                layerProvider.ToggleLayer(idx);
+                button.BackColor = layerProvider.IsLayerActive(idx) ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+
+            }
+        }
+
         public void OnHeightmapChanged(object? sender, ImageEventArgs e)
         {
-            heightPictureBox.Image = e.Image;
+            if (e.MapType == MapType.Heightmap)
+                layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, e.Image);
+            else if (e.MapType == MapType.ContourLines)
+                layerProvider.UpdateLayerBitmap(LayerProvider.ContourLayer, e.Image);
+
+
             ratio = e.Image.Height * 1f / e.Image.Width;
             heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
         public void OnFlowmapChanged(object? sender, ImageEventArgs e)
         {
-            flowPicturBox.Image = e.Image;
-            flowPicturBox.Invalidate();
+            layerProvider.UpdateLayerBitmap(LayerProvider.FlowLayer, e.Image);
+            heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
         public void OnRivermapChanged(object? sender, ImageEventArgs e)
         {
-            riverPictureBox.Image = e.Image;
-            riverPictureBox.Invalidate();
+            layerProvider.UpdateLayerBitmap(LayerProvider.RiverLayer, e.Image);
+            heightPictureBox.Invalidate();
+            BuildLayerToggleButtons();
         }
 
 
@@ -105,8 +170,6 @@ namespace WinFormsApp1
         private void RedrawMaps()
         {
             heightPictureBox.Invalidate();
-            flowPicturBox.Invalidate();
-            riverPictureBox.Invalidate();
         }
 
         private void MainForm_MouseWheel(object? sender, MouseEventArgs e)
@@ -116,19 +179,20 @@ namespace WinFormsApp1
             RedrawMaps();
         }
 
-        private void PictureBox1_Paint(object? sender, PaintEventArgs e)
+        private void MapPictureBox_Paint(object? sender, PaintEventArgs e)
         {
-            if (sender is PictureBox pictureBox && pictureBox.Image != null)
+            if (sender is PictureBox pictureBox)
             {
-
                 e.Graphics.FillRectangle(new SolidBrush(Color.Orange), 0, 0, pictureBox.Width, pictureBox.Height);
 
-                // Draw the portion of the image within the calculated rectangle
-                e.Graphics.DrawImage(
-                    pictureBox.Image,
-                    new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
-                    new Rectangle(position.x, position.y, (int)(pictureBox.Width / scale), (int)((pictureBox.Width * ratio) / scale)),
-                    GraphicsUnit.Pixel);
+                foreach (var layerImg in layerProvider.ActiveLayers())
+                {
+                    e.Graphics.DrawImage(
+                        layerImg,
+                        new Rectangle(0, 0, pictureBox.Width, (int)(pictureBox.Width * ratio)),
+                        new Rectangle(position.x, position.y, (int)(pictureBox.Width / scale), (int)((pictureBox.Width * ratio) / scale)),
+                        GraphicsUnit.Pixel);
+                }
             }
         }
 
@@ -179,7 +243,7 @@ namespace WinFormsApp1
                 FileName = "Select a PNG file",
                 Filter = "PNG files (*.png)|*.png",
                 Title = "Open PNG file",
-            //    RestoreDirectory = true
+                //    RestoreDirectory = true
             };
             if (state.lastFileDir != null)
                 openFileDialog1.InitialDirectory = state.lastFileDir;

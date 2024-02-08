@@ -9,6 +9,7 @@ namespace src.Maps.riverMap
         private readonly IFlowMap flowMap;
         private Map2dIterator _iterator;
         private IHeightMap _heightMap;
+        private SKBitmap riverOverlay;
         public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
         {
             this.flowMap = flowMap;
@@ -19,21 +20,19 @@ namespace src.Maps.riverMap
             {
                 map[i] = new bool[flowMap.Bounds().y];
             }
+            riverOverlay = new SKBitmap(new SKImageInfo(Bounds().x, Bounds().y, SKColorType.Rgba8888, SKAlphaType.Opaque));
+
         }
 
         public SKBitmap ToImage()
         {
-            SKBitmap bitmap = new SKBitmap(new SKImageInfo(Bounds().x, Bounds().y, SKColorType.Rgba8888, SKAlphaType.Opaque));
-            foreach(var point in iterator().Points())
-            {
-                bitmap.SetPixel(point.x, point.y, IsRiver(point.x, point.y) ? new SKColor(0,0,255) : new SKColor(0,0,0));
-            }
-            return bitmap;
+            return riverOverlay;
         }
 
         public void SetAsRiver(int x, int y)
         {
             map[x][y] = true;
+            riverOverlay.SetPixel(x,y, new SKColor(0, 0, 255));
         }
 
         public bool IsRiver(int x, int y)

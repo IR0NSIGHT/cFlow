@@ -32,8 +32,6 @@ namespace WinFormsApp1
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             heightPictureBox = new PictureBox();
-            flowPicturBox = new PictureBox();
-            riverPictureBox = new PictureBox();
             genFlowButton = new Button();
             genManyRiverButton = new Button();
             numericRiverSpacingX = new NumericUpDown();
@@ -46,9 +44,8 @@ namespace WinFormsApp1
             progressBar1 = new ProgressBar();
             loading_spinner_box = new PictureBox();
             ImportHeightmapButton = new Button();
+            LayerTogglePanel = new FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)flowPicturBox).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)riverPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).BeginInit();
@@ -56,31 +53,15 @@ namespace WinFormsApp1
             // 
             // heightPictureBox
             // 
-            heightPictureBox.Location = new System.Drawing.Point(91, 12);
+            heightPictureBox.Location = new System.Drawing.Point(12, 12);
             heightPictureBox.Name = "heightPictureBox";
-            heightPictureBox.Size = new Size(836, 452);
+            heightPictureBox.Size = new Size(1523, 1017);
             heightPictureBox.TabIndex = 0;
             heightPictureBox.TabStop = false;
             // 
-            // flowPicturBox
-            // 
-            flowPicturBox.Location = new System.Drawing.Point(933, 12);
-            flowPicturBox.Name = "flowPicturBox";
-            flowPicturBox.Size = new Size(836, 452);
-            flowPicturBox.TabIndex = 1;
-            flowPicturBox.TabStop = false;
-            // 
-            // riverPictureBox
-            // 
-            riverPictureBox.Location = new System.Drawing.Point(91, 470);
-            riverPictureBox.Name = "riverPictureBox";
-            riverPictureBox.Size = new Size(836, 452);
-            riverPictureBox.TabIndex = 2;
-            riverPictureBox.TabStop = false;
-            // 
             // genFlowButton
             // 
-            genFlowButton.Location = new System.Drawing.Point(933, 595);
+            genFlowButton.Location = new System.Drawing.Point(1541, 747);
             genFlowButton.Name = "genFlowButton";
             genFlowButton.Size = new Size(160, 90);
             genFlowButton.TabIndex = 4;
@@ -90,7 +71,7 @@ namespace WinFormsApp1
             // 
             // genManyRiverButton
             // 
-            genManyRiverButton.Location = new System.Drawing.Point(933, 691);
+            genManyRiverButton.Location = new System.Drawing.Point(1541, 843);
             genManyRiverButton.Name = "genManyRiverButton";
             genManyRiverButton.Size = new Size(160, 90);
             genManyRiverButton.TabIndex = 5;
@@ -99,7 +80,7 @@ namespace WinFormsApp1
             // 
             // numericRiverSpacingX
             // 
-            numericRiverSpacingX.Location = new System.Drawing.Point(1099, 691);
+            numericRiverSpacingX.Location = new System.Drawing.Point(1707, 843);
             numericRiverSpacingX.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             numericRiverSpacingX.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericRiverSpacingX.Name = "numericRiverSpacingX";
@@ -110,7 +91,7 @@ namespace WinFormsApp1
             // 
             // numericRiverSpacingY
             // 
-            numericRiverSpacingY.Location = new System.Drawing.Point(1099, 720);
+            numericRiverSpacingY.Location = new System.Drawing.Point(1707, 872);
             numericRiverSpacingY.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
             numericRiverSpacingY.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numericRiverSpacingY.Name = "numericRiverSpacingY";
@@ -122,7 +103,7 @@ namespace WinFormsApp1
             // xRiverSpacing
             // 
             xRiverSpacing.AutoSize = true;
-            xRiverSpacing.Location = new System.Drawing.Point(1212, 693);
+            xRiverSpacing.Location = new System.Drawing.Point(1820, 845);
             xRiverSpacing.Name = "xRiverSpacing";
             xRiverSpacing.Size = new Size(74, 15);
             xRiverSpacing.TabIndex = 8;
@@ -131,7 +112,7 @@ namespace WinFormsApp1
             // labelCurrentScaleDescription
             // 
             labelCurrentScaleDescription.AutoSize = true;
-            labelCurrentScaleDescription.Location = new System.Drawing.Point(12, 95);
+            labelCurrentScaleDescription.Location = new System.Drawing.Point(1541, 95);
             labelCurrentScaleDescription.Name = "labelCurrentScaleDescription";
             labelCurrentScaleDescription.Size = new Size(47, 15);
             labelCurrentScaleDescription.TabIndex = 9;
@@ -140,7 +121,7 @@ namespace WinFormsApp1
             // spawnSingleRiverButton
             // 
             spawnSingleRiverButton.BackColor = SystemColors.Control;
-            spawnSingleRiverButton.Location = new System.Drawing.Point(933, 787);
+            spawnSingleRiverButton.Location = new System.Drawing.Point(1541, 939);
             spawnSingleRiverButton.Name = "spawnSingleRiverButton";
             spawnSingleRiverButton.Size = new Size(160, 90);
             spawnSingleRiverButton.TabIndex = 10;
@@ -151,7 +132,7 @@ namespace WinFormsApp1
             // labelCurrentScale
             // 
             labelCurrentScale.AutoSize = true;
-            labelCurrentScale.Location = new System.Drawing.Point(65, 95);
+            labelCurrentScale.Location = new System.Drawing.Point(1594, 95);
             labelCurrentScale.Name = "labelCurrentScale";
             labelCurrentScale.Size = new Size(13, 15);
             labelCurrentScale.TabIndex = 12;
@@ -160,7 +141,7 @@ namespace WinFormsApp1
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(1212, 722);
+            label2.Location = new System.Drawing.Point(1820, 874);
             label2.Name = "label2";
             label2.Size = new Size(74, 15);
             label2.TabIndex = 11;
@@ -168,15 +149,15 @@ namespace WinFormsApp1
             // 
             // progressBar1
             // 
-            progressBar1.Location = new System.Drawing.Point(933, 470);
+            progressBar1.Location = new System.Drawing.Point(1541, 622);
             progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(836, 23);
+            progressBar1.Size = new Size(160, 23);
             progressBar1.TabIndex = 13;
             // 
             // loading_spinner_box
             // 
             loading_spinner_box.Image = (Image)resources.GetObject("loading_spinner_box.Image");
-            loading_spinner_box.Location = new System.Drawing.Point(6, 12);
+            loading_spinner_box.Location = new System.Drawing.Point(1541, 12);
             loading_spinner_box.Name = "loading_spinner_box";
             loading_spinner_box.Size = new Size(80, 80);
             loading_spinner_box.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -185,19 +166,27 @@ namespace WinFormsApp1
             // 
             // ImportHeightmapButton
             // 
-            ImportHeightmapButton.Location = new System.Drawing.Point(933, 499);
+            ImportHeightmapButton.Location = new System.Drawing.Point(1541, 651);
             ImportHeightmapButton.Name = "ImportHeightmapButton";
             ImportHeightmapButton.Size = new Size(160, 90);
             ImportHeightmapButton.TabIndex = 15;
-            ImportHeightmapButton.Text = "Import heightmap";
+            ImportHeightmapButton.Text = "Import Heightmap";
             ImportHeightmapButton.UseVisualStyleBackColor = true;
             ImportHeightmapButton.Click += OnImportHeightmapButtonClick;
+            // 
+            // LayerTogglePanel
+            // 
+            LayerTogglePanel.Location = new System.Drawing.Point(1541, 113);
+            LayerTogglePanel.Name = "LayerTogglePanel";
+            LayerTogglePanel.Size = new Size(351, 365);
+            LayerTogglePanel.TabIndex = 17;
             // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(LayerTogglePanel);
             Controls.Add(ImportHeightmapButton);
             Controls.Add(loading_spinner_box);
             Controls.Add(progressBar1);
@@ -210,14 +199,10 @@ namespace WinFormsApp1
             Controls.Add(numericRiverSpacingX);
             Controls.Add(genManyRiverButton);
             Controls.Add(genFlowButton);
-            Controls.Add(riverPictureBox);
-            Controls.Add(flowPicturBox);
             Controls.Add(heightPictureBox);
             Name = "MainWindow";
             Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).EndInit();
-            ((System.ComponentModel.ISupportInitialize)flowPicturBox).EndInit();
-            ((System.ComponentModel.ISupportInitialize)riverPictureBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).EndInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).EndInit();
@@ -228,8 +213,6 @@ namespace WinFormsApp1
         #endregion
 
         private PictureBox heightPictureBox;
-        private PictureBox flowPicturBox;
-        private PictureBox riverPictureBox;
         private Button genFlowButton;
         private Button genManyRiverButton;
         private NumericUpDown numericRiverSpacingX;
@@ -242,5 +225,6 @@ namespace WinFormsApp1
         private ProgressBar progressBar1;
         private PictureBox loading_spinner_box;
         private Button ImportHeightmapButton;
+        private FlowLayoutPanel LayerTogglePanel;
     }
 }
