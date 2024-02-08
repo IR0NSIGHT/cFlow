@@ -1,9 +1,6 @@
 ﻿using application.Maps;
 using SkiaSharp;
-using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using System.Threading;
 
 public class SimpleFlowMap : IFlowMap
 {
