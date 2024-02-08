@@ -52,12 +52,16 @@ namespace WinFormsApp1
             maxLakeDepthInfoLabel = new Label();
             maxLakeDepthNumeric = new NumericUpDown();
             maxLakeDepthText = new Label();
+            label3 = new Label();
+            riverSplitProbInfo = new Label();
+            riverSplitProbNumeric = new NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).BeginInit();
             ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).BeginInit();
             ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)riverSplitProbNumeric).BeginInit();
             SuspendLayout();
             // 
             // heightPictureBox
@@ -257,11 +261,43 @@ namespace WinFormsApp1
             maxLakeDepthText.TabIndex = 24;
             maxLakeDepthText.Text = "m";
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(1762, 610);
+            label3.Name = "label3";
+            label3.Size = new Size(119, 30);
+            label3.TabIndex = 27;
+            label3.Text = "blocks between splits\r\non average";
+            label3.Click += label3_Click;
+            // 
+            // riverSplitProbInfo
+            // 
+            riverSplitProbInfo.AutoSize = true;
+            riverSplitProbInfo.Location = new System.Drawing.Point(1707, 590);
+            riverSplitProbInfo.Name = "riverSplitProbInfo";
+            riverSplitProbInfo.Size = new Size(118, 15);
+            riverSplitProbInfo.TabIndex = 26;
+            riverSplitProbInfo.Text = "River split probability";
+            // 
+            // riverSplitProbNumeric
+            // 
+            riverSplitProbNumeric.Location = new System.Drawing.Point(1707, 608);
+            riverSplitProbNumeric.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            riverSplitProbNumeric.Minimum = -1;
+            riverSplitProbNumeric.Name = "riverSplitProbNumeric";
+            riverSplitProbNumeric.Size = new Size(49, 23);
+            riverSplitProbNumeric.TabIndex = 25;
+            riverSplitProbNumeric.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(label3);
+            Controls.Add(riverSplitProbInfo);
+            Controls.Add(riverSplitProbNumeric);
             Controls.Add(maxLakeDepthText);
             Controls.Add(maxLakeDepthInfoLabel);
             Controls.Add(maxLakeDepthNumeric);
@@ -291,6 +327,7 @@ namespace WinFormsApp1
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).EndInit();
             ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).EndInit();
             ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).EndInit();
+            ((System.ComponentModel.ISupportInitialize)riverSplitProbNumeric).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -319,5 +356,8 @@ namespace WinFormsApp1
         private Label maxLakeDepthInfoLabel;
         private NumericUpDown maxLakeDepthNumeric;
         private Label maxLakeDepthText;
+        private Label label3;
+        private Label riverSplitProbInfo;
+        private NumericUpDown riverSplitProbNumeric;
     }
 }

@@ -32,6 +32,8 @@ namespace WinFormsApp1
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
 
+            riverSplitProbNumeric.ValueChanged += OnRiverSplitProbNumericChanged;
+
             maxLakeDepthNumeric.ValueChanged += maxLakeDepthNumericChanged;
             maxLakeSurfaceNumeric.ValueChanged += maxLakeSurfaceNumericChanged;
 
@@ -39,6 +41,15 @@ namespace WinFormsApp1
             heightPictureBox.Click += handleMouseClickOnMap;
 
             BuildLayerToggleButtons();
+        }
+
+        private int riverSplitProbability = 10;
+        private void OnRiverSplitProbNumericChanged(object? sender, EventArgs e)
+        {
+            if (sender is NumericUpDown n)
+            {
+                this.riverSplitProbability = decimal.ToInt32(n.Value);
+            }
         }
 
         private void OnLayerToggled(object? sender, EventArgs e)
@@ -224,14 +235,14 @@ namespace WinFormsApp1
         {
             if (!doUse)
                 return;
-            channel.RequestRiverChange(new RiverChangeRequestEventArgs(mapPos, RiverChangeType.Add));
+            channel.RequestRiverChange(new RiverChangeRequestEventArgs(mapPos, RiverChangeType.Add){ splitEveryXBlocks = riverSplitProbability });
         }
 
         private void handleFloodAreaOnMap((int x, int y) mapPos, bool doUse)
         {
             if (!doUse)
                 return;
-            channel.RequestFloodChange(new FloodChangeRequestEventArgs(mapPos, FloodChangeType.Add){MaxDepth = this.maxLakeDepth, MaxSurface = this.maxLakeSurface*this.maxLakeSurface});
+            channel.RequestFloodChange(new FloodChangeRequestEventArgs(mapPos, FloodChangeType.Add) { MaxDepth = this.maxLakeDepth, MaxSurface = this.maxLakeSurface * this.maxLakeSurface });
         }
 
         private (int x, int y) riverSpacing = (10, 10);
@@ -245,7 +256,7 @@ namespace WinFormsApp1
         private void maxLakeSurfaceNumericChanged(object? sender, EventArgs e)
         {
             if (sender is NumericUpDown numeric)
-            maxLakeSurface = decimal.ToInt32(numeric.Value);
+                maxLakeSurface = decimal.ToInt32(numeric.Value);
             maxLakeSurfaceLabel.Text = $"x {maxLakeSurface} m";
         }
         private int maxLakeDepth = 10;
@@ -320,6 +331,11 @@ namespace WinFormsApp1
             {
                 b.BackColor = floodToolActive ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
             }
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
