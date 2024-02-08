@@ -30,7 +30,7 @@ namespace cFlowAPI.Maps.riverMap
                 }
 
                 var (outerMost, found, exceeded) = 
-                    collectPlaneAtOrBelow(currentOuterMost, maxZ, lakeMap,100000);
+                    collectPlaneAtOrBelow(currentOuterMost, maxZ, p => lakeMap.isMarked(p.x,p.y),100000);
                 if (!exceeded)
                 {
                     currentOuterMost = outerMost;
@@ -72,7 +72,7 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="maxZ"></param>
         /// <param name="maxSurfaceBeforeExceeded">lenght of border ring before aborting search, disable with -1 (default)</param>
         /// <returns></returns>
-        public (List<(int x, int y)> outerMostRing, BooleanMap seen, bool exceededMax) collectPlaneAtOrBelow(List<(int x, int y)> startingPositions, int maxZ, BooleanMap ignored, int maxSurfaceBeforeExceeded = -1)
+        public (List<(int x, int y)> outerMostRing, BooleanMap seen, bool exceededMax) collectPlaneAtOrBelow(List<(int x, int y)> startingPositions, int maxZ, Func<(int x, int y), bool> isIgnoredPoint, int maxSurfaceBeforeExceeded = -1)
         {
             BooleanMap seenMap = new BooleanMap(_heightMap.Bounds());
             Func<(int x, int y), bool> isBelowZ = pos =>
@@ -88,7 +88,7 @@ namespace cFlowAPI.Maps.riverMap
 
             while (true)
             {
-                var nextRing = GetTouchingUnseen(nextPositions, isBelowZ, seenMap, ignored);
+                var nextRing = GetTouchingUnseen(nextPositions, isBelowZ, seenMap, isIgnoredPoint);
                 //ring has found everything, nothing more to do
                 if (nextRing.Count == 0)
                     break;
@@ -117,7 +117,7 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="isBelowEqualZ"></param>
         /// <param name="seenMap"></param>
         /// <returns></returns>
-        private static List<(int x, int y)> GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isBelowEqualZ, BooleanMap seenMap, BooleanMap ignored)
+        private static List<(int x, int y)> GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isBelowEqualZ, BooleanMap seenMap, Func<(int x, int y), bool> isIgnoredPoint)
         {
             List<(int x, int y)> nextPositions = new List<(int x, int y)>();
             foreach (var origin in startingPositions)
@@ -125,7 +125,7 @@ namespace cFlowAPI.Maps.riverMap
                 var neighbours = new (int x, int y)[] { Up(origin), Left(origin), Right(origin), Down(origin) };
                 foreach (var neighbour in neighbours)
                 {
-                    if (seenMap.inBounds(neighbour.x, neighbour.y) && !seenMap.isMarked(neighbour.x, neighbour.y) && !ignored.isMarked(neighbour.x, neighbour.y) && isBelowEqualZ(neighbour))
+                    if (seenMap.inBounds(neighbour.x, neighbour.y) && !seenMap.isMarked(neighbour.x, neighbour.y) && !isIgnoredPoint(neighbour) && isBelowEqualZ(neighbour))
                     {
                         seenMap.setMarked(neighbour.x, neighbour.y);
                         nextPositions.Add(neighbour);

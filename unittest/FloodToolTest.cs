@@ -1,4 +1,6 @@
-﻿namespace unittest
+﻿using application.Maps;
+
+namespace unittest
 {
     [TestFixture]
     public class FloodToolTest
@@ -32,7 +34,7 @@
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
-                17
+                17, p => false
                 );
 
             Assert.That(exceeded, Is.False);
@@ -71,7 +73,7 @@
             *   h h h h
             *   h l l h
             *   h h h h
-            */ 
+            */
 
 
             IHeightMap heightMap = new DummyDimension((50, 50), 74);
@@ -84,7 +86,8 @@
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
-                34  //not z of bottom plain, but higher but still below rest of map
+                34,  //not z of bottom plain, but higher but still below rest of map,
+                p => false
                 );
 
             Assert.That(exceeded, Is.False);
@@ -138,15 +141,16 @@
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
-                new List<(int x, int y)> { (0,0) },
-                74  //map is all 74 or lower => flood all
+                new List<(int x, int y)> { (0, 0) },
+                74, //map is all 74 or lower => flood all
+                p => false
                 );
 
             Assert.That(exceeded, Is.False);
             //all points on map were flooded
             foreach (var point in heightMap.iterator().Points())
             {
-                  Assert.That(seenMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
+                Assert.That(seenMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
             }
 
             //no border exists, map is flooded
@@ -177,6 +181,7 @@
             var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25,25) },
                 74,  
+                p => false,
                 13
                 );
 
