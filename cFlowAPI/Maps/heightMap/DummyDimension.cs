@@ -45,4 +45,16 @@
     {
         return _iterator;
     }
+
+    public static bool hasLowerNeighbours((int X, int Y) p, IHeightMap heightMap)
+    {
+        short height = heightMap.GetHeight(p);
+        bool safeBounds = SimpleFlowMap.insideReducedBounds((p.X, p.Y), heightMap.Bounds());
+        return (
+            SimpleFlowMap.isLowerThan(Point.Left(p), heightMap, height, safeBounds) ||
+            SimpleFlowMap.isLowerThan(Point.Right(p), heightMap, height, safeBounds) ||
+            SimpleFlowMap.isLowerThan(Point.Up(p), heightMap, height, safeBounds) ||
+            SimpleFlowMap.isLowerThan(Point.Down(p), heightMap, height, safeBounds));
+
+    }
 }

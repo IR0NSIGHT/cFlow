@@ -7,6 +7,7 @@ public class SimpleFlowMap : IFlowMap
     private IFlowMap.Flow[][] flowMap;
     private int[][] cycleMap;
 
+   
     public SimpleFlowMap((int x, int y) dimension)
     {
         flowMap = emptyFlowMap(dimension);
@@ -121,7 +122,7 @@ public class SimpleFlowMap : IFlowMap
         return (false, defaultF);
     }
 
-    private static bool insideReducedBounds((int x, int y) pos, (int x, int y) dims)
+    public static bool insideReducedBounds((int x, int y) pos, (int x, int y) dims)
     {
         var positive = pos.x - 1 >= 0 && pos.y - 1 >= 0;
         var negative = pos.x + 1 < dims.x && pos.y + 1 < dims.y;
@@ -298,7 +299,7 @@ public class SimpleFlowMap : IFlowMap
         return bitmap;
     }
 
-    private static bool isLowerThan((int x, int y) pos, IHeightMap heightMap, short height, bool safeBounds)
+    public static bool isLowerThan((int x, int y) pos, IHeightMap heightMap, short height, bool safeBounds)
     {
         return (safeBounds || heightMap.inBounds(pos.x, pos.y)) && heightMap.GetHeight(pos) < height;
     }
