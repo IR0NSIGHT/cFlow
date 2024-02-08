@@ -79,7 +79,7 @@ public class Backend
             }
             FireLoadingEvent(true);
 
-            heightmapApi.RiverMap.AddRiverFrom(e.pos);
+            heightmapApi.RiverMap.AddRiverFrom(e.pos);  //TODO use branching probability
             backendChannel.RaiseRivermapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage()), MapType.RiverMap));
             FireLoadingEvent(false);
         }
