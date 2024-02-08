@@ -46,10 +46,18 @@ namespace WinFormsApp1
             ImportHeightmapButton = new Button();
             LayerTogglePanel = new FlowLayoutPanel();
             button_toogle_floodTool = new Button();
+            maxLakeSurfaceInfo = new Label();
+            maxLakeSurfaceNumeric = new NumericUpDown();
+            maxLakeSurfaceLabel = new Label();
+            maxLakeDepthInfoLabel = new Label();
+            maxLakeDepthNumeric = new NumericUpDown();
+            maxLakeDepthText = new Label();
             ((System.ComponentModel.ISupportInitialize)heightPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).BeginInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).BeginInit();
             SuspendLayout();
             // 
             // heightPictureBox
@@ -193,11 +201,73 @@ namespace WinFormsApp1
             button_toogle_floodTool.UseVisualStyleBackColor = false;
             button_toogle_floodTool.Click += OnToggleFloodToolButtonClick;
             // 
+            // maxLakeSurfaceInfo
+            // 
+            maxLakeSurfaceInfo.AutoSize = true;
+            maxLakeSurfaceInfo.Location = new System.Drawing.Point(1707, 686);
+            maxLakeSurfaceInfo.Name = "maxLakeSurfaceInfo";
+            maxLakeSurfaceInfo.Size = new Size(95, 15);
+            maxLakeSurfaceInfo.TabIndex = 20;
+            maxLakeSurfaceInfo.Text = "max lake surface";
+            // 
+            // maxLakeSurfaceNumeric
+            // 
+            maxLakeSurfaceNumeric.Location = new System.Drawing.Point(1707, 704);
+            maxLakeSurfaceNumeric.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            maxLakeSurfaceNumeric.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            maxLakeSurfaceNumeric.Name = "maxLakeSurfaceNumeric";
+            maxLakeSurfaceNumeric.Size = new Size(49, 23);
+            maxLakeSurfaceNumeric.TabIndex = 19;
+            maxLakeSurfaceNumeric.Value = new decimal(new int[] { 100, 0, 0, 0 });
+            // 
+            // maxLakeSurfaceLabel
+            // 
+            maxLakeSurfaceLabel.AutoSize = true;
+            maxLakeSurfaceLabel.Location = new System.Drawing.Point(1762, 706);
+            maxLakeSurfaceLabel.Name = "maxLakeSurfaceLabel";
+            maxLakeSurfaceLabel.Size = new Size(48, 15);
+            maxLakeSurfaceLabel.TabIndex = 21;
+            maxLakeSurfaceLabel.Text = "x 100 m";
+            // 
+            // maxLakeDepthInfoLabel
+            // 
+            maxLakeDepthInfoLabel.AutoSize = true;
+            maxLakeDepthInfoLabel.Location = new System.Drawing.Point(1707, 735);
+            maxLakeDepthInfoLabel.Name = "maxLakeDepthInfoLabel";
+            maxLakeDepthInfoLabel.Size = new Size(88, 15);
+            maxLakeDepthInfoLabel.TabIndex = 23;
+            maxLakeDepthInfoLabel.Text = "max lake depth";
+            // 
+            // maxLakeDepthNumeric
+            // 
+            maxLakeDepthNumeric.Location = new System.Drawing.Point(1707, 753);
+            maxLakeDepthNumeric.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            maxLakeDepthNumeric.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            maxLakeDepthNumeric.Name = "maxLakeDepthNumeric";
+            maxLakeDepthNumeric.Size = new Size(49, 23);
+            maxLakeDepthNumeric.TabIndex = 22;
+            maxLakeDepthNumeric.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            // 
+            // maxLakeDepthText
+            // 
+            maxLakeDepthText.AutoSize = true;
+            maxLakeDepthText.Location = new System.Drawing.Point(1762, 755);
+            maxLakeDepthText.Name = "maxLakeDepthText";
+            maxLakeDepthText.Size = new Size(18, 15);
+            maxLakeDepthText.TabIndex = 24;
+            maxLakeDepthText.Text = "m";
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1904, 1041);
+            Controls.Add(maxLakeDepthText);
+            Controls.Add(maxLakeDepthInfoLabel);
+            Controls.Add(maxLakeDepthNumeric);
+            Controls.Add(maxLakeSurfaceLabel);
+            Controls.Add(maxLakeSurfaceInfo);
+            Controls.Add(maxLakeSurfaceNumeric);
             Controls.Add(button_toogle_floodTool);
             Controls.Add(LayerTogglePanel);
             Controls.Add(ImportHeightmapButton);
@@ -219,6 +289,8 @@ namespace WinFormsApp1
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingX).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericRiverSpacingY).EndInit();
             ((System.ComponentModel.ISupportInitialize)loading_spinner_box).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeSurfaceNumeric).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxLakeDepthNumeric).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -240,5 +312,12 @@ namespace WinFormsApp1
         private Button ImportHeightmapButton;
         private FlowLayoutPanel LayerTogglePanel;
         private Button button_toogle_floodTool;
+        private Label maxLakeSurfaceInfo;
+        private NumericUpDown maxLakeSurfaceNumeric;
+        private Label maxLakeSurfaceLabel;
+        private Label label1;
+        private Label maxLakeDepthInfoLabel;
+        private NumericUpDown maxLakeDepthNumeric;
+        private Label maxLakeDepthText;
     }
 }

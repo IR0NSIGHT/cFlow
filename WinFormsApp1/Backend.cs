@@ -95,7 +95,12 @@ public class Backend
             }
             FireLoadingEvent(true);
 
-            new FloodTool(heightmapApi.Heightmap).FloodArea(e.pos, heightmapApi.RiverMap);
+            new FloodTool(heightmapApi.Heightmap).FloodArea(
+                e.pos, 
+                heightmapApi.RiverMap,
+                e.MaxDepth,
+                e.MaxSurface
+                );
 
             backendChannel.RaiseRivermapChanged(new ImageEventArgs(SkiaSharp.Views.Desktop.Extensions.ToBitmap(heightmapApi.RiverMap.ToImage()), MapType.RiverMap));
             FireLoadingEvent(false);

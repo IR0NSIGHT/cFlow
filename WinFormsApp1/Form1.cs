@@ -32,6 +32,9 @@ namespace WinFormsApp1
             numericRiverSpacingX.ValueChanged += riverSpacingNumericChanged;
             numericRiverSpacingY.ValueChanged += riverSpacingNumericChanged;
 
+            maxLakeDepthNumeric.ValueChanged += maxLakeDepthNumericChanged;
+            maxLakeSurfaceNumeric.ValueChanged += maxLakeSurfaceNumericChanged;
+
             genManyRiverButton.Click += OnGenerateMassRiverButton;
             heightPictureBox.Click += handleMouseClickOnMap;
 
@@ -228,7 +231,7 @@ namespace WinFormsApp1
         {
             if (!doUse)
                 return;
-            channel.RequestFloodChange(new FloodChangeRequestEventArgs(mapPos, FloodChangeType.Add));
+            channel.RequestFloodChange(new FloodChangeRequestEventArgs(mapPos, FloodChangeType.Add){MaxDepth = this.maxLakeDepth, MaxSurface = this.maxLakeSurface*this.maxLakeSurface});
         }
 
         private (int x, int y) riverSpacing = (10, 10);
@@ -237,6 +240,20 @@ namespace WinFormsApp1
         {
             riverSpacing = (decimal.ToInt32(numericRiverSpacingX.Value), decimal.ToInt32(numericRiverSpacingY.Value));
         }
+
+        private int maxLakeSurface = 100;
+        private void maxLakeSurfaceNumericChanged(object? sender, EventArgs e)
+        {
+            if (sender is NumericUpDown numeric)
+            maxLakeSurface = decimal.ToInt32(numeric.Value);
+            maxLakeSurfaceLabel.Text = $"x {maxLakeSurface} m";
+        }
+        private int maxLakeDepth = 10;
+        private void maxLakeDepthNumericChanged(object? sender, EventArgs e)
+        {
+            maxLakeDepth = decimal.ToInt32(numericRiverSpacingX.Value);
+        }
+
 
         private bool riverToolActive = false;
         private void OnSpawnRiverButtonClick(object sender, EventArgs e)
