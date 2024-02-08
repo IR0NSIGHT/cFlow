@@ -1,4 +1,5 @@
 ﻿using application.Maps;
+using src.Maps.riverMap;
 
 namespace unittest
 {
@@ -186,6 +187,61 @@ namespace unittest
                 );
 
             Assert.That(exceeded, Is.True);
+        }
+
+        [Test]
+        public void ExceededMultiLevelLake()
+        {
+            /** high/medium/low map sketch
+            *   h h h h h
+            *   h m m m h
+            *   h m l m h
+             *  h m m m h
+             *  h h h h h
+            */
+
+
+            IHeightMap heightMap = new DummyDimension((1000, 1000), 74);
+            (int x, int y) rectStart = (30, 20);
+            (int x, int y) rectEnd = (40, 30);
+
+            //make a large hole: 100x100 size
+            foreach (var point in iterateRect((10, 10), (110, 110)))
+            {
+                heightMap.SetHeight(point, 25);
+            }
+
+            //make hole in the middle: 10x10 size
+            foreach (var point in iterateRect(rectStart, rectEnd))
+                heightMap.SetHeight(point, 17);
+
+
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var riverMap = new RiverMap(new SimpleFlowMap(heightMap.Bounds()), heightMap);
+            flood.FloodArea(
+                (35, 25),
+                riverMap, 
+                100,
+                500 //big enough for small hole, to small for middle hole
+                );
+
+            bool IsInHole((int x, int y) p) => isInRect(p, rectStart, rectEnd);
+
+            //check that map was correctly marked
+            foreach (var point in heightMap.iterator().Points())
+            {
+                if (IsInHole(point))
+                {
+                    Assert.That(riverMap.IsRiver(point.x, point.y), Is.True);
+                }
+                else
+                {
+                    Assert.That(riverMap.IsRiver(point.x, point.y), Is.False, $"incorreclty marked point: {point}");
+                }
+            }
+
+            bool IsHoleEdge((int x, int y) p) => IsInHole(p) && !isInRect(p, (rectStart.x + 1, rectStart.y + 1), (rectEnd.x - 1, rectEnd.y - 1));
         }
     }
 }
