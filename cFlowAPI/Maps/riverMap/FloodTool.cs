@@ -13,10 +13,9 @@ namespace cFlowAPI.Maps.riverMap
             _heightMap = heightMap;
         }
 
-        public void FloodArea((int x, int y) start, RiverMap targetRiverMap)
+        public void FloodArea((int x, int y) start, RiverMap targetRiverMap, int maxDepth = 10, int maxSurfaceBeforeExceeded = 100000)
         {
             int startZ = _heightMap.GetHeight(start);
-            int maxDepth = 10;
 
             var lakeMap = new BooleanMap(targetRiverMap.Bounds());
             List<(int x, int y)> currentOuterMost = [start];
@@ -30,7 +29,7 @@ namespace cFlowAPI.Maps.riverMap
                 }
 
                 var (outerMost, found, exceeded) = 
-                    collectPlaneAtOrBelow(currentOuterMost, maxZ, p => lakeMap.isMarked(p.x,p.y),100000);
+                    collectPlaneAtOrBelow(currentOuterMost, maxZ, p => lakeMap.isMarked(p.x,p.y),maxSurfaceBeforeExceeded);
                 if (!exceeded)
                 {
                     currentOuterMost = outerMost;
