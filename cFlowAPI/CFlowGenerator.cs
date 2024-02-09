@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using System.Diagnostics;
+using SkiaSharp;
 using src.Maps.riverMap;
 using System.Text;
 using application.Maps.flowMap;
@@ -30,7 +31,12 @@ namespace cFlowApi
         
         public void GenerateFlow()
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            _flowMap = new DistanceMap(Heightmap);
             _flowMap.CalculateFromHeightmap();
+            stopwatch.Stop();
+            Debug.WriteLine(stopwatch.ElapsedMilliseconds);
             //TODO: image
             _flowmapImgColored = _flowMap.ToCycleImage();
             //_flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);

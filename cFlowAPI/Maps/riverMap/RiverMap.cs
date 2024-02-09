@@ -1,4 +1,5 @@
-﻿using application.Maps.flowMap;
+﻿using System.Diagnostics;
+using application.Maps.flowMap;
 using cFlowAPI.Maps.riverMap;
 using SkiaSharp;
 
@@ -68,6 +69,10 @@ namespace src.Maps.riverMap
                 }
                 start = next[0];
                 stopped = stop;
+                if (stop)
+                {
+                    Debug.WriteLine("owo");
+                }
             }
 
             //FIXME smart way to escape flooded area an continue river

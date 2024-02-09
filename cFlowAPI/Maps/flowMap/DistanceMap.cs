@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using SkiaSharp;
+using Xamarin.Forms.Internals;
 
 namespace application.Maps.flowMap;
 
@@ -14,9 +15,9 @@ public class DistanceMap : Map2d
     /// <param name="XOffset"></param>
     /// <param name="YOffset"></param>
     /// <param name="DistanceSquared"></param>
-    public record struct DistancePoint(short XOffset, short YOffset, bool isSet)
+    public record struct DistancePoint(int distance, bool isSet)
     {
-        public int DistanceSquared => (XOffset * XOffset + YOffset * YOffset);
+        public int DistanceSquared => distance;
     }
 
     private DistancePoint[][] distanceMap;
@@ -43,7 +44,7 @@ public class DistanceMap : Map2d
         foreach (var point in heightMap.iterator().Points())
         {
             if (DummyDimension.hasLowerNeighbours(point, heightMap))
-                outList.Add((point, new DistancePoint(0, 0, true)));
+                outList.Add((point, new DistancePoint(10,true)));
         }
         return outList;
     }
@@ -53,85 +54,37 @@ public class DistanceMap : Map2d
         if (heightMap.Bounds() != Bounds())
             throw new Exception("illegal size given");
 
-        var origins = MarkNaturalEdges();
-        foreach (var origin in origins)
+        var queue = new SortedQueue();
+        var edges = MarkNaturalEdges();
+        foreach (var origin in edges)
         {
-            SetDistanceToEdge(origin.point, origin.distance);
+            queue.TryInsert(origin.point, origin.distance.distance);
         }
-        while (origins.Count != 0)
+        while (!queue.isEmpty())
         {
-            origins = ExpandDistancesFor(origins);
-        }
-    }
+            var current = queue.Take();
+            if (IsSet(current.point))
+                throw new Exception("uwuw");
+            SetDistanceToEdge(current.point, new DistancePoint(){ distance = current.value, isSet = true});
+            var currentHeight = heightMap.GetHeight(current.point);
 
-
-    /// <summary>
-    /// calculate distances for the neighbours of points
-    /// </summary>
-    public List<((int x, int y) point, DistancePoint distance)> ExpandDistancesFor(List<((int x, int y) point, DistancePoint distance)> points)
-    {
-        var outList = new ((int x, int y) point, DistancePoint distance)[points.Count * 4];
-        int outIdx = 0;
-        foreach (var origin in points)
-        {
-            var ns = GetNeighbourDistances(origin.point, origin.distance);
-            var originHeight = heightMap.GetHeight(origin.point);
-            foreach (var n in ns)
+            var filter = ((int x, int y) p) =>
             {
-                // we only care about higher/equal neighbours => those flow towards us
-                if (heightMap.GetHeight(n.point) < originHeight)
-                    continue;
-                var existinValue = GetDistanceOf(n.point);
+                return inBounds(p.x, p.y) && !IsSet(p) && heightMap.GetHeight(p) >= currentHeight;
+            };
 
-                //found a better value for this point
-                if (existinValue.isSet && existinValue.DistanceSquared > n.distance.DistanceSquared)
-                {
-                    //overwrite point/distance in outList
-                    for (int i = 0; i < outList.Length; i++)
-                    {
-                        var entry = outList[i];
-                        if (entry.point == n.point)
-                        {
-                            entry.distance = n.distance;
-                            outList[i] = entry;
-                            break;
-                        }
-                    }
-                    SetDistanceToEdge(n.point,n.distance);
-                }
-                else if (!existinValue.isSet)
-                {
-                    SetDistanceToEdge(n.point, n.distance);
-                    outList[outIdx++] = n;
-                }
+            Point.Neighbours(current.point)
+                .Where(filter)
+                .Select(n => (n, current.value + 10))
+                .ForEach(x => queue.TryInsert(x.n, x.Item2));
 
-
-            }
+            Point.Diagonal(current.point)
+                .Where(filter)
+                .Select(n => (n, current.value + 14))
+                .ForEach(x => queue.TryInsert(x.n, x.Item2));
         }
-        Array.Resize(ref outList, outIdx);
-        return outList .ToList();
     }
 
-    private List<((int x, int y) point, DistancePoint distance)> GetNeighbourDistances(
-        (int x, int y) origin, DistancePoint originDistance)
-    {
-        var outList =
-            new List<((int x, int y) point, DistancePoint distance)>();
-        foreach (var n in Point.Neighbours(origin))
-        {
-            if (inBounds(n.x, n.y))
-            {
-                var delta = (n.x - origin.x, n.y - origin.y);
-                var offset = ((short)(originDistance.XOffset + delta.Item1), (short)(originDistance.YOffset + delta.Item2));
-                outList.Add((
-                    n,
-                    new DistancePoint(
-                        offset.Item1,
-                        offset.Item2, true)));
-            }
-        }
-        return outList;
-    }
 
     public bool IsSet((int x, int y) point)
     {
@@ -152,14 +105,10 @@ public class DistanceMap : Map2d
             {
                 var dist = (byte)((Math.Sqrt(origin.DistanceSquared) % 25) * 10);
                 bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
-                if (dist > max)
-                    max = dist;
-                if (points.x == 0)
-                    Debug.WriteLine($"distance: {points} = {dist}");
             }
             else
             {
-                bitmap.SetPixel(points.x, points.y,  new SKColor(255,0,0));
+                bitmap.SetPixel(points.x, points.y, new SKColor(255, 0, 0));
             }
 
 
@@ -171,15 +120,20 @@ public class DistanceMap : Map2d
     public List<(int x, int y)> FlowFrom((int x, int y) point)
     {
         var pointDistance = GetDistanceOf(point).DistanceSquared;
+        var pointHeight = heightMap.GetHeight(point);
         List<(int x, int y)> outList = new();
-        foreach (var n in Point.Neighbours(point))
+        var ns = Point.Neighbours(point);
+        var accepted = ns.Where(n => inBounds(n.x, n.y))
+            .Where(n => heightMap.GetHeight(n) <= pointHeight)
+            .Where(n => GetDistanceOf(n).DistanceSquared < pointDistance)
+            .ToList();
+        if (accepted.Count == 0)
         {
-            if (inBounds(n.x, n.y) && GetDistanceOf(n).DistanceSquared < pointDistance)
-            {
-                outList.Add(n);
-            }
+            var debugList = ns.Select(n => (n, heightMap.GetHeight(n), GetDistanceOf(n).distance)).ToList();
+            Debug.WriteLine("on no");
+
         }
-        return outList;
+        return accepted.ToList();
     }
 
     public void SetDistanceToEdge((int x, int y) point, DistancePoint distance)
@@ -189,7 +143,8 @@ public class DistanceMap : Map2d
 
     public DistancePoint GetDistanceOf((int x, int y) point)
     {
-        return distanceMap[point.x][point.y];
+        var val = distanceMap[point.x][point.y];
+        return val;
     }
 
     public (int x, int y) Bounds()

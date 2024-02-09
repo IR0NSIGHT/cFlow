@@ -6,38 +6,6 @@ namespace unittest;
 public class DistanceMapTest
 {
     [Test]
-    public void CollectNextIteration()
-    {
-
-        var dMap = new DistanceMap(new DummyDimension((10, 10), 0));
-        var origins = new List<((int, int) point, DistanceMap.DistancePoint distance)>
-        {
-            ((3, 5), new DistanceMap.DistancePoint(0,0, true)),
-            ((7, 8), new DistanceMap.DistancePoint(0,0, true))
-        };
-        dMap.SetDistanceToEdge(origins[0].point, origins[0].distance);
-        dMap.SetDistanceToEdge(origins[1].point, origins[1].distance);
-
-        var firstLayer = dMap.ExpandDistancesFor(origins);
-        var shouldBe = new List<(int, int)>();
-        shouldBe.AddRange(Point.Neighbours((3, 5)));
-        shouldBe.AddRange(Point.Neighbours((7, 8)));
-        foreach (var tuple in firstLayer)
-        {
-            Assert.That(shouldBe.Contains(tuple.point), Is.True, $"point {tuple} not in list");
-            Assert.That(tuple.distance.DistanceSquared, Is.EqualTo(1));
-        }
-
-        var secondLayer = dMap.ExpandDistancesFor(firstLayer);
-        foreach (var tuple in secondLayer)
-        {
-            Assert.That(origins.Contains(tuple), Is.False, $"point was logged twice {tuple}");
-            Assert.That(shouldBe.Contains(tuple.point), Is.False, $"point {tuple} logged twice");
-            Assert.That(tuple.distance.DistanceSquared, Is.EqualTo(2).Or.EqualTo(4));
-        }
-    }
-
-    [Test]
     public void ApplyFromHeightmap()
     {
         var hMap = new DummyDimension((5, 5), 7);
@@ -47,11 +15,11 @@ public class DistanceMapTest
 
         short[][] shouldBe =
         {
-            [5, 2, 1, 2, 5],
-            [2, 1, 0, 1, 2],
-            [1, 0, 0, 0, 1],    //hole in middle at  2,2
-            [2, 1, 0, 1, 2],
-            [5, 2, 1, 2, 5]
+            [24, 14, 10, 14, 24],
+            [14, 10, 0, 10, 14],
+            [10, 0, 0, 0, 10],    //hole in middle at  14,14
+            [14, 10, 0, 10, 14],
+            [24, 14, 10, 14, 24]
         };
         Assert.That(dMap.IsSet((2, 2)), Is.False);
         foreach (var point in dMap.iterator().Points())

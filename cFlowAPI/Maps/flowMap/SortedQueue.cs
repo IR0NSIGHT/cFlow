@@ -4,15 +4,20 @@ namespace application.Maps.flowMap;
 
 public class SortedQueue
 {
-    SortedSet<listEntry> sortedUniqueList = new(new ListEntryComparer());
+    private List<listEntry> sortedList = new();
+    private HashSet<(int x, int y)> knowPoints = new();
 
     public struct listEntry
     {
         public int value;
-        public (int  x, int y) point;
+        public (int x, int y) point;
 
+        public override string ToString()
+        {
+            return $"{point}:{value}";
+        }
     }
-    
+
     /// <summary>
     /// will insert if: point is unknown OR point is know with a higher value
     /// list is guaranteed unique on point coords
@@ -22,35 +27,40 @@ public class SortedQueue
     public void TryInsert((int x, int y) point, int value)
     {
         var newEntry = new listEntry() { point = point, value = value };
-
-        var existingValue = new listEntry();
-        var exists = sortedUniqueList.TryGetValue(newEntry, out existingValue);
-        if (exists && existingValue.value > newEntry.value)
+        var existingValue = GetValue(point);
+        if (existingValue.value == -1)
         {
-            //overwrite existng value with lower value
-            sortedUniqueList.Remove(existingValue);
-            sortedUniqueList.Add(newEntry); 
-        } else if (!exists)
+            sortedList.Add(new listEntry() { point = point, value = value });
+            knowPoints.Add(point);
+            sortedList.Sort((a, b) => a.value.CompareTo(b.value));
+        }
+        else if (existingValue.value > newEntry.value)
         {
-            //add new value
-            sortedUniqueList.Add(newEntry);
+            //overwrite existng value with lower value / or insert new value
+            sortedList.Remove(existingValue);
+            sortedList.Add(new listEntry() { point = point, value = value });
+            sortedList.Sort((a, b) => a.value.CompareTo(b.value));
         }
     }
 
-    public listEntry Get((int x, int y) point)
+    public listEntry GetValue((int x, int y) point)
     {
-        var outV = new listEntry();
-        var equalPoint = new listEntry() { point = point };
-        var success = sortedUniqueList.TryGetValue(equalPoint, out outV);
-        return outV;
+        if (knowPoints.Contains(point))
+            return sortedList.Find(p => p.point == point);
+        else
+            return new listEntry() { value = -1 };
     }
 
+    public bool isEmpty()
+    {
+        return sortedList.Count == 0;
+    }
 
 
     public ((int x, int y) point, int value) Take()
     {
-        var outV = sortedUniqueList.Min;
-        sortedUniqueList.Remove(outV);
+        var outV = sortedList[0];
+        sortedList.Remove(outV);
         return (outV.point, outV.value);
     }
 }
