@@ -63,8 +63,6 @@ public class DistanceMap : Map2d
         while (!queue.isEmpty())
         {
             var current = queue.Take();
-            if (IsSet(current.point))
-                continue;
             SetDistanceToEdge(current.point, new DistancePoint(){ distance = current.value, isSet = true});
             var currentHeight = heightMap.GetHeight(current.point);
 
@@ -82,6 +80,13 @@ public class DistanceMap : Map2d
                 .Where(filter)
                 .Select(n => (n, current.value + 14))
                 .ForEach(x => queue.TryInsert(x.n, x.Item2));
+        }
+
+        foreach (var point in iterator().Points())
+        {
+            var d = GetDistanceOf(point);
+            if ((IsSet(point) && d.distance == 0))
+                Debug.WriteLine(":(");
         }
     }
 
@@ -103,15 +108,13 @@ public class DistanceMap : Map2d
             var origin = GetDistanceOf(points);
             if (origin.isSet)
             {
-                var dist = (byte)((origin.DistanceSquared % 25) * 10);
+                var dist = (byte)((origin.DistanceSquared));
                 bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
             }
             else
             {
                 bitmap.SetPixel(points.x, points.y, new SKColor(255, 0, 0));
             }
-
-
         }
 
         return bitmap;
@@ -129,7 +132,9 @@ public class DistanceMap : Map2d
             .ToList();
         if (accepted.Count == 0)
         {
-            var debugList = ns.Select(n => (n, heightMap.GetHeight(n), GetDistanceOf(n).distance)).ToList();
+            var debugList = ns.Select(n => 
+                (n, heightMap.GetHeight(n), GetDistanceOf(n).distance))
+                .ToList();
             Debug.WriteLine("on no");
 
         }

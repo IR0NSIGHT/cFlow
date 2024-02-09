@@ -33,7 +33,6 @@ namespace cFlowApi
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            _flowMap = new DistanceMap(Heightmap);
             _flowMap.CalculateFromHeightmap();
             stopwatch.Stop();
             Debug.WriteLine(stopwatch.ElapsedMilliseconds);
