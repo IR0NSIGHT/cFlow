@@ -1,4 +1,5 @@
 ﻿using application.Maps;
+using application.Maps.flowMap;
 using src.Maps.riverMap;
 
 namespace unittest
@@ -218,7 +219,7 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var riverMap = new RiverMap(new SimpleFlowMap(heightMap.Bounds()), heightMap);
+            var riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
             flood.FloodArea(
                 (35, 25),
                 riverMap, 

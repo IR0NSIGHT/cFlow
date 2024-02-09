@@ -16,7 +16,7 @@ public class DistanceMap : Map2d
     /// <param name="DistanceSquared"></param>
     public record struct DistancePoint(short XOffset, short YOffset, bool isSet)
     {
-        public short DistanceSquared => (short)(XOffset * XOffset + YOffset * YOffset);
+        public int DistanceSquared => (XOffset * XOffset + YOffset * YOffset);
     }
 
     private DistancePoint[][] distanceMap;
@@ -147,10 +147,22 @@ public class DistanceMap : Map2d
 
         foreach (var points in iterator().Points())
         {
-            var dist = GetDistanceOf(points).DistanceSquared;
-            bitmap.SetPixel(points.x, points.y, ((uint)(dist) | 0xFF000000));
-            if (dist > max)
-                max = dist;
+            var origin = GetDistanceOf(points);
+            if (origin.isSet)
+            {
+                var dist = (byte)((Math.Sqrt(origin.DistanceSquared) % 25) * 10);
+                bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
+                if (dist > max)
+                    max = dist;
+                if (points.x == 0)
+                    Debug.WriteLine($"distance: {points} = {dist}");
+            }
+            else
+            {
+                bitmap.SetPixel(points.x, points.y,  new SKColor(255,0,0));
+            }
+
+
         }
 
         return bitmap;
