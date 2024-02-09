@@ -127,8 +127,7 @@ public class DistanceMap : Map2d
         List<(int x, int y)> outList = new();
         var ns = Point.Neighbours(point);
         var accepted = ns.Where(n => inBounds(n.x, n.y))
-            .Where(n => heightMap.GetHeight(n) <= pointHeight)
-            .Where(n => GetDistanceOf(n).DistanceSquared < pointDistance)
+            .Where(n => heightMap.GetHeight(n) < pointHeight || heightMap.GetHeight(n) == pointHeight && GetDistanceOf(n).DistanceSquared < pointDistance)
             .ToList();
         if (accepted.Count == 0)
         {
