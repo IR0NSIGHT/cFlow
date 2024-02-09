@@ -31,7 +31,10 @@ public class SortedQueue
         if (isKnown && knownValue > value)
         {
             knowPoints[point] = value;
-        } else if (!isKnown)
+            sortedList.Enqueue(point, value); //accept that point is in there twice now
+
+        }
+        else if (!isKnown)
         {
             knowPoints.Add(point, value);
             sortedList.Enqueue(point, value); //accept that point is in there twice now
@@ -53,6 +56,11 @@ public class SortedQueue
         taken.Add(outV);
         var val = knowPoints.GetValueOrDefault(outV, -1);
         return (outV, val);
+    }
+
+    public int GetValue((int x, int y) point)
+    {
+        return knowPoints[point];
     }
 }
 

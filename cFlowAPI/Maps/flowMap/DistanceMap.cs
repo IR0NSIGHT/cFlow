@@ -103,7 +103,7 @@ public class DistanceMap : Map2d
             var origin = GetDistanceOf(points);
             if (origin.isSet)
             {
-                var dist = (byte)((Math.Sqrt(origin.DistanceSquared) % 25) * 10);
+                var dist = (byte)((origin.DistanceSquared % 25) * 10);
                 bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
             }
             else
@@ -135,6 +135,8 @@ public class DistanceMap : Map2d
         }
         return accepted.ToList();
     }
+
+
 
     public void SetDistanceToEdge((int x, int y) point, DistancePoint distance)
     {
