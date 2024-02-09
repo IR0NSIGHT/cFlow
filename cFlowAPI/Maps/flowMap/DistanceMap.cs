@@ -64,7 +64,7 @@ public class DistanceMap : Map2d
         {
             var current = queue.Take();
             if (IsSet(current.point))
-                throw new Exception("uwuw");
+                continue;
             SetDistanceToEdge(current.point, new DistancePoint(){ distance = current.value, isSet = true});
             var currentHeight = heightMap.GetHeight(current.point);
 

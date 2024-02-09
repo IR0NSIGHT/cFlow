@@ -4,8 +4,8 @@ namespace application.Maps.flowMap;
 
 public class SortedQueue
 {
-    private List<listEntry> sortedList = new();
-    private HashSet<(int x, int y)> knowPoints = new();
+    private PriorityQueue<(int x, int y), int> sortedList = new();
+    private Dictionary<(int x, int y), int> knowPoints = new();
 
     public struct listEntry
     {
@@ -26,29 +26,16 @@ public class SortedQueue
     /// <param name="value"></param>
     public void TryInsert((int x, int y) point, int value)
     {
-        var newEntry = new listEntry() { point = point, value = value };
-        var existingValue = GetValue(point);
-        if (existingValue.value == -1)
+        var isKnown = knowPoints.ContainsKey(point);
+        var knownValue = isKnown ? knowPoints[point] : -1;
+        if (isKnown && knownValue > value)
         {
-            sortedList.Add(new listEntry() { point = point, value = value });
-            knowPoints.Add(point);
-            sortedList.Sort((a, b) => a.value.CompareTo(b.value));
-        }
-        else if (existingValue.value > newEntry.value)
+            knowPoints[point] = value;
+        } else if (!isKnown)
         {
-            //overwrite existng value with lower value / or insert new value
-            sortedList.Remove(existingValue);
-            sortedList.Add(new listEntry() { point = point, value = value });
-            sortedList.Sort((a, b) => a.value.CompareTo(b.value));
+            knowPoints.Add(point, value);
+            sortedList.Enqueue(point, value); //accept that point is in there twice now
         }
-    }
-
-    public listEntry GetValue((int x, int y) point)
-    {
-        if (knowPoints.Contains(point))
-            return sortedList.Find(p => p.point == point);
-        else
-            return new listEntry() { value = -1 };
     }
 
     public bool isEmpty()
@@ -56,12 +43,16 @@ public class SortedQueue
         return sortedList.Count == 0;
     }
 
+    private HashSet<(int x, int y)> taken = new HashSet<(int x, int y)>();
 
     public ((int x, int y) point, int value) Take()
     {
-        var outV = sortedList[0];
-        sortedList.Remove(outV);
-        return (outV.point, outV.value);
+        var outV = sortedList.Dequeue();
+        if (taken.Contains(outV))
+            return Take();
+        taken.Add(outV);
+        var val = knowPoints.GetValueOrDefault(outV, -1);
+        return (outV, val);
     }
 }
 
