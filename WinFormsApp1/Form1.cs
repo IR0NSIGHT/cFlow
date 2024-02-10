@@ -9,8 +9,13 @@ using Rectangle = System.Drawing.Rectangle;
 
 namespace WinFormsApp1
 {
+
     public partial class MainWindow : Form
     {
+        public static readonly Color HighlightColor = Color.LightGreen;
+        public static readonly Color DefaultColor = Color.LightGray;
+
+
         private float scale = 1;
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
@@ -117,7 +122,7 @@ namespace WinFormsApp1
                 newButton.Text = x.name;
                 newButton.Name = x.name;
                 newButton.Size = new System.Drawing.Size(100, 30);
-                newButton.BackColor = x.active ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+                newButton.BackColor = x.active ? HighlightColor : DefaultColor;
                 newButton.Click += OnLayerToggleButtonClick;
                 LayerTogglePanel.Controls.Add(newButton);
             }
@@ -140,7 +145,7 @@ namespace WinFormsApp1
                 if (idx == -1)
                     return;
                 layerProvider.ToggleLayer(idx);
-                button.BackColor = layerProvider.IsLayerActive(idx) ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+                button.BackColor = layerProvider.IsLayerActive(idx) ? HighlightColor : DefaultColor;
 
             }
         }
@@ -205,7 +210,7 @@ namespace WinFormsApp1
             {
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
-                e.Graphics.FillRectangle(new SolidBrush(Color.Orange), 0, 0, pictureBox.Width, pictureBox.Height);
+                e.Graphics.FillRectangle(new SolidBrush(DefaultColor), 0, 0, pictureBox.Width, pictureBox.Height);
 
                 foreach (var layerImg in layerProvider.ActiveLayers())
                 {
@@ -274,7 +279,7 @@ namespace WinFormsApp1
         private void OnSpawnRiverButtonClick(object sender, EventArgs e)
         {
             riverToolActive = !riverToolActive;
-            spawnSingleRiverButton.BackColor = riverToolActive ? Color.DeepSkyBlue : Color.LightGray;
+            spawnSingleRiverButton.BackColor = riverToolActive ? HighlightColor :DefaultColor;
             spawnSingleRiverButton.Text = riverToolActive ? "Spawn single river: Active" : "Spawn single river";
         }
 
@@ -333,7 +338,7 @@ namespace WinFormsApp1
             floodToolActive = !floodToolActive;
             if (sender is Button b)
             {
-                b.BackColor = floodToolActive ? SystemColors.ButtonHighlight : SystemColors.ButtonFace;
+                b.BackColor = floodToolActive ? HighlightColor: DefaultColor;
             }
         }
 
