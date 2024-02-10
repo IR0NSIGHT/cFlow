@@ -1,4 +1,5 @@
-﻿using System.Security;
+﻿using System.Drawing.Drawing2D;
+using System.Security;
 using cFlowForms;
 using Xamarin.Forms;
 using static cFlowForms.GuiEvents;
@@ -199,8 +200,11 @@ namespace WinFormsApp1
 
         private void MapPictureBox_Paint(object? sender, PaintEventArgs e)
         {
+
             if (sender is PictureBox pictureBox)
             {
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
                 e.Graphics.FillRectangle(new SolidBrush(Color.Orange), 0, 0, pictureBox.Width, pictureBox.Height);
 
                 foreach (var layerImg in layerProvider.ActiveLayers())
