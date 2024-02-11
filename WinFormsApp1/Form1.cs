@@ -1,10 +1,8 @@
 ﻿using System.Drawing.Drawing2D;
 using System.Security;
 using cFlowForms;
-using Xamarin.Forms;
 using static cFlowForms.GuiEvents;
 using Button = System.Windows.Forms.Button;
-using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace WinFormsApp1
@@ -12,10 +10,6 @@ namespace WinFormsApp1
 
     public partial class MainWindow : Form
     {
-        public static readonly Color HighlightColor = Color.LightGreen;
-        public static readonly Color DefaultColor = Color.LightGray;
-
-
         private float scale = 1;
         private float ratio = 1;
         private (int x, int y) position = (0, 0);
@@ -84,10 +78,6 @@ namespace WinFormsApp1
 
         public void OnLoadingStateChanged(object? sender, LoadingStateEventArgs e)
         {
-            progressBar1.Maximum = 100;
-            progressBar1.Minimum = 0;
-            progressBar1.Value = e.LoadingProgress;
-
             if (e.IsLoading)
             {
                 loading_spinner_box.Visible = true;
@@ -122,7 +112,7 @@ namespace WinFormsApp1
                 newButton.Text = x.name;
                 newButton.Name = x.name;
                 newButton.Size = new System.Drawing.Size(100, 30);
-                newButton.BackColor = x.active ? HighlightColor : DefaultColor;
+                newButton.BackColor = x.active ? StyledButton.HighlightColor : StyledButton.BackColor;
                 newButton.Click += OnLayerToggleButtonClick;
                 LayerTogglePanel.Controls.Add(newButton);
             }
@@ -145,7 +135,7 @@ namespace WinFormsApp1
                 if (idx == -1)
                     return;
                 layerProvider.ToggleLayer(idx);
-                button.BackColor = layerProvider.IsLayerActive(idx) ? HighlightColor : DefaultColor;
+                button.BackColor = layerProvider.IsLayerActive(idx) ? StyledButton.HighlightColor : StyledButton.BackColor;
 
             }
         }
@@ -210,7 +200,7 @@ namespace WinFormsApp1
             {
                 e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                 e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
-                e.Graphics.FillRectangle(new SolidBrush(DefaultColor), 0, 0, pictureBox.Width, pictureBox.Height);
+                e.Graphics.FillRectangle(new SolidBrush(StyledButton.BackColor), 0, 0, pictureBox.Width, pictureBox.Height);
 
                 foreach (var layerImg in layerProvider.ActiveLayers())
                 {
@@ -244,7 +234,7 @@ namespace WinFormsApp1
         {
             if (!doUse)
                 return;
-            channel.RequestRiverChange(new RiverChangeRequestEventArgs(mapPos, RiverChangeType.Add){ splitEveryXBlocks = riverSplitProbability });
+            channel.RequestRiverChange(new RiverChangeRequestEventArgs(mapPos, RiverChangeType.Add) { splitEveryXBlocks = riverSplitProbability });
         }
 
         private void handleFloodAreaOnMap((int x, int y) mapPos, bool doUse)
@@ -279,7 +269,7 @@ namespace WinFormsApp1
         private void OnSpawnRiverButtonClick(object sender, EventArgs e)
         {
             riverToolActive = !riverToolActive;
-            spawnSingleRiverButton.BackColor = riverToolActive ? HighlightColor :DefaultColor;
+            spawnSingleRiverButton.BackColor = riverToolActive ? StyledButton.HighlightColor : StyledButton.BackColor;
             spawnSingleRiverButton.Text = riverToolActive ? "Spawn single river: Active" : "Spawn single river";
         }
 
@@ -338,11 +328,16 @@ namespace WinFormsApp1
             floodToolActive = !floodToolActive;
             if (sender is Button b)
             {
-                b.BackColor = floodToolActive ? HighlightColor: DefaultColor;
+                b.BackColor = floodToolActive ? StyledButton.HighlightColor : StyledButton.BackColor;
             }
         }
 
         private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 
         }
