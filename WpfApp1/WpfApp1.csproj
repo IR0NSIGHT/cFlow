@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="large_circle.png" />
+    <None Remove="medium_flats.png" />
+    <None Remove="medium_flats_brokenUp_EDIT.png" />
+    <None Remove="medium_flats_brokenUp_RIVER.png" />
+    <None Remove="medium_flats_EDIT.png" />
+    <None Remove="medium_flats_RIVER.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="large_circle.png" />
+    <Resource Include="medium_flats.png" />
+    <Resource Include="medium_flats_brokenUp_EDIT.png" />
+    <Resource Include="medium_flats_brokenUp_RIVER.png" />
+    <Resource Include="medium_flats_EDIT.png" />
+    <Resource Include="medium_flats_RIVER.png" />
+  </ItemGroup>
+
+</Project>

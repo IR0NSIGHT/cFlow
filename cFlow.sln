@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cFlowAPI", "cFlowAPI\cFlowA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cFlowForms", "WinFormsApp1\cFlowForms.csproj", "{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp1", "WpfApp1\WpfApp1.csproj", "{3DA9EEF8-8643-4DCF-A78B-F47767BFB5C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13B86BDB-6B64-4897-92F2-223DC9DDFAF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DA9EEF8-8643-4DCF-A78B-F47767BFB5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DA9EEF8-8643-4DCF-A78B-F47767BFB5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DA9EEF8-8643-4DCF-A78B-F47767BFB5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DA9EEF8-8643-4DCF-A78B-F47767BFB5C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
