@@ -9,21 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="components\medium_flats_EDIT.png" />
     <None Remove="large_circle.png" />
     <None Remove="medium_flats.png" />
     <None Remove="medium_flats_brokenUp_EDIT.png" />
     <None Remove="medium_flats_brokenUp_RIVER.png" />
     <None Remove="medium_flats_EDIT.png" />
     <None Remove="medium_flats_RIVER.png" />
+    <None Remove="textureGrid_1k.jpg" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="components\medium_flats_EDIT.png" />
     <Resource Include="large_circle.png" />
     <Resource Include="medium_flats.png" />
     <Resource Include="medium_flats_brokenUp_EDIT.png" />
     <Resource Include="medium_flats_brokenUp_RIVER.png" />
     <Resource Include="medium_flats_EDIT.png" />
     <Resource Include="medium_flats_RIVER.png" />
+    <Resource Include="textureGrid_1k.jpg" />
   </ItemGroup>
 
 </Project>
