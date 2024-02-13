@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WpfApp1.components
 {
@@ -32,11 +33,11 @@ namespace WpfApp1.components
 
         private BitmapImage originalImage;
 
-        readonly struct MapSection
+        record struct MapSection
         {
-            public readonly int PosX;
-            public readonly int PosY;
-            public readonly int DisplayWidth;
+            public int PosX;
+            public int PosY;
+            public int DisplayWidth;
 
             public MapSection(int posX, int posY, int displayWidth) =>
                 (PosX, PosY, DisplayWidth) = (posX, posY, displayWidth);
@@ -56,9 +57,34 @@ namespace WpfApp1.components
 
             var section = getDisplayMapCrop(this.ActualWidth, this.ActualHeight);
             CroppedBitmap cropped_bitmap =
-                new CroppedBitmap(originalImage, section );
+                new CroppedBitmap(originalImage, section);
 
             MapImage.Source = cropped_bitmap;
+        }
+
+        private float currentScale = 1;
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnPreviewMouseWheel(e);
+            PreviewMouseWheel(this, e);
+        }
+
+        private void SetSectionByScale(float scale)
+        {
+            _currentMapSection = _currentMapSection with { DisplayWidth = (int)(originalImage.PixelWidth / scale) };
+        }
+
+        private void updateScale(float delta)
+        {
+            this.currentScale = Math.Clamp(currentScale+delta, 1, 5);
+            
+        }
+        private void PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            updateScale(e.Delta * 1f / 1000);
+            Debug.WriteLine($"scale = {currentScale}");
+            SetSectionByScale(currentScale);
+            RedrawMap(sender, e);
         }
     }
 }

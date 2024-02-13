@@ -9,6 +9,5 @@
     <Grid Background="Aqua" Opacity="0.25">
         <Image x:Name="MapImage" Source="/components/medium_flats_EDIT.png" Stretch="UniformToFill" ></Image>
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="72">HELLO WORLD</TextBlock>
-
-</Grid>
+    </Grid>
 </UserControl>
