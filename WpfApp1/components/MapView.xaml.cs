@@ -18,11 +18,11 @@ using static System.Formats.Asn1.AsnWriter;
 namespace WpfApp1.components
 {
     /// <summary>
-    /// Interaction logic for TierCard.xaml
+    /// Interaction logic for MapView.xaml
     /// </summary>
-    public partial class TierCard : UserControl
+    public partial class MapView : UserControl
     {
-        public TierCard()
+        public MapView()
         {
             InitializeComponent();
 
