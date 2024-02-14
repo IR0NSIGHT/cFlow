@@ -1,9 +1,7 @@
 ﻿using application.Maps;
-using SkiaSharp;
 using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using System.Threading;
+using System.Drawing.Imaging;
+
 
 public class SimpleFlowMap : IFlowMap
 {
@@ -259,40 +257,11 @@ public class SimpleFlowMap : IFlowMap
             cycle++;
         }
     }
-
-    public static SKBitmap ToCycleImage(IFlowMap flowMap)
+    
+    public static Bitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow, Color> flowToColor)
     {
         var (width, height) = flowMap.Bounds();
-        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
-        float ratio = int.MaxValue / Math.Max(flowMap.Bounds().y, flowMap.Bounds().x);
-        foreach (var points in flowMap.iterator().Points())
-        {
-            bitmap.SetPixel(points.x, points.y, ((uint)(flowMap.GetCylce(points) * ratio)));
-        }
-
-        return bitmap;
-    }
-
-    public static SKBitmap ToImage(IFlowMap flowMap)
-    {
-        var (width, height) = flowMap.Bounds();
-        byte[] pixelData = new byte[width * height];
-
-        foreach (var points in flowMap.iterator().Points())
-        {
-            pixelData[points.y * width + points.x] = FlowTranslation.FlowToGray8(flowMap.GetFlow(points));
-        }
-
-        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Gray8, SKAlphaType.Opaque));
-        IntPtr pixelsPointer = Marshal.UnsafeAddrOfPinnedArrayElement(pixelData, 0);
-        bitmap.SetPixels(pixelsPointer);
-        return bitmap;
-    }
-
-    public static SKBitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow, SKColor> flowToColor)
-    {
-        var (width, height) = flowMap.Bounds();
-        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
+        Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format16bppArgb1555);
         foreach (var points in flowMap.iterator().Points())
         {
             bitmap.SetPixel(points.x, points.y, flowToColor(flowMap.GetFlow(points)));

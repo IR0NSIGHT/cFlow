@@ -1,4 +1,5 @@
-using SkiaSharp;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace TestProject1
 {
@@ -58,11 +59,11 @@ namespace TestProject1
         public void FromImage()
         {
             var (width, height) = (10, 3);
-            var bitmap = new SKBitmap(width, height, SKColorType.Gray8, SKAlphaType.Opaque);
+            var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             //mark edges top left, top right, bottom right in brighter getting grays
-            bitmap.SetPixel(0, 0, new SKColor(27, 27, 27));
-            bitmap.SetPixel(9, 0, new SKColor(47, 47, 47));
-            bitmap.SetPixel(9, 2, new SKColor(77, 77, 77));
+            bitmap.SetPixel(0, 0, Color.FromArgb(255,27,27,27));
+            bitmap.SetPixel(9, 0, Color.FromArgb(255, 47, 47, 47));
+            bitmap.SetPixel(9, 2, Color.FromArgb(255, 77, 77, 77));
 
             var heightmap = new Image8BitHeightMap(bitmap);
             Assert.AreEqual(27, heightmap.GetHeight((0, 0)));

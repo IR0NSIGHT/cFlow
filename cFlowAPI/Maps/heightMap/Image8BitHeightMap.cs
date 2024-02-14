@@ -1,42 +1,21 @@
-﻿using SkiaSharp;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
+
 
 public class Image8BitHeightMap : IHeightMap
 {
-    private SKBitmap bitmap;
+    private Bitmap bitmap;
     private Map2dIterator _iterator;
-    public Image8BitHeightMap(SKBitmap bitmap)
+    public Image8BitHeightMap(Bitmap bitmap)
     {
         _iterator = new Map2dIterator((bitmap.Width, bitmap.Height));
         this.bitmap = bitmap;
     }
-
-    public SKBitmap ContourLinesOverlay()
-    {
-        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Alpha8, SKAlphaType.Premul);
-        byte alpha = 127;
-        foreach (var (x, y) in iterator().Points())
-        {
-            if (GetHeight((x, y)) % 10 == 0)
-                contourMap.SetPixel(x, y, new SKColor(255, 255, 255, alpha));
-        }
-
-        for (var x = 0; x < bitmap.Width; x++)
-        {
-            contourMap.SetPixel(x, 0, new SKColor(255, 255, 255, alpha));
-            contourMap.SetPixel(x, bitmap.Height - 1, new SKColor(255, 255, 255, alpha));
-        }
-        for (var y = 0; y < bitmap.Height; y++)
-        {
-            contourMap.SetPixel(0, y, new SKColor(255, 255, 255, alpha));
-            contourMap.SetPixel(bitmap.Width - 1, y, new SKColor(255, 255, 255, alpha));
-        }
-        return contourMap;
-    }
     
-    public (SKBitmap, SKBitmap) ShadedHeightmap()
+    public (Bitmap, Bitmap) ShadedHeightmap()
     {
-        var shadedHeightMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Gray8, SKAlphaType.Premul);
-        var contourMap = new SKBitmap(Bounds().x, Bounds().y, SKColorType.Alpha8, SKAlphaType.Premul);
+        var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format16bppGrayScale);
+        var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Alpha);
         byte alpha = 127;
 
         var flowMap = new SimpleFlowMap(Bounds());
@@ -57,10 +36,10 @@ public class Image8BitHeightMap : IHeightMap
             if (flow.Right)
                 val -= 50;
 
-            shadedHeightMap.SetPixel(x, y, new SKColor(val, val, val));
+            shadedHeightMap.SetPixel(x, y, Color.FromArgb(255, val, val, val));
 
             if (!flow.Unknown && GetHeight((x,y)) % 10 == 0) 
-                contourMap.SetPixel(x,y,new SKColor(255,255,alpha));
+                contourMap.SetPixel(x,y,Color.FromArgb(alpha, Color.Black));
         }
 
         return (shadedHeightMap, contourMap);
@@ -78,7 +57,7 @@ public class Image8BitHeightMap : IHeightMap
 
     public short GetHeight((int x, int y) pos)
     {
-        return bitmap.GetPixel(pos.x, pos.y).Red;
+        return bitmap.GetPixel(pos.x, pos.y).R;
     }
 
     public bool inBounds(int x, int y)
@@ -88,6 +67,6 @@ public class Image8BitHeightMap : IHeightMap
 
     public void SetHeight((int x, int y) pos, short z)
     {
-        bitmap.SetPixel(pos.x, pos.y, new SKColor((byte)z, (byte)z, (byte)z));
+        bitmap.SetPixel(pos.x, pos.y, Color.FromArgb(255,(byte)z, (byte)z, (byte)z));
     }
 }

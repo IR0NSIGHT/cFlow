@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+﻿using System.Drawing;
 using src.Maps.riverMap;
 using System.Text;
 
@@ -6,13 +6,13 @@ namespace cFlowApi
 {
     public class CFlowGenerator
     {
-        private SKBitmap _flowmapImgColored;
-        private SKBitmap _rivermapImg;
+        private Bitmap _flowmapImgColored;
+        private Bitmap _rivermapImg;
 
         public IHeightMap Heightmap { get; }
         private IFlowMap _flowMap;
-        public SKBitmap FlowmapImgColored { get => _flowmapImgColored; }
-        public SKBitmap RivermapImg { get => _rivermapImg; }
+        public Bitmap FlowmapImgColored { get => _flowmapImgColored; }
+        public Bitmap RivermapImg { get => _rivermapImg; }
 
         public RiverMap RiverMap;
 

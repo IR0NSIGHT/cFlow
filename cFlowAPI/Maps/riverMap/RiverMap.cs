@@ -1,5 +1,6 @@
 ﻿using cFlowAPI.Maps.riverMap;
-using SkiaSharp;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace src.Maps.riverMap
 {
@@ -9,7 +10,7 @@ namespace src.Maps.riverMap
         private readonly IFlowMap flowMap;
         private Map2dIterator _iterator;
         private IHeightMap _heightMap;
-        private SKBitmap riverOverlay;
+        private Bitmap riverOverlay;
         public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
         {
             this.flowMap = flowMap;
@@ -20,11 +21,11 @@ namespace src.Maps.riverMap
             {
                 map[i] = new bool[flowMap.Bounds().y];
             }
-            riverOverlay = new SKBitmap(new SKImageInfo(Bounds().x, Bounds().y, SKColorType.Rgba8888, SKAlphaType.Opaque));
+            riverOverlay = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format16bppArgb1555);
 
         }
 
-        public SKBitmap ToImage()
+        public Bitmap ToImage()
         {
             return riverOverlay;
         }
@@ -32,7 +33,7 @@ namespace src.Maps.riverMap
         public void SetAsRiver(int x, int y)
         {
             map[x][y] = true;
-            riverOverlay.SetPixel(x, y, new SKColor(0, 0, 255));
+            riverOverlay.SetPixel(x, y, Color.Blue);
         }
 
         public bool IsRiver(int x, int y)
