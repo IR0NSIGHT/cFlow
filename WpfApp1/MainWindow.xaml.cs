@@ -34,7 +34,7 @@ namespace WpfApp1
         {
             //load Heightmap
             var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
-            var file = "medium_flats.png";
+            var file = "medium_flats_brokenUp.png";
             _guiEventChannel.RequestLoadHeightmap(new FileEventArgs(path + file));
         }
         private GuiEventChannel _guiEventChannel;
