@@ -8,6 +8,7 @@ namespace cFlowForms;
 /// </summary>
 public class BackendEventChannel
 {
+    
     private MainWindow gui;
     public event EventHandler<ImageEventArgs>? HeightmapChanged;
     public event EventHandler<ImageEventArgs>? RivermapChanged;
@@ -54,4 +55,5 @@ public class BackendEventChannel
         };
         Application.Current.Dispatcher.Invoke(safeLoadingStateUpdate);
     }
+    
 }

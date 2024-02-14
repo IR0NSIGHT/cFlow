@@ -1,4 +1,7 @@
-﻿namespace cFlowForms;
+﻿using System.Drawing;
+using System.Windows.Media.Imaging;
+
+namespace cFlowForms;
 
 public readonly struct LoadingStateEventArgs(bool isLoading, int loadingProgress)
 {

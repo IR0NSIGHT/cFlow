@@ -1,14 +1,5 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using cFlowForms;
 
 namespace WpfApp1
 {
@@ -19,6 +10,35 @@ namespace WpfApp1
     {
         public MainWindow()
         {
+            InitializeComponent();
+            SetupChannels();
+        }
+        public void SetupChannels()
+        {
+            var guiChannel = new GuiEventChannel();
+            var backend = new Backend();
+            var gui = this;
+            if (gui == null || !(gui is MainWindow mainWindow))
+            {
+                throw new Exception("Main Window is null or wrong type on setup");
+            }
+            var backendChannel = new BackendEventChannel(mainWindow);
+            mainWindow.Populate(guiChannel, backendChannel);
+            backend.Populate(guiChannel, backendChannel);
+
+
+            //load Heightmap
+            //       var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
+            //       var file = "medium_flats.png";
+            //       backend.OnHeightmapPathSelected(null, new FileEventArgs(path + file));
+        }
+
+        private GuiEventChannel _guiEventChannel;
+        private BackendEventChannel _backendEventChannel;
+        public void Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendEventChannel)
+        {
+            this._backendEventChannel = backendEventChannel;
+            this._guiEventChannel = guiEventChannel;
         }
     }
 }

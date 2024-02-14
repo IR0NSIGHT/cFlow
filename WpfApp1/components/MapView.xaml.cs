@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using static System.Windows.Point;
 
 namespace WpfApp1.components
 {
@@ -119,7 +120,7 @@ namespace WpfApp1.components
             dragStartMapSection = _currentMapSection;
         }
 
-        private (int x, int y) ToMapPxPos(Point mousePosition)
+        private (int x, int y) ToMapPxPos(System.Windows.Point mousePosition)
         {
             double mapPxPerDPI = _currentMapSection.DisplayWidth / MapImage.ActualWidth;
             var x = _currentMapSection.PosX + mousePosition.X * mapPxPerDPI;
@@ -127,7 +128,7 @@ namespace WpfApp1.components
             return ((int)x, (int)y);
         }
 
-        private (int x, int y) ToPxPosInWindow(Point mousePosition)
+        private (int x, int y) ToPxPosInWindow(System.Windows.Point mousePosition)
         {
             double mapPxPerDPI = _currentMapSection.DisplayWidth / MapImage.ActualWidth;
             var x = mousePosition.X * mapPxPerDPI;
