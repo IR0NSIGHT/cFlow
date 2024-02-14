@@ -28,18 +28,24 @@ namespace WpfApp1.components
 
         private void OnLayerToggled(object? sender, EventArgs e)
         {
-            RedrawMap(this, _mapPositioner.getDisplayedAreaOfMapImage(this.ActualWidth, this.ActualHeight));
+            RedrawMap();
         }
 
+        private void RedrawMap()
+        {
+            RedrawMap(this, _mapPositioner.getDisplayedAreaOfMapImage(this.ActualWidth, this.ActualHeight));
+        }
 
         private void OnFlowMapChanged(object? sender, ImageEventArgs e)
         {
             _layerProvider.UpdateLayerBitmap(LayerProvider.FlowLayer, e.Image);
+            RedrawMap();
         }
 
         private void OnRiverMapChanged(object? sender, ImageEventArgs e)
         {
             _layerProvider.UpdateLayerBitmap(LayerProvider.RiverLayer, e.Image);
+            RedrawMap();
         }
 
         private void OnHeightMapChanged(object? sender, ImageEventArgs args)
@@ -49,7 +55,7 @@ namespace WpfApp1.components
 
             _layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, args.Image);
             _mapPositioner.SetMapDimensions((args.Image.Width, args.Image.Height));
-
+            RedrawMap();
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs args)
