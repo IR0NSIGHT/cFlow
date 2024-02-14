@@ -14,8 +14,8 @@ public class Image8BitHeightMap : IHeightMap
     
     public (Bitmap, Bitmap) ShadedHeightmap()
     {
-        var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format16bppGrayScale);
-        var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Alpha);
+        var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
+        var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
         byte alpha = 127;
 
         var flowMap = new SimpleFlowMap(Bounds());

@@ -2,7 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using cFlowForms;
 using static System.Windows.Point;
 
 namespace WpfApp1.components
@@ -12,16 +14,38 @@ namespace WpfApp1.components
     /// </summary>
     public partial class MapView : UserControl
     {
+        private BitmapSource _heightBitmapSource;
         public MapView()
         {
             InitializeComponent();
-            SetMapImage(new BitmapImage(new Uri("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\textureGrid_1k.jpg", UriKind.Absolute)));
-            this.Loaded += RedrawMap;
+            
             this.MouseMove += OnPreviewMouseMove;
             this.MouseRightButtonDown += OnPreviewMouseRightButtonDown;
         }
 
-        private BitmapImage originalImage;
+        public void SetChannels(GuiEventChannel guiChannel, BackendEventChannel backendChannel)
+        {
+            backendChannel.HeightmapChanged += OnHeightMapChanged;
+        }
+
+        private void OnHeightMapChanged(object? sender, ImageEventArgs args)
+        {
+            if (args.MapType != MapType.Heightmap)
+                return;
+          
+            var bmp = args.Image;
+            var bitmapData = bmp.LockBits(
+                new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width, bitmapData.Height, 96, 96, PixelFormats.Gray8, null,
+                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+
+            bmp.UnlockBits(bitmapData);
+
+            SetMapImage(bitmapSource);
+        }
 
         record struct MapSection
         {
@@ -38,8 +62,12 @@ namespace WpfApp1.components
         {
             int xWidth = _currentMapSection.DisplayWidth;
             int yHeight = (int)(_currentMapSection.DisplayWidth * (guiHeight / (guiWidth)));
-            int xPos = (int)Math.Clamp(_currentMapSection.PosX, 0, originalImage.PixelWidth - xWidth);
-            int yPos = (int)Math.Clamp(_currentMapSection.PosY, 0, originalImage.PixelWidth - yHeight);
+            int xPos = (int)Math.Clamp(_currentMapSection.PosX, 0, _heightBitmapSource.PixelWidth - xWidth);
+            int yPos = (int)Math.Clamp(_currentMapSection.PosY, 0, _heightBitmapSource.PixelHeight - yHeight);
+            Debug.Assert(xWidth != 0 && yHeight != 0);
+            Debug.Assert(xWidth + xPos <= this._heightBitmapSource.PixelWidth);
+            Debug.Assert(yHeight + yPos <= this._heightBitmapSource.PixelHeight);
+
             return new Int32Rect(
                 xPos,
                 yPos,
@@ -50,16 +78,26 @@ namespace WpfApp1.components
 
         private void RedrawMap(object sender, RoutedEventArgs e)
         {
-            if (originalImage == null ||this.ActualHeight == 0 || this.ActualWidth == 0)
+            if (_heightBitmapSource == null ||this.ActualHeight == 0 || this.ActualWidth == 0)
                 return;
 
             var section = getDisplayMapCrop(this.ActualWidth, this.ActualHeight);
-            CroppedBitmap cropped_bitmap =
-                new CroppedBitmap(originalImage, section);
+           
+            Debug.Assert(section.HasArea," section is illegal shape");
+            try
+            {
+                CroppedBitmap cropped_bitmap =
+                    new CroppedBitmap(_heightBitmapSource, section);
 
-            MapImage.Source = cropped_bitmap;
-            InfoText.Text = $"{originalImage.PixelWidth} x {originalImage.PixelHeight} blocks";
-        }
+                MapImage.Source = cropped_bitmap;
+                InfoText.Text = $"{_heightBitmapSource.PixelWidth} x {_heightBitmapSource.PixelHeight} blocks";
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("UWU");
+            }
+       }
 
         private float currentScale = 1;
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
@@ -68,9 +106,9 @@ namespace WpfApp1.components
             PreviewMouseWheel(this, e);
         }
 
-        private void SetMapImage(BitmapImage newMap)
+        private void SetMapImage(BitmapSource newMap)
         {
-            this.originalImage = newMap;
+            this._heightBitmapSource = newMap;
             SetPosition(0,0);
             SetSectionByScale(1);
 
@@ -81,7 +119,7 @@ namespace WpfApp1.components
 
         private void SetSectionByScale(float scale)
         {
-            _currentMapSection = _currentMapSection with { DisplayWidth = (int)(originalImage.PixelWidth / scale) };
+            _currentMapSection = _currentMapSection with { DisplayWidth = (int)(_heightBitmapSource.PixelWidth / scale) };
         }
 
         private void updateScale(float delta)
@@ -106,8 +144,8 @@ namespace WpfApp1.components
         {
             _currentMapSection = _currentMapSection with
             {
-                PosX = Math.Clamp(x, 0, originalImage.PixelWidth),
-                PosY = Math.Clamp(y, 0, originalImage.PixelHeight)
+                PosX = Math.Clamp(x, 0, _heightBitmapSource.PixelWidth),
+                PosY = Math.Clamp(y, 0, _heightBitmapSource.PixelHeight)
             };
         }
 

@@ -12,7 +12,10 @@ namespace WpfApp1
         {
             InitializeComponent();
             SetupChannels();
+            MapView.SetChannels(this._guiEventChannel, this._backendEventChannel);
+            LoadDefaultMap();
         }
+
         public void SetupChannels()
         {
             var guiChannel = new GuiEventChannel();
@@ -25,14 +28,15 @@ namespace WpfApp1
             var backendChannel = new BackendEventChannel(mainWindow);
             mainWindow.Populate(guiChannel, backendChannel);
             backend.Populate(guiChannel, backendChannel);
-
-
-            //load Heightmap
-            //       var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
-            //       var file = "medium_flats.png";
-            //       backend.OnHeightmapPathSelected(null, new FileEventArgs(path + file));
         }
 
+        private void LoadDefaultMap()
+        {
+            //load Heightmap
+            var path = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\";
+            var file = "medium_flats.png";
+            _guiEventChannel.RequestLoadHeightmap(new FileEventArgs(path + file));
+        }
         private GuiEventChannel _guiEventChannel;
         private BackendEventChannel _backendEventChannel;
         public void Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendEventChannel)
