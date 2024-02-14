@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using cFlowForms;
 using static System.Windows.Point;
+using static WpfApp1.MainWindow;
 
 namespace WpfApp1.components
 {
@@ -13,11 +15,20 @@ namespace WpfApp1.components
     public partial class MapView : UserControl
     {
         private BitmapSource _heightBitmapSource;
+        public EventHandler<((int x, int y), MouseEventArgs)> OnMapClicked;
         public MapView()
         {
             InitializeComponent();
             this._mapPositioner = new MapPositioner(this);
             _mapPositioner.OnMapSectionChanged += RedrawMap;
+
+            this.MouseDown += OnMouseDown;
+        }
+
+        private void OnMouseDown(object? sender, MouseEventArgs args)
+        {
+            var mapPos = _mapPositioner.ToMapPxPos(args.GetPosition(this));
+            OnMapClicked.Invoke(this, (mapPos, args));
         }
 
         private MapPositioner _mapPositioner;

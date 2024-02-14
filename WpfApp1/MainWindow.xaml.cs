@@ -1,5 +1,4 @@
 ﻿using System.Security;
-using System.Threading.Channels;
 using System.Windows;
 using cFlowForms;
 using Microsoft.Win32;
@@ -19,8 +18,12 @@ namespace WpfApp1
             LoadDefaultMap();
 
             this.ImportHeightmap.Click += OnImportHeightmapButtonClick;
-            this.RiverToolButton.Click += new RiverTool().OnToggleToolClicked;
             this.CalcFlowButton.Click += OnCalcFlowButtonClick;
+
+            var riverTool = new RiverTool(_guiEventChannel);
+
+            this.RiverToolButton.Click += riverTool.OnToggleToolClicked;
+            this.MapView.OnMapClicked += riverTool.OnMapClicked;
 
             _backendEventChannel.LoadingStateChanged += OnLoadingUpdate;
         }
