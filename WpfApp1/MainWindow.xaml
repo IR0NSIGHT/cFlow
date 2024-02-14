@@ -32,15 +32,11 @@
             </Grid.ColumnDefinitions>
         </Grid>
         <components:MapView Grid.Row="1" Grid.Column="1"/>
-
-        <!--
-        <Grid Grid.Column="2" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"></RowDefinition>
-                <RowDefinition Height="10*"></RowDefinition>
-                <RowDefinition Height="3*"></RowDefinition>
-            </Grid.RowDefinitions>
-        </Grid>
-    -->
+        <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Vertical">
+            <TextBlock HorizontalAlignment="Center">Tools</TextBlock>
+            <components:ToolButton></components:ToolButton>
+            <components:ToolButton></components:ToolButton>
+            <components:ToolButton></components:ToolButton>
+        </StackPanel>
     </Grid>
 </Window>

@@ -1,19 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace WpfApp1.components
 {
@@ -25,9 +14,7 @@ namespace WpfApp1.components
         public MapView()
         {
             InitializeComponent();
-
-            originalImage = new BitmapImage(new Uri("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\textureGrid_1k.jpg", UriKind.Absolute));
-            _currentMapSection = new MapSection(0, 0, originalImage.PixelWidth);
+            SetMapImage(new BitmapImage(new Uri("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\textureGrid_1k.jpg", UriKind.Absolute)));
             this.Loaded += RedrawMap;
             this.MouseMove += OnPreviewMouseMove;
             this.MouseRightButtonDown += OnPreviewMouseRightButtonDown;
@@ -62,11 +49,15 @@ namespace WpfApp1.components
 
         private void RedrawMap(object sender, RoutedEventArgs e)
         {
+            if (originalImage == null ||this.ActualHeight == 0 || this.ActualWidth == 0)
+                return;
+
             var section = getDisplayMapCrop(this.ActualWidth, this.ActualHeight);
             CroppedBitmap cropped_bitmap =
                 new CroppedBitmap(originalImage, section);
 
             MapImage.Source = cropped_bitmap;
+            InfoText.Text = $"{originalImage.PixelWidth} x {originalImage.PixelHeight} blocks";
         }
 
         private float currentScale = 1;
@@ -74,6 +65,17 @@ namespace WpfApp1.components
         {
             base.OnPreviewMouseWheel(e);
             PreviewMouseWheel(this, e);
+        }
+
+        private void SetMapImage(BitmapImage newMap)
+        {
+            this.originalImage = newMap;
+            SetPosition(0,0);
+            SetSectionByScale(1);
+
+            ScaleText.Text = $"{_currentMapSection.DisplayWidth / 3} blocks";
+
+            RedrawMap(null,null);
         }
 
         private void SetSectionByScale(float scale)
@@ -140,16 +142,11 @@ namespace WpfApp1.components
                 var mousePosGui = e.GetPosition((IInputElement)sender);
                 var currentMousePos = ToPxPosInWindow(mousePosGui);
 
+                //moved mouse this many map units since start of dragging
                 int deltaX = dragStartPxPos.x - currentMousePos.x;
                 int deltaY = dragStartPxPos.y - currentMousePos.y;
 
-                Debug.WriteLine($"mouse at gui pos {mousePosGui}");
-                Debug.WriteLine($"mouse at map pos {currentMousePos}");
-                Debug.WriteLine($"map moved by {deltaX},{deltaY} from {dragStartMapSection}");
-
                 SetPosition(dragStartMapSection.PosX + deltaX, dragStartMapSection.PosY + deltaY);
-            //    UpdatePosition(deltaX, deltaY);
-            //   dragStartPxPos = currentMousePos;
                 RedrawMap(null, null);
             }
         }
