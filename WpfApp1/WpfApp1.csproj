@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="components\medium_flats_EDIT.png" />
     <None Remove="large_circle.png" />
+    <None Remove="loading_spinner.gif" />
     <None Remove="medium_flats.png" />
     <None Remove="medium_flats_brokenUp_EDIT.png" />
     <None Remove="medium_flats_brokenUp_RIVER.png" />
@@ -30,6 +31,7 @@
   <ItemGroup>
     <Resource Include="components\medium_flats_EDIT.png" />
     <Resource Include="large_circle.png" />
+    <Resource Include="loading_spinner.gif" />
     <Resource Include="medium_flats.png" />
     <Resource Include="medium_flats_brokenUp_EDIT.png" />
     <Resource Include="medium_flats_brokenUp_RIVER.png" />

@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.Security;
+using System.Threading.Channels;
+using System.Windows;
 using cFlowForms;
-using WpfApp1.components;
+using Microsoft.Win32;
 
 namespace WpfApp1
 {
@@ -15,7 +17,14 @@ namespace WpfApp1
             SetupChannels();
             MapView.SetChannels(this._guiEventChannel, this._backendEventChannel);
             LoadDefaultMap();
+
+            this.ImportHeightmap.Click += OnImportHeightmapButtonClick;
+            this.RiverToolButton.Click += new RiverTool().OnToggleToolClicked;
+            this.CalcFlowButton.Click += OnCalcFlowButtonClick;
         }
+
+        private GuiEventChannel _guiEventChannel;
+        private BackendEventChannel _backendEventChannel;
 
         public void SetupChannels()
         {
@@ -38,12 +47,44 @@ namespace WpfApp1
             var file = "medium_flats_brokenUp.png";
             _guiEventChannel.RequestLoadHeightmap(new FileEventArgs(path + file));
         }
-        private GuiEventChannel _guiEventChannel;
-        private BackendEventChannel _backendEventChannel;
+
         public void Populate(GuiEventChannel guiEventChannel, BackendEventChannel backendEventChannel)
         {
             this._backendEventChannel = backendEventChannel;
             this._guiEventChannel = guiEventChannel;
+        }
+
+        private void OnCalcFlowButtonClick(object sender, EventArgs e)
+        {
+            _guiEventChannel.RequestCalculateFlow();
+        }
+
+
+        private void OnImportHeightmapButtonClick(object sender, EventArgs e)
+        {
+            var openFileDialog1 = new OpenFileDialog()
+            {
+                FileName = "Select a PNG file",
+                Filter = "PNG files (*.png)|*.png",
+                Title = "Open PNG file",
+                RestoreDirectory = true
+            };
+
+            if (openFileDialog1.ShowDialog() == true)
+            {
+                try
+                {
+                    string selectedDirectory = System.IO.Path.GetDirectoryName(openFileDialog1.FileName);
+                    string fileName = System.IO.Path.GetFileName(openFileDialog1.FileName);
+
+                    _guiEventChannel.RequestLoadHeightmap(new FileEventArgs(openFileDialog1.FileName));
+                }
+                catch (SecurityException ex)
+                {
+                    MessageBox.Show($"Security error.\n\nError message: {ex.Message}\n\n" +
+                                    $"Details:\n\n{ex.StackTrace}");
+                }
+            }
         }
     }
 }
