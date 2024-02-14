@@ -4,8 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using cFlowForms;
-using static System.Windows.Point;
-using static WpfApp1.MainWindow;
 
 namespace WpfApp1.components
 {
@@ -16,13 +14,42 @@ namespace WpfApp1.components
     {
         private BitmapSource _heightBitmapSource;
         public EventHandler<((int x, int y), MouseEventArgs)> OnMapClicked;
+        private LayerProvider _layerProvider;
         public MapView()
         {
             InitializeComponent();
             this._mapPositioner = new MapPositioner(this);
             _mapPositioner.OnMapSectionChanged += RedrawMap;
 
+            _layerProvider = new LayerProvider(this.ButtonList);
+            _layerProvider.LayerToggledEventHandler += OnLayerToggled;
             this.MouseDown += OnMouseDown;
+        }
+
+        private void OnLayerToggled(object? sender, EventArgs e)
+        {
+            RedrawMap(this, _mapPositioner.getDisplayedAreaOfMapImage(this.ActualWidth, this.ActualHeight));
+        }
+
+
+        private void OnFlowMapChanged(object? sender, ImageEventArgs e)
+        {
+            _layerProvider.UpdateLayerBitmap(LayerProvider.FlowLayer, e.Image);
+        }
+
+        private void OnRiverMapChanged(object? sender, ImageEventArgs e)
+        {
+            _layerProvider.UpdateLayerBitmap(LayerProvider.RiverLayer, e.Image);
+        }
+
+        private void OnHeightMapChanged(object? sender, ImageEventArgs args)
+        {
+            if (args.MapType != MapType.Heightmap)
+                return;
+
+            _layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, args.Image);
+            _mapPositioner.SetMapDimensions((args.Image.Width, args.Image.Height));
+
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs args)
@@ -36,32 +63,30 @@ namespace WpfApp1.components
         public void SetChannels(GuiEventChannel guiChannel, BackendEventChannel backendChannel)
         {
             backendChannel.HeightmapChanged += OnHeightMapChanged;
+            backendChannel.FlowmapChanged += OnFlowMapChanged;
+            backendChannel.RivermapChanged += OnRiverMapChanged;
         }
-
-        private void OnHeightMapChanged(object? sender, ImageEventArgs args)
-        {
-            if (args.MapType != MapType.Heightmap)
-                return;
-
-            IntPtr hBitmap = args.Image.GetHbitmap();
-            BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
-            );
-
-            SetMapImage(bitmapSource);
-        }
-
-
-
+        
         private void RedrawMap(object sender, Int32Rect displayedSection)
         {
-            if (_heightBitmapSource == null || this.ActualHeight == 0 || this.ActualWidth == 0)
+            if (this.ActualHeight == 0 || this.ActualWidth == 0)
                 return;
 
             ScaleText.Text = $"{displayedSection.Width / 3} blocks";
 
             Debug.Assert(displayedSection.HasArea, " displayedSection is illegal shape");
-            try
+            ImageOverlay.Children.Clear();
+            foreach (var bitmap in _layerProvider.ActiveLayers())
+            {
+                IntPtr hBitmap = bitmap.GetHbitmap();
+                BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
+                );
+                Image img = new Image();
+                img.Source = bitmapSource;
+                ImageOverlay.Children.Add(img);
+            }
+        /*    try
             {
                 CroppedBitmap cropped_bitmap =
                     new CroppedBitmap(_heightBitmapSource, displayedSection);
@@ -73,16 +98,7 @@ namespace WpfApp1.components
             catch (Exception ex)
             {
                 Debug.WriteLine("UWU");
-            }
+            } */
         }
-
-        private void SetMapImage(BitmapSource newMap)
-        {
-            _mapPositioner.SetMapDimensions((newMap.PixelWidth, newMap.PixelHeight));
-            this._heightBitmapSource = newMap;
-            RedrawMap(this, _mapPositioner.getDisplayedAreaOfMapImage(this.ActualWidth, this.ActualHeight));
-        }
-
-
     }
 }

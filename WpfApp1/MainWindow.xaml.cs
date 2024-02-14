@@ -10,12 +10,14 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         public MainWindow()
         {
             InitializeComponent();
             SetupChannels();
             MapView.SetChannels(this._guiEventChannel, this._backendEventChannel);
             LoadDefaultMap();
+
 
             this.ImportHeightmap.Click += OnImportHeightmapButtonClick;
             this.CalcFlowButton.Click += OnCalcFlowButtonClick;
@@ -24,6 +26,8 @@ namespace WpfApp1
 
             this.RiverToolButton.Click += riverTool.OnToggleToolClicked;
             this.MapView.OnMapClicked += riverTool.OnMapClicked;
+
+            
 
             _backendEventChannel.LoadingStateChanged += OnLoadingUpdate;
         }
