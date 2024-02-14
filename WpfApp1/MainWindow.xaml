@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         xmlns:components="clr-namespace:WpfApp1.components"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
     <Grid 
         VerticalAlignment="Stretch"
         HorizontalAlignment="Stretch"
-        Background="Beige">
+        Background="DimGray">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"></ColumnDefinition>
             <ColumnDefinition Width="10*"></ColumnDefinition>
@@ -39,7 +40,6 @@
             <components:ToolButton  x:Name="RiverToolButton" Content="River"></components:ToolButton>
             <components:ToolButton  x:Name="FloodToolButton" Content="Flood"></components:ToolButton>
         </StackPanel>
-
-        <Image Grid.Column="0" Grid.Row="0" Source="/loading_spinner.gif"></Image>
+        <fa:ImageAwesome x:Name="LoadingSpinner" Foreground="WhiteSmoke" Icon="Cog" Spin="True" SpinDuration="10" Margin="5,5,5,5" />
     </Grid>
 </Window>

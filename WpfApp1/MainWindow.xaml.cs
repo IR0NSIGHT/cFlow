@@ -21,6 +21,8 @@ namespace WpfApp1
             this.ImportHeightmap.Click += OnImportHeightmapButtonClick;
             this.RiverToolButton.Click += new RiverTool().OnToggleToolClicked;
             this.CalcFlowButton.Click += OnCalcFlowButtonClick;
+
+            _backendEventChannel.LoadingStateChanged += OnLoadingUpdate;
         }
 
         private GuiEventChannel _guiEventChannel;
@@ -59,6 +61,13 @@ namespace WpfApp1
             _guiEventChannel.RequestCalculateFlow();
         }
 
+        private void OnLoadingUpdate(object? sender, LoadingStateEventArgs e)
+        {
+            if (e.IsLoading)
+                LoadingSpinner.Visibility = Visibility.Visible;
+            else
+                LoadingSpinner.Visibility = Visibility.Hidden;
+        }
 
         private void OnImportHeightmapButtonClick(object sender, EventArgs e)
         {
