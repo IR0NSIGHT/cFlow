@@ -28,9 +28,9 @@
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="1" x:Name="ButtonList" >
-                <local:ToolButton>river</local:ToolButton>
-                <local:ToolButton>contour</local:ToolButton>
-                <local:ToolButton>hieghtmap</local:ToolButton>
+                <local:ToolButton />
+                <local:ToolButton />
+                <local:ToolButton />
 
             </StackPanel>
 

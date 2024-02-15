@@ -19,12 +19,12 @@ namespace WpfApp1
             LoadDefaultMap();
 
 
-            this.ImportHeightmap.Click += OnImportHeightmapButtonClick;
-            this.CalcFlowButton.Click += OnCalcFlowButtonClick;
+            this.ImportHeightmap.OnToggledEventHandler += OnImportHeightmapButtonClick;
+            this.CalcFlowButton.OnToggledEventHandler += OnCalcFlowButtonClick;
 
             var riverTool = new RiverTool(_guiEventChannel);
 
-            this.RiverToolButton.Click += riverTool.OnToggleToolClicked;
+            this.RiverToolButton.OnToggledEventHandler += riverTool.OnToggleToolClicked;
             this.MapView.OnMapClicked += riverTool.OnMapClicked;
 
             
@@ -63,7 +63,7 @@ namespace WpfApp1
             this._guiEventChannel = guiEventChannel;
         }
 
-        private void OnCalcFlowButtonClick(object sender, EventArgs e)
+        private void OnCalcFlowButtonClick(object sender, bool newState)
         {
             _guiEventChannel.RequestCalculateFlow();
         }
@@ -76,7 +76,7 @@ namespace WpfApp1
                 LoadingSpinner.Visibility = Visibility.Hidden;
         }
 
-        private void OnImportHeightmapButtonClick(object sender, EventArgs e)
+        private void OnImportHeightmapButtonClick(object sender, bool newState)
         {
             var openFileDialog1 = new OpenFileDialog()
             {

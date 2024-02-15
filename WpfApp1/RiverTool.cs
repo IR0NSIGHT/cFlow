@@ -15,13 +15,9 @@ public partial class MainWindow
             this._channel = channel;
         }
 
-        public void OnToggleToolClicked(object sender, EventArgs e)
+        public void OnToggleToolClicked(object sender, bool newState)
         {
-            _isEnabled = !_isEnabled;
-            if (sender is ToolButton button)
-            {
-                button.SetActive(_isEnabled);
-            }
+            _isEnabled = newState;
         }
 
         public void OnMapClicked(object sender, ((int x, int y) pos, MouseEventArgs e) args)

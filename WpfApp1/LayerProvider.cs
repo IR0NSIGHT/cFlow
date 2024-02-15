@@ -53,18 +53,13 @@ public class LayerProvider
             var button = new ToolButton();
             _layerToggleButtons[tuple.idx] = button;
             button.SetActive(tuple.active);
-            button.Content = tuple.name;
 
-            var callBack = new RoutedEventHandler((sender, e) =>
+            var callBack = new EventHandler<bool>((sender, newState) =>
             {
-                ToggleLayer(tuple.idx);
-                bool active = IsLayerActive(tuple.idx);
-                if (sender is ToolButton button)
-                {
-                    button.SetActive(active);
-                }
+                
+                ToggleLayer(tuple.idx, newState);
             });
-            button.Click += callBack;
+            button.OnToggledEventHandler += callBack;
 
             buttonContainerControl.Children.Add(button);
         }
@@ -86,10 +81,10 @@ public class LayerProvider
     {
         return layers[index].active;
     }
-    public void ToggleLayer(int idx)
+    public void ToggleLayer(int idx, bool newState)
     {
         var (layer, active, name) = layers[idx];
-        layers[idx] = (layer, !active, name);
+        layers[idx] = (layer, newState, name);
 
         LayerToggledEventHandler?.Invoke(this, EventArgs.Empty);
     }
