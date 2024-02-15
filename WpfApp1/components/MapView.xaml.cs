@@ -18,7 +18,7 @@ namespace WpfApp1.components
         public MapView()
         {
             InitializeComponent();
-            this._mapPositioner = new MapPositioner(this);
+            this._mapPositioner = new MapPositioner(this.ImageOverlay);
             _mapPositioner.OnMapSectionChanged += RedrawMap;
 
             _layerProvider = new LayerProvider(this.ButtonList);
@@ -33,7 +33,33 @@ namespace WpfApp1.components
 
         private void RedrawMap()
         {
-            RedrawMap(this, _mapPositioner.getDisplayedAreaOfMapImage(this.ActualWidth, this.ActualHeight));
+            var displayedSection = _mapPositioner.getDisplayedAreaOfMapImage();
+
+            if (this.ActualHeight == 0 || this.ActualWidth == 0)
+                return;
+
+            ScaleText.Text = $"{displayedSection.Width / 3} blocks";
+
+            Debug.Assert(displayedSection.HasArea, " displayedSection is illegal shape");
+            ImageOverlay.Children.Clear();
+            foreach (var bitmap in _layerProvider.ActiveLayers())
+            {
+                if ((bitmap.Width, bitmap.Height) != _mapPositioner.MapDimensions)
+                    continue;
+                IntPtr hBitmap = bitmap.GetHbitmap();
+                BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
+                );
+                Image img = new Image();
+
+                CroppedBitmap cropped_bitmap =
+                    new CroppedBitmap(bitmapSource, displayedSection);
+
+                img.Source = cropped_bitmap;
+                ImageOverlay.Children.Add(img);
+                InfoText.Text = $"{displayedSection.Width} x {displayedSection.Height} blocks";
+
+            }
         }
 
         private void OnFlowMapChanged(object? sender, ImageEventArgs e)
@@ -72,39 +98,10 @@ namespace WpfApp1.components
             backendChannel.FlowmapChanged += OnFlowMapChanged;
             backendChannel.RivermapChanged += OnRiverMapChanged;
         }
-        
+
         private void RedrawMap(object sender, Int32Rect displayedSection)
         {
-            if (this.ActualHeight == 0 || this.ActualWidth == 0)
-                return;
-
-            ScaleText.Text = $"{displayedSection.Width / 3} blocks";
-
-            Debug.Assert(displayedSection.HasArea, " displayedSection is illegal shape");
-            ImageOverlay.Children.Clear();
-            foreach (var bitmap in _layerProvider.ActiveLayers())
-            {
-                IntPtr hBitmap = bitmap.GetHbitmap();
-                BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
-                );
-                Image img = new Image();
-                img.Source = bitmapSource;
-                ImageOverlay.Children.Add(img);
-            }
-        /*    try
-            {
-                CroppedBitmap cropped_bitmap =
-                    new CroppedBitmap(_heightBitmapSource, displayedSection);
-
-                MapImage.Source = cropped_bitmap;
-                InfoText.Text = $"{_heightBitmapSource.PixelWidth} x {_heightBitmapSource.PixelHeight} blocks";
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("UWU");
-            } */
+            RedrawMap();
         }
     }
 }
