@@ -10,9 +10,9 @@
         <Button
             x:Name="MyButton"
             Foreground="WhiteSmoke"
-            FontSize="20">
-            world
-        </Button>
+            FontSize="20" 
+            Content="{Binding ToolName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        />
     </Grid>
 </UserControl>
     

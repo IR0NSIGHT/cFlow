@@ -28,9 +28,9 @@
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="1" x:Name="ButtonList" >
-                <local:ToolButton />
-                <local:ToolButton />
-                <local:ToolButton />
+                <local:ToolButton Stateless="True"/>
+                <local:ToolButton ToolName="layer 1"/>
+                <local:ToolButton  ToolName="layer 2" />
 
             </StackPanel>
 

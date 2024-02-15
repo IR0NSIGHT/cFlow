@@ -53,7 +53,7 @@ public class LayerProvider
             var button = new ToolButton();
             _layerToggleButtons[tuple.idx] = button;
             button.SetActive(tuple.active);
-
+            button.ToolName = tuple.name;
             var callBack = new EventHandler<bool>((sender, newState) =>
             {
                 

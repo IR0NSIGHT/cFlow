@@ -35,10 +35,10 @@
         <components:MapView x:Name="MapView" Grid.Row="1" Grid.Column="1"/>
         <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Vertical">
             <TextBlock HorizontalAlignment="Center">Tools</TextBlock>
-            <components:ToolButton x:Name="ImportHeightmap"/>
-            <components:ToolButton x:Name="CalcFlowButton"/>
-            <components:ToolButton  x:Name="RiverToolButton"/>
-            <components:ToolButton  x:Name="FloodToolButton" />
+            <components:ToolButton x:Name="ImportHeightmap" Stateless="True" ToolName="Import heightmap"/>
+            <components:ToolButton x:Name="CalcFlowButton" Stateless="True" ToolName="Calculate Flow"/>
+            <components:ToolButton  x:Name="RiverToolButton" ToolName="River"/>
+            <components:ToolButton  x:Name="FloodToolButton" ToolName="Flood" />
         </StackPanel>
         <fa:ImageAwesome x:Name="LoadingSpinner" Foreground="WhiteSmoke" Icon="Cog" Spin="True" SpinDuration="10" Margin="5,5,5,5" />
     </Grid>
