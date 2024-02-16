@@ -21,7 +21,7 @@ namespace src.Maps.riverMap
             {
                 map[i] = new bool[flowMap.Bounds().y];
             }
-            riverOverlay = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format16bppArgb1555);
+            riverOverlay = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
 
         }
 
