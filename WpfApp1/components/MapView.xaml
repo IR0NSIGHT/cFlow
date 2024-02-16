@@ -22,18 +22,20 @@
                         <ColumnDefinition Width="3*"></ColumnDefinition>
                         <ColumnDefinition Width="3*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="InfoText" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15">15000 x 6740 m</TextBlock>
+                    <TextBlock x:Name="InfoText" Background="WhiteSmoke" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontSize="15">15000 x 6740 m</TextBlock>
                     <TextBlock x:Name="ScaleText" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="15">100 m</TextBlock>
                     <Rectangle Grid.Column="2" VerticalAlignment="Bottom" Height="20" Stroke="Black" StrokeThickness="2" />
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="1" x:Name="ButtonList" >
-                <local:ToolButton Stateless="True"/>
+                <local:ToolButton Stateless="True" ToolName="layer 0"/>
                 <local:ToolButton ToolName="layer 1"/>
                 <local:ToolButton  ToolName="layer 2" />
-
             </StackPanel>
+            <Grid Background="WhiteSmoke" HorizontalAlignment="Left" Width="Auto" VerticalAlignment="Top">
+                <TextBlock x:Name="CurrentPosText" Margin="5,5,5,5" >pos 69 x 420</TextBlock>
 
+            </Grid>
 
         </Grid>
     </Grid>

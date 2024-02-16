@@ -24,6 +24,7 @@ namespace WpfApp1.components
             _layerProvider = new LayerProvider(this.ButtonList);
             _layerProvider.LayerToggledEventHandler += OnLayerToggled;
             this.MouseDown += OnMouseDown;
+            this.ImageOverlay.PreviewMouseMove += OnPreviewMouseMove;
         }
 
         private void OnLayerToggled(object? sender, EventArgs e)
@@ -82,6 +83,12 @@ namespace WpfApp1.components
             _layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, args.Image);
             _mapPositioner.SetMapDimensions((args.Image.Width, args.Image.Height));
             RedrawMap();
+        }
+
+        private void OnPreviewMouseMove(object? sender, MouseEventArgs e)
+        {
+            var mouseMapPos = _mapPositioner.ToMapPxPos(e.GetPosition(this.ImageOverlay));
+            this.CurrentPosText.Text = $"mouse: {mouseMapPos.x}, {mouseMapPos.y}";
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs args)
