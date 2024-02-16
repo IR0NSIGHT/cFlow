@@ -21,11 +21,11 @@ public class GuiEvents
         Remove
     }
 
-    public record struct FloodChangeRequestEventArgs((int x, int y) pos, FloodChangeType ChangeType)
+    public record struct FloodChangeRequestEventArgs((int x, int y) pos, FloodChangeType ChangeType, int maxDepth = 10, int maxSurface = 100000)
     {
         public (int x, int y) Position { get; } = pos;
         public FloodChangeType ChangeType { get; } = ChangeType;
-        public int MaxDepth;
-        public int MaxSurface;
+        public int MaxDepth { get; } = maxDepth;
+        public int MaxSurface { get; } = maxSurface;
     }
 }

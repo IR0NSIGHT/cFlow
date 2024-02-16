@@ -62,6 +62,10 @@ namespace WpfApp1.components
             SetActive(!active);
         }
 
+        public bool isActive()
+        {
+            return active;
+        }
         public void SetStateless(bool stateless)
         {
             this.Stateless = stateless;

@@ -1,5 +1,6 @@
 ﻿using System.Security;
 using System.Windows;
+using System.Windows.Input;
 using cFlowForms;
 using Microsoft.Win32;
 
@@ -10,7 +11,7 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -27,9 +28,23 @@ namespace WpfApp1
             this.RiverToolButton.OnToggledEventHandler += riverTool.OnToggleToolClicked;
             this.MapView.OnMapClicked += riverTool.OnMapClicked;
 
-            
+            this.MapView.OnMapClicked += OnMapClicked;
+
 
             _backendEventChannel.LoadingStateChanged += OnLoadingUpdate;
+        }
+
+        private void OnMapClicked(object? sender, ((int x, int y) pos, MouseEventArgs e) arg)
+        {
+            if (arg.e.LeftButton == MouseButtonState.Pressed && this.FloodToolButton.isActive())
+                _guiEventChannel.RequestFloodChange(
+                    new GuiEvents.FloodChangeRequestEventArgs(
+                        arg.pos, 
+                        GuiEvents.FloodChangeType.Add,
+                        10,
+                        400000
+                        
+                        ));
         }
 
         private GuiEventChannel _guiEventChannel;
