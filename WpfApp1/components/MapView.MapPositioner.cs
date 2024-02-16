@@ -11,11 +11,10 @@ public partial class MapView
     {
         public EventHandler<Int32Rect> OnMapSectionChanged;
 
-        public MapPositioner(Grid mapWindow)
+        public MapPositioner(Canvas mapWindow)
         {
             mapWindow.MouseMove += OnPreviewMouseMove;
             mapWindow.MouseRightButtonDown += OnPreviewMouseRightButtonDown;
-            mapWindow.MouseWheel += PreviewMouseWheel;
             this.mapView = mapWindow;
         }
 
@@ -29,7 +28,7 @@ public partial class MapView
 
         private (int width, int height) mapDimensions;
         public (int width, int height) MapDimensions => mapDimensions;
-        private Grid mapView;
+        private Canvas mapView;
         private (int x, int y) dragStartPxPos;
         private MapSection dragStartMapSection;
         private float currentScale = 1;
@@ -55,10 +54,10 @@ public partial class MapView
             Debug.Assert(yHeight + yPos <= mapDimensions.height);
 
             return new Int32Rect(
-                xPos,
-                yPos,
-                xWidth,
-                yHeight
+                0,
+                0,
+                mapDimensions.width,
+                mapDimensions.height
             );
         }
         private void SetSectionByScale(float scale)
@@ -68,15 +67,16 @@ public partial class MapView
 
         private void updateScale(float delta)
         {
-            this.currentScale = Math.Clamp(currentScale + delta, 1, 1000);
+            this.currentScale = Math.Clamp(currentScale + delta, 0.01f, 1000);
+            Debug.WriteLine($"Set map scale to {currentScale}");
         }
 
-        private void PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        public void PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            updateScale(e.Delta * 1f / 1000);
-            Debug.WriteLine($"scale = {currentScale}");
-            SetSectionByScale(currentScale);
-            this.OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
+              updateScale(e.Delta * 1f / 1000);
+        //    Debug.WriteLine($"scale = {currentScale}");
+        //    SetSectionByScale(currentScale);
+                this.OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
         }
 
         private MapSection SectionWithPosition(int x, int y)
@@ -93,7 +93,7 @@ public partial class MapView
             if (!(sender is IInputElement input))
                 return;
 
-            dragStartPxPos = ToPxPosInWindow(e.GetPosition(input));
+            dragStartPxPos = ToPxPosInWindow(e.GetPosition(input)); //FIXME this HAS to be the mapcanvas, otherwise the position is incorrect
             dragStartMapSection = _currentMapSection;
         }
 
@@ -113,18 +113,19 @@ public partial class MapView
 
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                var mousePosGui = e.GetPosition((IInputElement)sender);
-                var currentMousePos = ToPxPosInWindow(mousePosGui);
-
-                //moved mouse this many map units since start of dragging
-                int deltaX = dragStartPxPos.x - currentMousePos.x;
-                int deltaY = dragStartPxPos.y - currentMousePos.y;
-
-                _currentMapSection = SectionWithPosition(dragStartMapSection.PosX + deltaX, dragStartMapSection.PosY + deltaY);
-                OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
-            }
+            //FIXME disabled for now: scrollview handles movement
+        //    if (e.RightButton == MouseButtonState.Pressed)
+        //    {
+        //        var mousePosGui = e.GetPosition((IInputElement)sender);
+        //        var currentMousePos = ToPxPosInWindow(mousePosGui);
+        //
+        //        //moved mouse this many map units since start of dragging
+        //        int deltaX = dragStartPxPos.x - currentMousePos.x;
+        //        int deltaY = dragStartPxPos.y - currentMousePos.y;
+        //
+        //        _currentMapSection = SectionWithPosition(dragStartMapSection.PosX + deltaX, dragStartMapSection.PosY + deltaY);
+        //        OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
+        //    }
         }
     }
 }

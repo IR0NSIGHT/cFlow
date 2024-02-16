@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using cFlowForms;
 
@@ -18,13 +20,13 @@ namespace WpfApp1.components
         public MapView()
         {
             InitializeComponent();
-            this._mapPositioner = new MapPositioner(this.ImageOverlay);
+            this._mapPositioner = new MapPositioner(this.MapCanvas);
             _mapPositioner.OnMapSectionChanged += RedrawMap;
 
             _layerProvider = new LayerProvider(this.ButtonList);
             _layerProvider.LayerToggledEventHandler += OnLayerToggled;
-            this.MouseDown += OnMouseDown;
-            this.ImageOverlay.PreviewMouseMove += OnPreviewMouseMove;
+            MapCanvas.MouseDown += OnMouseDown;
+            MapCanvas.PreviewMouseMove += OnPreviewMouseMove;
         }
 
         private void OnLayerToggled(object? sender, EventArgs e)
@@ -32,35 +34,58 @@ namespace WpfApp1.components
             RedrawMap();
         }
 
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            _mapPositioner.PreviewMouseWheel(sender, e);
+            e.Handled = true;
+        }
+
         private void RedrawMap()
         {
             var displayedSection = _mapPositioner.getDisplayedAreaOfMapImage();
-
-            if (this.ActualHeight == 0 || this.ActualWidth == 0)
-                return;
-
             ScaleText.Text = $"{displayedSection.Width / 3} blocks";
-
             Debug.Assert(displayedSection.HasArea, " displayedSection is illegal shape");
-            ImageOverlay.Children.Clear();
+
+
+            MapCanvas.Children.Clear();
             foreach (var bitmap in _layerProvider.ActiveLayers())
             {
                 if ((bitmap.Width, bitmap.Height) != _mapPositioner.MapDimensions)
                     continue;
-                IntPtr hBitmap = bitmap.GetHbitmap();
-                BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                    hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
-                );
-                Image img = new Image();
+                
+                //set canvas to size of map times scale: scale = 2 ==> canvas is twice as big
+                MapCanvas.Width = _mapPositioner.MapDimensions.width * _mapPositioner.CurrentScale;
+                MapCanvas.Height = _mapPositioner.MapDimensions.height * _mapPositioner.CurrentScale;
 
                 CroppedBitmap cropped_bitmap =
-                    new CroppedBitmap(bitmapSource, displayedSection);
+                    new CroppedBitmap(FromBitmap(bitmap), displayedSection);
 
-                img.Source = cropped_bitmap;
-                ImageOverlay.Children.Add(img);
-                InfoText.Text = $"{displayedSection.Width} x {displayedSection.Height} blocks";
+                var imageBrush = new ImageBrush(cropped_bitmap);
+                imageBrush.Freeze();
+
+                var rect = new System.Windows.Shapes.Rectangle
+                {
+                    Width = cropped_bitmap.PixelWidth * _mapPositioner.CurrentScale,
+                    Height = cropped_bitmap.PixelHeight * _mapPositioner.CurrentScale,
+                    Fill = imageBrush
+                };
+
+                MapCanvas.Children.Add(rect);
+                Canvas.SetLeft(rect,displayedSection.X);
+                Canvas.SetTop(rect, displayedSection.Y);
+              //img.Source = cropped_bitmap;
+                InfoText.Text = $"{displayedSection.Width} x {displayedSection.Height} blocks at x{_mapPositioner.CurrentScale} ";
 
             }
+        }
+
+        private BitmapSource FromBitmap(Bitmap bmp)
+        {
+            IntPtr hBitmap = bmp.GetHbitmap();
+            BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
+            );
+            return bitmapSource;
         }
 
         private void OnFlowMapChanged(object? sender, ImageEventArgs e)
@@ -87,13 +112,14 @@ namespace WpfApp1.components
 
         private void OnPreviewMouseMove(object? sender, MouseEventArgs e)
         {
-            var mouseMapPos = _mapPositioner.ToMapPxPos(e.GetPosition(this.ImageOverlay));
+            var mouseMapPos = _mapPositioner.ToMapPxPos(e.GetPosition(this.MapCanvas));
             this.CurrentPosText.Text = $"mouse: {mouseMapPos.x}, {mouseMapPos.y}";
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs args)
         {
-            var mapPos = _mapPositioner.ToMapPxPos(args.GetPosition(this));
+            var mapPos = _mapPositioner.ToMapPxPos(args.GetPosition(this.MapCanvas));
+            Debug.WriteLine($"user clicked map at mapcoord {mapPos} ");
             OnMapClicked.Invoke(this, (mapPos, args));
         }
 

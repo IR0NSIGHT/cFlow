@@ -12,10 +12,13 @@
                 <ColumnDefinition Width="10*"></ColumnDefinition>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
-                <Grid x:Name="ImageOverlay">
-                    <Image x:Name="MapImage" Source="/components/medium_flats_EDIT.png" Stretch="UniformToFill" ></Image>
-                </Grid>
+            <Grid Grid.Column="0" ClipToBounds="True">
+                <ScrollViewer HorizontalScrollBarVisibility="Visible"
+                              VerticalScrollBarVisibility="Visible"
+                              PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"
+                              >
+                    <Canvas x:Name="MapCanvas" Background="DarkGreen" Width="2048" Height="2048"/>
+                </ScrollViewer>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"></ColumnDefinition>
