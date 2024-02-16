@@ -48,45 +48,34 @@ namespace WpfApp1.components
 
 
             MapCanvas.Children.Clear();
-            foreach (var bitmap in _layerProvider.ActiveLayers())
+            //set canvas to size of map times scale: scale = 2 ==> canvas is twice as big
+            MapCanvas.Width = _mapPositioner.MapDimensions.width * _mapPositioner.CurrentScale;
+            MapCanvas.Height = _mapPositioner.MapDimensions.height * _mapPositioner.CurrentScale;
+            InfoText.Text = $"{displayedSection.Width} x {displayedSection.Height} blocks at x{_mapPositioner.CurrentScale} ";
+
+            foreach (var imageSource in _layerProvider.ActiveLayers())
             {
-                if ((bitmap.Width, bitmap.Height) != _mapPositioner.MapDimensions)
+                if ((imageSource.Width, imageSource.Height) != _mapPositioner.MapDimensions)
                     continue;
                 
-                //set canvas to size of map times scale: scale = 2 ==> canvas is twice as big
-                MapCanvas.Width = _mapPositioner.MapDimensions.width * _mapPositioner.CurrentScale;
-                MapCanvas.Height = _mapPositioner.MapDimensions.height * _mapPositioner.CurrentScale;
-
-                CroppedBitmap cropped_bitmap =
-                    new CroppedBitmap(FromBitmap(bitmap), displayedSection);
-
-                var imageBrush = new ImageBrush(cropped_bitmap);
+                var imageBrush = new ImageBrush(imageSource);
                 imageBrush.Freeze();
 
                 var rect = new System.Windows.Shapes.Rectangle
                 {
-                    Width = cropped_bitmap.PixelWidth * _mapPositioner.CurrentScale,
-                    Height = cropped_bitmap.PixelHeight * _mapPositioner.CurrentScale,
+                    Width = imageSource.Width * _mapPositioner.CurrentScale,
+                    Height = imageSource.Height * _mapPositioner.CurrentScale,
                     Fill = imageBrush
                 };
 
                 MapCanvas.Children.Add(rect);
-                Canvas.SetLeft(rect,displayedSection.X);
-                Canvas.SetTop(rect, displayedSection.Y);
-              //img.Source = cropped_bitmap;
-                InfoText.Text = $"{displayedSection.Width} x {displayedSection.Height} blocks at x{_mapPositioner.CurrentScale} ";
+                Canvas.SetLeft(rect,displayedSection.X * _mapPositioner.CurrentScale);
+                Canvas.SetTop(rect, displayedSection.Y * _mapPositioner.CurrentScale);
 
             }
         }
 
-        private BitmapSource FromBitmap(Bitmap bmp)
-        {
-            IntPtr hBitmap = bmp.GetHbitmap();
-            BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()
-            );
-            return bitmapSource;
-        }
+
 
         private void OnFlowMapChanged(object? sender, ImageEventArgs e)
         {
