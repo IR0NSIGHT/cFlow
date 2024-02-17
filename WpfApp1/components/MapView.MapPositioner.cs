@@ -59,10 +59,10 @@ public partial class MapView
         }
 
         //returns newScale/oldScale
-        private float updateScale(float delta)
+        private float updateScale(float scaleMultiplier)
         {
             var oldScale = currentScale;
-            this.currentScale = Math.Clamp(currentScale + delta, 0.01f, 1000);
+            this.currentScale = Math.Clamp(currentScale * scaleMultiplier, 0.01f, 1000);
             Debug.WriteLine($"Set map scale to {currentScale}");
             return currentScale / oldScale;
         }
@@ -70,7 +70,8 @@ public partial class MapView
         public void PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             var mouseCanvasPos = e.GetPosition(MapCanvas);
-            var scaleDelta = updateScale(e.Delta * 1f / 1000);
+            var multi = e.Delta < 0 ? 1/1.1f : 1.1f;
+            var scaleDelta = updateScale(multi);
             var newMousePos = (mouseCanvasPos.X * scaleDelta, mouseCanvasPos.Y * scaleDelta);
             var movedDelta = (mouseCanvasPos.X - newMousePos.Item1, mouseCanvasPos.Y - newMousePos.Item2);
 
@@ -78,8 +79,8 @@ public partial class MapView
                 (mapScrollViewer.HorizontalOffset, mapScrollViewer.VerticalOffset);
 
             var newCanvasOffset = 
-                (oldCanvasOffset.HorizontalOffset + movedDelta.Item1,
-                oldCanvasOffset.VerticalOffset + movedDelta.Item2);
+                (oldCanvasOffset.HorizontalOffset - movedDelta.Item1,
+                oldCanvasOffset.VerticalOffset - movedDelta.Item2);
 
             //move map to
             mapScrollViewer.ScrollToHorizontalOffset(newCanvasOffset.Item1);
