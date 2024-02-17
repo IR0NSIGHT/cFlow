@@ -42,7 +42,7 @@ namespace WpfApp1.components
 
         private void RedrawMap()
         {
-            var displayedSection = _mapPositioner.getDisplayedAreaOfMapImage();
+            var displayedSection = _mapPositioner.MapAsRect();
             ScaleText.Text = $"{displayedSection.Width / 3} blocks";
             Debug.Assert(displayedSection.HasArea, " displayedSection is illegal shape");
 

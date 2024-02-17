@@ -17,6 +17,8 @@ public partial class MapView
             mapWindow.MouseRightButtonDown += OnPreviewMouseRightButtonDown;
             this.MapCanvas = mapWindow;
             this.mapScrollViewer = mapScrollViewer;
+
+            mapScrollViewer.PanningMode = PanningMode.None;
         }
 
         public void SetMapDimensions((int width, int height) mapDimensions)
@@ -31,7 +33,6 @@ public partial class MapView
         public (int width, int height) MapDimensions => mapDimensions;
         private Canvas MapCanvas;
         private (int x, int y) dragStartPxPos;
-        private MapSection dragStartMapSection;
         private float currentScale = 1;
         private MapSection _currentMapSection = new();
 
@@ -42,18 +43,8 @@ public partial class MapView
             public int DisplayWidth = DisplayWidth;
         }
 
-
-        public Int32Rect getDisplayedAreaOfMapImage()
+        public Int32Rect MapAsRect()
         {
-            (double guiWidth, double guiHeight) = (MapCanvas.ActualWidth, MapCanvas.ActualHeight);
-            int xWidth = _currentMapSection.DisplayWidth;
-            int yHeight = (int)(_currentMapSection.DisplayWidth * (guiHeight / (guiWidth)));
-            int xPos = (int)Math.Clamp(_currentMapSection.PosX, 0, mapDimensions.width - xWidth);
-            int yPos = (int)Math.Clamp(_currentMapSection.PosY, 0, mapDimensions.height - yHeight);
-            Debug.Assert(xWidth != 0 && yHeight != 0);
-            Debug.Assert(xWidth + xPos <= mapDimensions.width);
-            Debug.Assert(yHeight + yPos <= mapDimensions.height);
-
             return new Int32Rect(
                 0,
                 0,
@@ -61,34 +52,42 @@ public partial class MapView
                 mapDimensions.height
             );
         }
+
         private void SetSectionByScale(float scale)
         {
             _currentMapSection = _currentMapSection with { DisplayWidth = (int)(mapDimensions.width / scale) };
         }
 
-        private void updateScale(float delta)
+        //returns newScale/oldScale
+        private float updateScale(float delta)
         {
+            var oldScale = currentScale;
             this.currentScale = Math.Clamp(currentScale + delta, 0.01f, 1000);
             Debug.WriteLine($"Set map scale to {currentScale}");
+            return currentScale / oldScale;
         }
 
         public void PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-              updateScale(e.Delta * 1f / 1000);
-        //    Debug.WriteLine($"scale = {currentScale}");
-        //    SetSectionByScale(currentScale);
-                this.OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
+            var mouseCanvasPos = e.GetPosition(MapCanvas);
+            var scaleDelta = updateScale(e.Delta * 1f / 1000);
+            var newMousePos = (mouseCanvasPos.X * scaleDelta, mouseCanvasPos.Y * scaleDelta);
+            var movedDelta = (mouseCanvasPos.X - newMousePos.Item1, mouseCanvasPos.Y - newMousePos.Item2);
+
+            var oldCanvasOffset = 
+                (mapScrollViewer.HorizontalOffset, mapScrollViewer.VerticalOffset);
+
+            var newCanvasOffset = 
+                (oldCanvasOffset.HorizontalOffset + movedDelta.Item1,
+                oldCanvasOffset.VerticalOffset + movedDelta.Item2);
+
+            //move map to
+            mapScrollViewer.ScrollToHorizontalOffset(newCanvasOffset.Item1);
+            mapScrollViewer.ScrollToVerticalOffset(newCanvasOffset.Item2);
+
+            this.OnMapSectionChanged.Invoke(this, MapAsRect());
         }
 
-        private MapSection SectionWithPosition(int x, int y)
-        {
-            return _currentMapSection with
-            {
-                PosX = Math.Clamp(x, 0, mapDimensions.width),
-                PosY = Math.Clamp(y, 0, mapDimensions.height)
-            };
-        }
-        
         private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (!(sender is IInputElement input))
@@ -123,11 +122,11 @@ public partial class MapView
                 //moved mouse this many map units since start of dragging
                 int deltaX = dragStartPxPos.x - mouseMapCoord.x;
                 int deltaY = dragStartPxPos.y - mouseMapCoord.y;
-        
+
                 Debug.WriteLine($"map move from anchor {dragStartPxPos} to now {mouseMapCoord}");
                 mapScrollViewer.ScrollToHorizontalOffset(mapScrollViewer.HorizontalOffset + deltaX);
                 mapScrollViewer.ScrollToVerticalOffset(mapScrollViewer.VerticalOffset + deltaY);
-                OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
+                OnMapSectionChanged.Invoke(this, MapAsRect());
             }
         }
     }
