@@ -20,7 +20,7 @@ namespace WpfApp1.components
         public MapView()
         {
             InitializeComponent();
-            this._mapPositioner = new MapPositioner(this.MapCanvas);
+            this._mapPositioner = new MapPositioner(this.MapCanvas, this.MapScrollViewer);
             _mapPositioner.OnMapSectionChanged += RedrawMap;
 
             _layerProvider = new LayerProvider(this.ButtonList);
@@ -101,13 +101,13 @@ namespace WpfApp1.components
 
         private void OnPreviewMouseMove(object? sender, MouseEventArgs e)
         {
-            var mouseMapPos = _mapPositioner.ToMapPxPos(e.GetPosition(this.MapCanvas));
+            var mouseMapPos = _mapPositioner.ToMapPxPos(e);
             this.CurrentPosText.Text = $"mouse: {mouseMapPos.x}, {mouseMapPos.y}";
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs args)
         {
-            var mapPos = _mapPositioner.ToMapPxPos(args.GetPosition(this.MapCanvas));
+            var mapPos = _mapPositioner.ToMapPxPos(args);
             Debug.WriteLine($"user clicked map at mapcoord {mapPos} ");
             OnMapClicked.Invoke(this, (mapPos, args));
         }

@@ -16,6 +16,7 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Visible"
                               VerticalScrollBarVisibility="Visible"
                               PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"
+                              x:Name="MapScrollViewer"
                               >
                     <Canvas x:Name="MapCanvas" Background="DarkGreen" Width="2048" Height="2048"/>
                 </ScrollViewer>

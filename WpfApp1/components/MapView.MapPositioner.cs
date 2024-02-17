@@ -10,12 +10,13 @@ public partial class MapView
     private class MapPositioner
     {
         public EventHandler<Int32Rect> OnMapSectionChanged;
-
-        public MapPositioner(Canvas mapWindow)
+        private ScrollViewer mapScrollViewer;
+        public MapPositioner(Canvas mapWindow, ScrollViewer mapScrollViewer)
         {
             mapWindow.MouseMove += OnPreviewMouseMove;
             mapWindow.MouseRightButtonDown += OnPreviewMouseRightButtonDown;
-            this.mapView = mapWindow;
+            this.MapCanvas = mapWindow;
+            this.mapScrollViewer = mapScrollViewer;
         }
 
         public void SetMapDimensions((int width, int height) mapDimensions)
@@ -28,7 +29,7 @@ public partial class MapView
 
         private (int width, int height) mapDimensions;
         public (int width, int height) MapDimensions => mapDimensions;
-        private Canvas mapView;
+        private Canvas MapCanvas;
         private (int x, int y) dragStartPxPos;
         private MapSection dragStartMapSection;
         private float currentScale = 1;
@@ -44,7 +45,7 @@ public partial class MapView
 
         public Int32Rect getDisplayedAreaOfMapImage()
         {
-            (double guiWidth, double guiHeight) = (mapView.ActualWidth, mapView.ActualHeight);
+            (double guiWidth, double guiHeight) = (MapCanvas.ActualWidth, MapCanvas.ActualHeight);
             int xWidth = _currentMapSection.DisplayWidth;
             int yHeight = (int)(_currentMapSection.DisplayWidth * (guiHeight / (guiWidth)));
             int xPos = (int)Math.Clamp(_currentMapSection.PosX, 0, mapDimensions.width - xWidth);
@@ -93,19 +94,20 @@ public partial class MapView
             if (!(sender is IInputElement input))
                 return;
 
-            dragStartPxPos = ToPxPosInWindow(e.GetPosition(input)); //FIXME this HAS to be the mapcanvas, otherwise the position is incorrect
-            dragStartMapSection = _currentMapSection;
+            dragStartPxPos = ToPxPosInWindow(e);
+            Debug.WriteLine($"SET ANCHOR TO {dragStartPxPos}");
         }
 
-        public (int x, int y) ToMapPxPos(System.Windows.Point positionInWindow)
+        public (int x, int y) ToMapPxPos(MouseEventArgs args)
         {
-            var (x, y) = ToPxPosInWindow(positionInWindow);
+            var (x, y) = ToPxPosInWindow(args);
             return (_currentMapSection.PosX + x, _currentMapSection.PosY + y);
         }
 
-        public (int x, int y) ToPxPosInWindow(System.Windows.Point positionInWindow)
+        public (int x, int y) ToPxPosInWindow(MouseEventArgs args)
         {
-            double mapPxPerDPI = _currentMapSection.DisplayWidth / mapView.ActualWidth;
+            var positionInWindow = args.GetPosition(MapCanvas);
+            double mapPxPerDPI = _currentMapSection.DisplayWidth / MapCanvas.ActualWidth;
             var x = positionInWindow.X * mapPxPerDPI;
             var y = positionInWindow.Y * mapPxPerDPI;
             return ((int)x, (int)y);
@@ -114,18 +116,19 @@ public partial class MapView
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
             //FIXME disabled for now: scrollview handles movement
-        //    if (e.RightButton == MouseButtonState.Pressed)
-        //    {
-        //        var mousePosGui = e.GetPosition((IInputElement)sender);
-        //        var currentMousePos = ToPxPosInWindow(mousePosGui);
-        //
-        //        //moved mouse this many map units since start of dragging
-        //        int deltaX = dragStartPxPos.x - currentMousePos.x;
-        //        int deltaY = dragStartPxPos.y - currentMousePos.y;
-        //
-        //        _currentMapSection = SectionWithPosition(dragStartMapSection.PosX + deltaX, dragStartMapSection.PosY + deltaY);
-        //        OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
-        //    }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                var mouseMapCoord = ToPxPosInWindow(e);
+
+                //moved mouse this many map units since start of dragging
+                int deltaX = dragStartPxPos.x - mouseMapCoord.x;
+                int deltaY = dragStartPxPos.y - mouseMapCoord.y;
+        
+                Debug.WriteLine($"map move from anchor {dragStartPxPos} to now {mouseMapCoord}");
+                mapScrollViewer.ScrollToHorizontalOffset(mapScrollViewer.HorizontalOffset + deltaX);
+                mapScrollViewer.ScrollToVerticalOffset(mapScrollViewer.VerticalOffset + deltaY);
+                OnMapSectionChanged.Invoke(this, getDisplayedAreaOfMapImage());
+            }
         }
     }
 }
