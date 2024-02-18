@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using ComputeSharp;
-using TerraFX.Interop.Windows;
 
 namespace application.Maps.heightMap;
 
@@ -35,6 +34,7 @@ public class ShadedHeightmapComputer
         stopwatch.Restart();
 
         uint[] outArr = new uint[input.Width * input.Height];
+
         // Get the data back
         output.CopyTo(outArr);
         stopwatch.Restart();

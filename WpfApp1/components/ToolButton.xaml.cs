@@ -44,13 +44,8 @@ namespace WpfApp1.components
             InitializeComponent();
             SetActive(false);
             MyButton.Click += OnButtonClick;
-            Loaded += ToolButton_Loaded; // Subscribe to the Loaded event
         }
 
-        private void ToolButton_Loaded(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine("Button has ToolName property: " + ToolName);
-        }
 
         public EventHandler<bool> OnToggledEventHandler;
 

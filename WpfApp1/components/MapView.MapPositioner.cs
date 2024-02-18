@@ -63,7 +63,7 @@ public partial class MapView
         {
             var oldScale = currentScale;
             this.currentScale = Math.Clamp(currentScale * scaleMultiplier, 0.01f, 1000);
-            Debug.WriteLine($"Set map scale to {currentScale}");
+            //Debug.WriteLine($"Set map scale to {currentScale}");
             return currentScale / oldScale;
         }
 
@@ -95,7 +95,7 @@ public partial class MapView
                 return;
 
             dragStartPxPos = ToPxPosInWindow(e);
-            Debug.WriteLine($"SET ANCHOR TO {dragStartPxPos}");
+        //    Debug.WriteLine($"SET ANCHOR TO {dragStartPxPos}");
         }
 
         public (int x, int y) ToMapPxPos(MouseEventArgs args)
@@ -124,7 +124,7 @@ public partial class MapView
                 int deltaX = dragStartPxPos.x - mouseMapCoord.x;
                 int deltaY = dragStartPxPos.y - mouseMapCoord.y;
 
-                Debug.WriteLine($"map move from anchor {dragStartPxPos} to now {mouseMapCoord}");
+            //    Debug.WriteLine($"map move from anchor {dragStartPxPos} to now {mouseMapCoord}");
                 mapScrollViewer.ScrollToHorizontalOffset(mapScrollViewer.HorizontalOffset + deltaX);
                 mapScrollViewer.ScrollToVerticalOffset(mapScrollViewer.VerticalOffset + deltaY);
                 OnMapSectionChanged.Invoke(this, MapAsRect());

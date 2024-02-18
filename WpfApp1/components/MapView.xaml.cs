@@ -108,7 +108,6 @@ namespace WpfApp1.components
         private void OnMouseDown(object? sender, MouseEventArgs args)
         {
             var mapPos = _mapPositioner.ToMapPxPos(args);
-            Debug.WriteLine($"user clicked map at mapcoord {mapPos} ");
             OnMapClicked.Invoke(this, (mapPos, args));
         }
 
