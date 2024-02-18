@@ -10,4 +10,10 @@ public class MapShaderApi
         return ComputeShaderUtility.RunShader(heightmap,
             (texture2D, writeTexture2D) => new SunlightMapShader(texture2D, writeTexture2D));
     }
+
+    public static Bitmap ContourFromHeightmap(Bitmap heightmap)
+    {
+        return ComputeShaderUtility.RunShader(heightmap,
+            (texture2D, writeTexture2D) => new ContourMapShader(texture2D, writeTexture2D));
+    }
 }

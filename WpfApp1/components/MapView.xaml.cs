@@ -91,12 +91,16 @@ namespace WpfApp1.components
 
         private void OnHeightMapChanged(object? sender, ImageEventArgs args)
         {
-            if (args.MapType != MapType.Heightmap)
-                return;
-
-            _layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, args.Image);
-            _mapPositioner.SetMapDimensions((args.Image.Width, args.Image.Height));
-            RedrawMap();
+            if (args.MapType == MapType.Heightmap)
+            {
+                _layerProvider.UpdateLayerBitmap(LayerProvider.HeightmapLayer, args.Image);
+                _mapPositioner.SetMapDimensions((args.Image.Width, args.Image.Height));
+                RedrawMap();
+            } else if (args.MapType == MapType.ContourLines)
+            {
+                _layerProvider.UpdateLayerBitmap(LayerProvider.ContourLayer, args.Image);
+                RedrawMap();
+            }
         }
 
         private void OnPreviewMouseMove(object? sender, MouseEventArgs e)

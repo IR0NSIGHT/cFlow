@@ -17,8 +17,8 @@ public class Image8BitHeightMap : IHeightMap
     {
         //TODO create contour map too
         var sunlightMap = MapShaderApi.SunlightFromHeightmap(heightmap: bitmap);
-
-        return (sunlightMap, sunlightMap);
+        var contourMap = MapShaderApi.ContourFromHeightmap(heightmap: bitmap);
+        return (sunlightMap, contourMap);
     }
 
     public IMapIterator<(int, int)> iterator()
