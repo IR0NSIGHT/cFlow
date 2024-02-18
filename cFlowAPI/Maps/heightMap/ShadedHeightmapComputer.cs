@@ -20,8 +20,8 @@ public class ShadedHeightmapComputer
         // We want the shader to modify the items in-place, so we
         // can allocate a single read-write buffer to work on.
 
-        using ReadOnlyTexture2D<int> input = GraphicsDevice.GetDefault()
-            .AllocateReadOnlyTexture2D<int>(ToReadOnlySpan(heightBitmap), heightBitmap.Width, heightBitmap.Height);
+        using ReadOnlyTexture2D<uint> input = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D<uint>(ToReadOnlySpan(heightBitmap), heightBitmap.Width, heightBitmap.Height);
 
         using ReadWriteTexture2D<int> output = GraphicsDevice.GetDefault()
             .AllocateReadWriteTexture2D<int>(input.Width, input.Height);
@@ -47,13 +47,11 @@ public class ShadedHeightmapComputer
         return image;
     }
 
-
-
-    static ReadOnlySpan<int> ToReadOnlySpan(Bitmap bitmap)
+    static ReadOnlySpan<uint> ToReadOnlySpan(Bitmap bitmap)
     {
         // Lock the bitmap data
         BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-
+        var ptr = bmpData.Scan0;
         try
         {
             unsafe
@@ -62,7 +60,7 @@ public class ShadedHeightmapComputer
                 int pixelCount = bmpData.Width * bmpData.Height ;
 
                 // Create a read-only span from the locked bitmap data
-                ReadOnlySpan<int> span = new ReadOnlySpan<int>(bmpData.Scan0.ToPointer(), pixelCount);
+                ReadOnlySpan<uint> span = new ReadOnlySpan<uint>(bmpData.Scan0.ToPointer(), pixelCount);
 
                 // Return the read-only span
                 return span;
@@ -87,6 +85,7 @@ public class ShadedHeightmapComputer
 
         BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly,
             bitmap.PixelFormat);
+        var ptr = bmpData.Scan0;
 
         try
         {
@@ -94,7 +93,7 @@ public class ShadedHeightmapComputer
             {
                 // Calculate the total number of bytes in the bitmap
                 int pixelCount = bmpData.Width * bmpData.Height;
-                Marshal.Copy(sourceArray, 0, destination: bmpData.Scan0, pixelCount);
+                Marshal.Copy(sourceArray, 0, destination: ptr, pixelCount);
             }
         }
         catch (Exception ex)
@@ -104,6 +103,7 @@ public class ShadedHeightmapComputer
         finally
         {
             // Always unlock the bitmap
+            
             bitmap.UnlockBits(bmpData);
         }
     }
@@ -113,7 +113,7 @@ public class ShadedHeightmapComputer
 [AutoConstructor]
 public readonly partial struct MultiplyByTwo : IComputeShader
 {
-    public readonly ReadOnlyTexture2D<int> input;
+    public readonly ReadOnlyTexture2D<uint> input;
     public readonly ReadWriteTexture2D<int> output;
 
     public void Execute()
@@ -139,7 +139,7 @@ public readonly partial struct MultiplyByTwo : IComputeShader
         }
         output[ThreadIds.XY] = ownSunshine;
         //DEBUG
-        //output[ThreadIds.XY] = input[ThreadIds.XY];
+       // output[ThreadIds.XY] = (int)input[ThreadIds.XY];
 
     }
 }
