@@ -57,7 +57,7 @@ public class ShadedHeightmapComputer
             unsafe
             {
                 // Calculate the total number of bytes in the bitmap
-                int pixelCount = bmpData.Width * bmpData.Height ;
+                int pixelCount = bmpData.Width * bmpData.Height;
 
                 // Create a read-only span from the locked bitmap data
                 ReadOnlySpan<uint> span = new ReadOnlySpan<uint>(bmpData.Scan0.ToPointer(), pixelCount);
@@ -103,7 +103,7 @@ public class ShadedHeightmapComputer
         finally
         {
             // Always unlock the bitmap
-            
+
             bitmap.UnlockBits(bmpData);
         }
     }
@@ -118,7 +118,7 @@ public readonly partial struct MultiplyByTwo : IComputeShader
 
     public void Execute()
     {
-        int ownSunshine = 127;
+        uint ownSunshine = 127;
         int posX = ThreadIds.X;
         int posY = ThreadIds.Y;
         if (posX > 0 && posX < input.Width && posY > 0 && posY < input.Height)
@@ -138,12 +138,11 @@ public readonly partial struct MultiplyByTwo : IComputeShader
                 ownSunshine += 32;
         }
         //int to uint32 ARGB
-        output[ThreadIds.XY] =0xFF000000 ;
+        output[ThreadIds.XY] = 0xFF000000 | ownSunshine << 16 | ownSunshine << 8 | ownSunshine;
         if (posX == posY)
         {
             output[ThreadIds.XY] = 0xFFFFFFFF;
         }
-        //DEBUG
-        //output[ThreadIds.XY] = (int)input[ThreadIds.XY];
+
     }
 }
