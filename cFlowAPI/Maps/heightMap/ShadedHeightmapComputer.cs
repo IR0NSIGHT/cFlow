@@ -125,17 +125,24 @@ public readonly partial struct MultiplyByTwo : IComputeShader
         {
             //block left of me is higher => reduce sunshine
             if (input[ThreadIds.XY - new int2(-1, 0)] > input[ThreadIds.XY])
+                ownSunshine += 32;
+            //block lef of me is lower => increase sunshine
+            if (input[ThreadIds.XY - new int2(-1, 0)] < input[ThreadIds.XY])
                 ownSunshine -= 32;
-            //im higher than block right of me => increase sunshine
-            if (input[ThreadIds.XY] < input[ThreadIds.XY - new int2(1, 0)])
+
+            //block left of me is higher => reduce sunshine
+            if (input[ThreadIds.XY - new int2(1, 0)] > input[ThreadIds.XY])
+                ownSunshine -= 32;
+            //block lef of me is lower => increase sunshine
+            if (input[ThreadIds.XY - new int2(1, 0)] < input[ThreadIds.XY])
                 ownSunshine += 32;
 
-            //block bottom of me is higher => reduce sunshine
-            if (input[ThreadIds.XY - new int2(0, -1)] > input[ThreadIds.XY])
-                ownSunshine -= 32;
-            //im higher than block top of me => increase sunshine
-            if (input[ThreadIds.XY] < input[ThreadIds.XY - new int2(0, 1)])
-                ownSunshine += 32;
+       //     //block bottom of me is higher => reduce sunshine
+       //     if (input[ThreadIds.XY - new int2(0, -1)] > input[ThreadIds.XY])
+       //         ownSunshine -= 32;
+       //     //im higher than block top of me => increase sunshine
+       //     if (input[ThreadIds.XY - new int2(0, -1)] < input[ThreadIds.XY])
+       //         ownSunshine += 32;
         }
         //int to uint32 ARGB
         output[ThreadIds.XY] = 0xFF000000 | ownSunshine << 16 | ownSunshine << 8 | ownSunshine;
