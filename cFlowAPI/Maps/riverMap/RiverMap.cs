@@ -10,7 +10,6 @@ namespace src.Maps.riverMap
         private readonly IFlowMap flowMap;
         private Map2dIterator _iterator;
         private IHeightMap _heightMap;
-        private Bitmap riverOverlay;
         public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
         {
             this.flowMap = flowMap;
@@ -21,19 +20,17 @@ namespace src.Maps.riverMap
             {
                 map[i] = new bool[flowMap.Bounds().y];
             }
-            riverOverlay = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
-
         }
 
         public Bitmap ToImage()
         {
-            return riverOverlay;
+            //FIXME create an image
+            return new Bitmap(100,100);
         }
 
         public void SetAsRiver(int x, int y)
         {
             map[x][y] = true;
-            riverOverlay.SetPixel(x, y, Color.Blue);
         }
 
         public bool IsRiver(int x, int y)
