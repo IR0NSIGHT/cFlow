@@ -121,50 +121,31 @@ public readonly partial struct MultiplyByTwo : IComputeShader
         uint ownSunshine = 127;
         int posX = ThreadIds.X;
         int posY = ThreadIds.Y;
-        uint delta = 16;
+        uint delta = 31;
         if (posX > 0 && posX < input.Width && posY > 0 && posY < input.Height)
         {
-            //block left of me is higher => reduce sunshine
             if (input[ThreadIds.XY - new int2(-1, 0)] > input[ThreadIds.XY])
                 ownSunshine += delta;
-            //block lef of me is lower => increase sunshine
             if (input[ThreadIds.XY - new int2(-1, 0)] < input[ThreadIds.XY])
                 ownSunshine -= delta;
 
-            //block left of me is higher => reduce sunshine
             if (input[ThreadIds.XY - new int2(1, 0)] > input[ThreadIds.XY])
                 ownSunshine -= delta;
-            //block lef of me is lower => increase sunshine
             if (input[ThreadIds.XY - new int2(1, 0)] < input[ThreadIds.XY])
                 ownSunshine += delta;
 
-            //block left of me is higher => reduce sunshine
             if (input[ThreadIds.XY - new int2(0, -1)] > input[ThreadIds.XY])
                 ownSunshine += delta;
-            //block lef of me is lower => increase sunshine
             if (input[ThreadIds.XY - new int2(0,-1)] < input[ThreadIds.XY])
                 ownSunshine -= delta;
 
-            //block left of me is higher => reduce sunshine
             if (input[ThreadIds.XY - new int2(0,1)] > input[ThreadIds.XY])
                 ownSunshine -= delta;
-            //block lef of me is lower => increase sunshine
             if (input[ThreadIds.XY - new int2(0,1)] < input[ThreadIds.XY])
                 ownSunshine += delta;
 
-            //     //block bottom of me is higher => reduce sunshine
-            //     if (input[ThreadIds.XY - new int2(0, -1)] > input[ThreadIds.XY])
-            //         ownSunshine -= 32;
-            //     //im higher than block top of me => increase sunshine
-            //     if (input[ThreadIds.XY - new int2(0, -1)] < input[ThreadIds.XY])
-            //         ownSunshine += 32;
         }
         //int to uint32 ARGB
         output[ThreadIds.XY] = 0xFF000000 | ownSunshine << 16 | ownSunshine << 8 | ownSunshine;
-        if (posX == posY)
-        {
-            output[ThreadIds.XY] = 0xFFFFFFFF;
-        }
-
     }
 }

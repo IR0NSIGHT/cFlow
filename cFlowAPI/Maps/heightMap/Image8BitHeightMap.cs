@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
+using application.Maps.heightMap;
 
 
 public class Image8BitHeightMap : IHeightMap
@@ -14,35 +15,12 @@ public class Image8BitHeightMap : IHeightMap
     
     public (Bitmap, Bitmap) ShadedHeightmap()
     {
-        var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
-        var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
-        byte alpha = 127;
+        //var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
+        //var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
+        //TODO create contour map too
+        var sunlightMap = ShadedHeightmapComputer.RunShader(bitmap);
 
-        var flowMap = new SimpleFlowMap(Bounds());
-        SimpleFlowMap.ApplyNaturalEdgeFlow(this, flowMap);
-
-        foreach (var (x, y) in flowMap.iterator().Points())
-        {
-            var flow = flowMap.GetFlow((x, y));
-            byte val = 127;
-            if (flow.Up)
-                val += 50;
-            if (flow.Left)
-                val += 50;
-
-
-            if (flow.Down)
-                val -= 50;
-            if (flow.Right)
-                val -= 50;
-
-            shadedHeightMap.SetPixel(x, y, Color.FromArgb(255, val, val, val));
-
-            if (!flow.Unknown && GetHeight((x,y)) % 10 == 0) 
-                contourMap.SetPixel(x,y,Color.FromArgb(alpha, Color.Black));
-        }
-
-        return (shadedHeightMap, contourMap);
+        return (sunlightMap, sunlightMap);
     }
 
     public IMapIterator<(int, int)> iterator()
