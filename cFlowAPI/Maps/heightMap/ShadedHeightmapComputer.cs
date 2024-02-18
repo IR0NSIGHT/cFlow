@@ -23,8 +23,8 @@ public class ShadedHeightmapComputer
         using ReadOnlyTexture2D<uint> input = GraphicsDevice.GetDefault()
             .AllocateReadOnlyTexture2D<uint>(ToReadOnlySpan(heightBitmap), heightBitmap.Width, heightBitmap.Height);
 
-        using ReadWriteTexture2D<int> output = GraphicsDevice.GetDefault()
-            .AllocateReadWriteTexture2D<int>(input.Width, input.Height);
+        using ReadWriteTexture2D<uint> output = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(input.Width, input.Height);
 
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -34,7 +34,7 @@ public class ShadedHeightmapComputer
         Debug.WriteLine($"running shader took {stopwatch.ElapsedMilliseconds / 1000f} seconds");
         stopwatch.Restart();
 
-        int[] outArr = new int[input.Width * input.Height];
+        uint[] outArr = new uint[input.Width * input.Height];
         // Get the data back
         output.CopyTo(outArr);
         stopwatch.Restart();
@@ -73,7 +73,7 @@ public class ShadedHeightmapComputer
         }
     }
 
-    public static void CopyArrayToBitmap(int[] sourceArray, Bitmap bitmap)
+    public static void CopyArrayToBitmap(uint[] sourceArray, Bitmap bitmap)
     {
         // Ensure the dimensions of the sourceArray match the dimensions of the bitmap
         if (sourceArray.Length != bitmap.Width * bitmap.Height)
@@ -93,7 +93,7 @@ public class ShadedHeightmapComputer
             {
                 // Calculate the total number of bytes in the bitmap
                 int pixelCount = bmpData.Width * bmpData.Height;
-                Marshal.Copy(sourceArray, 0, destination: ptr, pixelCount);
+                Marshal.Copy((int[])(object)sourceArray, 0, destination: ptr, pixelCount);
             }
         }
         catch (Exception ex)
@@ -114,7 +114,7 @@ public class ShadedHeightmapComputer
 public readonly partial struct MultiplyByTwo : IComputeShader
 {
     public readonly ReadOnlyTexture2D<uint> input;
-    public readonly ReadWriteTexture2D<int> output;
+    public readonly ReadWriteTexture2D<uint> output;
 
     public void Execute()
     {
@@ -137,9 +137,13 @@ public readonly partial struct MultiplyByTwo : IComputeShader
             if (input[ThreadIds.XY] < input[ThreadIds.XY - new int2(0, 1)])
                 ownSunshine += 32;
         }
-        output[ThreadIds.XY] = ownSunshine;
+        //int to uint32 ARGB
+        output[ThreadIds.XY] =0xFF000000 ;
+        if (posX == posY)
+        {
+            output[ThreadIds.XY] = 0xFFFFFFFF;
+        }
         //DEBUG
-       // output[ThreadIds.XY] = (int)input[ThreadIds.XY];
-
+        //output[ThreadIds.XY] = (int)input[ThreadIds.XY];
     }
 }
