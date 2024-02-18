@@ -1,4 +1,5 @@
-﻿using application.Maps;
+﻿using System.Diagnostics;
+using application.Maps;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -6,24 +7,14 @@ using System.Drawing.Imaging;
 public class SimpleFlowMap : IFlowMap
 {
     private IFlowMap.Flow[][] flowMap;
-    private int[][] cycleMap;
 
     public SimpleFlowMap((int x, int y) dimension)
     {
+        Debug.WriteLine("instantiate empty flowmap");
         flowMap = emptyFlowMap(dimension);
-        cycleMap = emptyCycleMap(dimension);
-        FillWithUnknown(this);
-    }
-
-    private static int[][] emptyCycleMap((int x, int y) dimension)
-    {
-        var map = new int[dimension.x][];
-        for (int i = 0; i < dimension.x; i++)
-        {
-            map[i] = new int[dimension.y];
-        }
-
-        return map;
+        Debug.WriteLine("fill with unknown flow");
+        FillWithUnknown();
+        Debug.WriteLine("finished flowmap");
     }
 
     private static IFlowMap.Flow[][] emptyFlowMap((int x, int y) dimensions)
@@ -39,20 +30,16 @@ public class SimpleFlowMap : IFlowMap
 
     public SimpleFlowMap FromHeightMap(IHeightMap heightMap)
     {
-        FillWithUnknown(this);
+        FillWithUnknown();
         CalculateFlowFromHeightMap(heightMap, this);
         return this;
     }
 
-    private static void FillWithUnknown(IFlowMap flowMap)
+    private void FillWithUnknown()
     {
-        //set everything to unknown
-        foreach (var point in flowMap.iterator().Points())
+        for (int x = 0; x < flowMap.Length; x++)
         {
-            flowMap.SetFlow(point,
-                new IFlowMap.Flow(
-                    true, false, false, false, false
-                ), Int32.MaxValue);
+            Array.Fill(flowMap[x], new IFlowMap.Flow(true,false,false,false,false));
         }
     }
 
@@ -71,7 +58,7 @@ public class SimpleFlowMap : IFlowMap
         {
             IFlowMap.Flow flow = pointFlowByHeight(point, heightMap);
             if (!flow.Unknown)
-                flowMap.SetFlow(point, flow, 0);
+                flowMap.SetFlow(point, flow);
         }
     }
 
@@ -214,7 +201,7 @@ public class SimpleFlowMap : IFlowMap
         {
             foreach (var flowPoint in changedCandidates)
             {
-                flowMap.SetFlow((flowPoint.X, flowPoint.Y), flowPoint.Flow, cycle);
+                flowMap.SetFlow((flowPoint.X, flowPoint.Y), flowPoint.Flow);
             }
         }
 
@@ -293,12 +280,7 @@ public class SimpleFlowMap : IFlowMap
             return new IFlowMap.Flow(true, false, false, false, false);
         return new IFlowMap.Flow(false, up, down, left, right);
     }
-
-    public void SetCylce((int x, int y) point, int cycle)
-    {
-        cycleMap[point.x][point.y] = cycle;
-    }
-
+    
     public List<(int x, int y)> FollowFlow((int x, int y) point)
     {
         IFlowMap.Flow flow = GetFlow(point);
@@ -325,15 +307,9 @@ public class SimpleFlowMap : IFlowMap
         return flowMap[point.x][point.y];
     }
 
-    public void SetFlow((int x, int y) point, IFlowMap.Flow flow, int cycle)
+    public void SetFlow((int x, int y) point, IFlowMap.Flow flow)
     {
         flowMap[point.x][point.y] = flow;
-        SetCylce(point, cycle);
-    }
-
-    public int GetCylce((int x, int y) point)
-    {
-        return cycleMap[point.x][point.y];
     }
 
     public bool inBounds(int x, int y)

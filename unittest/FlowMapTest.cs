@@ -11,9 +11,9 @@
 
             //mark y = 0 ==> first column 
 
-            fMap.SetFlow((0, 0), new IFlowMap.Flow(false, true, false, false, false),0);
+            fMap.SetFlow((0, 0), new IFlowMap.Flow(false, true, false, false, false));
             Assert.IsTrue(fMap.GetFlow((0, 0)).Up);
-            fMap.SetFlow((9, 0), new IFlowMap.Flow(false, true, false, false, false),0);
+            fMap.SetFlow((9, 0), new IFlowMap.Flow(false, true, false, false, false));
             Assert.IsTrue(fMap.GetFlow((9, 0)).Up);
 
             //picture origin is top left = 0,0
@@ -21,7 +21,7 @@
             //height = y
 
 
-            fMap.SetFlow((9, 2), new IFlowMap.Flow(false, false, true, false, false),0);
+            fMap.SetFlow((9, 2), new IFlowMap.Flow(false, false, true, false, false));
             Assert.IsTrue(fMap.GetFlow((9, 2)).Down);
 
             var bitmap = SimpleFlowMap.ToColorImage(fMap, FlowTranslation.FlowToColor);

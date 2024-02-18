@@ -29,7 +29,7 @@ namespace namespace_01
             };
             for (int i = 0; i < 15; i++)
             {
-                flowMap.SetFlow((i, 3), allFlows[i],0);
+                flowMap.SetFlow((i, 3), allFlows[i]);
                 var flowOnMap = flowMap.GetFlow((i, 3));
             }
         }

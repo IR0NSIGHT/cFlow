@@ -44,7 +44,7 @@ public class Backend
     {
         FireLoadingEvent(true);
         heightmapApi = new CFlowGenerator(e.FilePath);
-        var (shadedMap, contours) = ((Image8BitHeightMap)heightmapApi.Heightmap).ShadedHeightmap();
+        var (shadedMap, contours) = (heightmapApi.Heightmap).ShadedHeightmap();
 
         backendChannel.RaiseHeightmapChanged(new ImageEventArgs(shadedMap, MapType.Heightmap));
         backendChannel.RaiseHeightmapChanged(new ImageEventArgs(contours, MapType.ContourLines));

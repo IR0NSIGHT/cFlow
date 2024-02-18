@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using src.Maps.riverMap;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace cFlowApi
         private Bitmap _flowmapImgColored;
         private Bitmap _rivermapImg;
 
-        public IHeightMap Heightmap { get; }
+        public DummyDimension Heightmap { get; }
         private IFlowMap _flowMap;
         public Bitmap FlowmapImgColored { get => _flowmapImgColored; }
         public Bitmap RivermapImg { get => _rivermapImg; }
@@ -19,14 +20,17 @@ namespace cFlowApi
         public CFlowGenerator(string imagePath)
         {
             var _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
-            Console.WriteLine("Loaded bitmap");
-            Heightmap = new Image8BitHeightMap(_heightmapImg);
-            Console.WriteLine("Converted image to heightmap");
+            Debug.WriteLine("Loaded bitmap");
+            Heightmap = new DummyDimension((30000, 30000),64);
+            Debug.WriteLine("Converted image to heightmap");
 
             _flowMap = new SimpleFlowMap(Heightmap.Bounds());
+            Debug.WriteLine("loaded flowmap");
             RiverMap = new RiverMap(_flowMap, Heightmap);
+            Debug.WriteLine("loaded rivermap");
+
         }
-        
+
         public void GenerateFlow()
         {
             SimpleFlowMap.CalculateFlowFromHeightMap(Heightmap, _flowMap);

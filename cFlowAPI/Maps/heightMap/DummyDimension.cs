@@ -1,4 +1,7 @@
-﻿public class DummyDimension : IHeightMap
+﻿using System.Drawing;
+using cFlowAPI.Maps.Shader;
+
+public class DummyDimension : IHeightMap
 {
     private Map2dIterator _iterator;
 
@@ -6,6 +9,13 @@
     {
         heightMap = filledHeightmap(size, height);
         _iterator = new Map2dIterator(size);
+    }
+
+    public (Bitmap, Bitmap) ShadedHeightmap()
+    {
+    //    var sunlightMap = MapShaderApi.SunlightFromHeightmap(heightmap: bitmap);
+    //    var contourMap = MapShaderApi.ContourFromHeightmap(heightmap: bitmap);
+        return (new Bitmap(30,30), new Bitmap(30, 30));
     }
 
     private static short[][] filledHeightmap((int x, int y) size, short height)

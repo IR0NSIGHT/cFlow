@@ -2,8 +2,9 @@
 {
     record PointFlow(int X, int Y, IFlowMap.Flow Flow);
 
-    record Flow(bool Unknown, bool Up, bool Down, bool Left, bool Right)
+    struct Flow(bool unknown, bool up, bool down, bool left, bool right)
     {
+        public bool Unknown => unknown; public bool Up => up; public bool Down => down; public bool Left => left; public bool Right => right;
         public static String FlowToString(IFlowMap.Flow p)
         {
             if (p.Unknown)
@@ -50,13 +51,7 @@
 
     Flow GetFlow((int x, int y) point);
 
-    void SetFlow((int x, int y) point, Flow flow, int cycle);
-
-    
-    int GetCylce((int x, int y) point);
-    
-    void SetCylce((int x, int y) point, int cycle);
+    void SetFlow((int x, int y) point, Flow flow);
 
     List<(int x, int y)> FollowFlow((int x, int y) point);
-    
 }
