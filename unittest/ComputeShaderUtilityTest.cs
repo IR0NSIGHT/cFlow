@@ -4,7 +4,7 @@ using application.Maps.heightMap;
 
 namespace unittest;
 [TestFixture]
-public class ShadedHeightmapComputerTest
+public class ComputeShaderUtilityTest
 {
     [Test]
     public void owo()

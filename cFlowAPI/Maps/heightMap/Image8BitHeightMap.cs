@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
-using application.Maps.heightMap;
+using cFlowAPI.Maps.Shader;
 
 
 public class Image8BitHeightMap : IHeightMap
@@ -15,10 +15,8 @@ public class Image8BitHeightMap : IHeightMap
     
     public (Bitmap, Bitmap) ShadedHeightmap()
     {
-        //var shadedHeightMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
-        //var contourMap = new Bitmap(Bounds().x, Bounds().y, PixelFormat.Format32bppArgb);
         //TODO create contour map too
-        var sunlightMap = ShadedHeightmapComputer.RunShader(bitmap);
+        var sunlightMap = MapShaderApi.SunlightFromHeightmap(heightmap: bitmap);
 
         return (sunlightMap, sunlightMap);
     }

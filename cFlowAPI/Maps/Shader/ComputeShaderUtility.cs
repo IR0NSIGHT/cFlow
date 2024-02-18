@@ -2,25 +2,23 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using application.Maps.Shader;
 using ComputeSharp;
 
-namespace application.Maps.heightMap;
+namespace cFlowAPI.Maps.Shader;
 
-public class ShadedHeightmapComputer
+internal class ComputeShaderUtility
 {
-    public static Bitmap RunShader(Bitmap heightBitmap)
+    public static Bitmap SunlightFromHeightmap(Bitmap heightmap)
     {
+        return RunShader(heightmap,
+            (texture2D, writeTexture2D) => new SunlightMapShader(texture2D, writeTexture2D));
+    }
 
-        //    // Get a read-only span of the bitmap data
-        //    ReadOnlySpan<byte> bitmapData = ToReadOnlySpan(heightBitmap);
-        //    GraphicsDevice.GetDefault().LoadReadOnlyTexture2D<Rgba32, float4>(bitmapData);
-
-        // Allocate a GPU buffer and copy the data to it.
-        // We want the shader to modify the items in-place, so we
-        // can allocate a single read-write buffer to work on.
-
+    public static Bitmap RunShader<T>(Bitmap heightBitmap, Func<ReadOnlyTexture2D<uint>, ReadWriteTexture2D<uint>, T> createShader) where T : struct, IComputeShader
+    {
         using ReadOnlyTexture2D<uint> input = GraphicsDevice.GetDefault()
-            .AllocateReadOnlyTexture2D<uint>(ToReadOnlySpan(heightBitmap), heightBitmap.Width, heightBitmap.Height);
+            .AllocateReadOnlyTexture2D(ToReadOnlySpan(heightBitmap), heightBitmap.Width, heightBitmap.Height);
 
         using ReadWriteTexture2D<uint> output = GraphicsDevice.GetDefault()
             .AllocateReadWriteTexture2D<uint>(input.Width, input.Height);
@@ -28,7 +26,8 @@ public class ShadedHeightmapComputer
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         // Launch the shader
-        GraphicsDevice.GetDefault().For(input.Width, input.Height, new MultiplyByTwo(input, output));
+        var shader = createShader(input, output);
+        GraphicsDevice.GetDefault().For(input.Width, input.Height, shader);
 
         Debug.WriteLine($"running shader took {stopwatch.ElapsedMilliseconds / 1000f} seconds");
         stopwatch.Restart();
@@ -106,46 +105,5 @@ public class ShadedHeightmapComputer
 
             bitmap.UnlockBits(bmpData);
         }
-    }
-}
-
-
-[AutoConstructor]
-public readonly partial struct MultiplyByTwo : IComputeShader
-{
-    public readonly ReadOnlyTexture2D<uint> input;
-    public readonly ReadWriteTexture2D<uint> output;
-
-    public void Execute()
-    {
-        uint ownSunshine = 127;
-        int posX = ThreadIds.X;
-        int posY = ThreadIds.Y;
-        uint delta = 31;
-        if (posX > 0 && posX < input.Width && posY > 0 && posY < input.Height)
-        {
-            if (input[ThreadIds.XY - new int2(-1, 0)] > input[ThreadIds.XY])
-                ownSunshine += delta;
-            if (input[ThreadIds.XY - new int2(-1, 0)] < input[ThreadIds.XY])
-                ownSunshine -= delta;
-
-            if (input[ThreadIds.XY - new int2(1, 0)] > input[ThreadIds.XY])
-                ownSunshine -= delta;
-            if (input[ThreadIds.XY - new int2(1, 0)] < input[ThreadIds.XY])
-                ownSunshine += delta;
-
-            if (input[ThreadIds.XY - new int2(0, -1)] > input[ThreadIds.XY])
-                ownSunshine += delta;
-            if (input[ThreadIds.XY - new int2(0,-1)] < input[ThreadIds.XY])
-                ownSunshine -= delta;
-
-            if (input[ThreadIds.XY - new int2(0,1)] > input[ThreadIds.XY])
-                ownSunshine -= delta;
-            if (input[ThreadIds.XY - new int2(0,1)] < input[ThreadIds.XY])
-                ownSunshine += delta;
-
-        }
-        //int to uint32 ARGB
-        output[ThreadIds.XY] = 0xFF000000 | ownSunshine << 16 | ownSunshine << 8 | ownSunshine;
     }
 }
