@@ -29,7 +29,7 @@ namespace cFlowApi.Heightmap
 
             int chunksize = 10000;
 
-            dim._thumbNail = thumbNail(image, 1028, 1028);
+            dim._thumbNail = thumbNail(image, Math.Min(image.Width, chunksize), Math.Min(image.Height, chunksize));
             for (int x = 0; x < width; x += chunksize)
             {
                 int yChunk = 0;
