@@ -103,7 +103,7 @@ namespace cFlowApi.Heightmap
 
         public void SetHeight((int x, int y) pos, ushort z)
         {
-            heightMap[pos.x][pos.y] = z;
+            heightMap[pos.y][pos.x] = z;
         }
 
         public bool inBounds(int x, int y) =>

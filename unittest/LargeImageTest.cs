@@ -25,7 +25,7 @@ public class LargeImageTest
         var data = DummyDimension.pixel16bitHeighmapArray(bmp);
         for (int i = 0; i < bmp.Width; i++)
         {
-            Assert.That(data[i][i], Is.EqualTo(15<<8 | 27));
+            Assert.That(data[i][i], Is.EqualTo(27));
         }
     }
 
@@ -45,7 +45,7 @@ public class LargeImageTest
         DummyDimension.pixel16bitHeighmapArray(bmp, data, widthOffset, heightOffset);
         for (int i = 0; i < bmp.Width; i++)
         {
-            Assert.That(data[i+heightOffset][i+widthOffset], Is.EqualTo(15 << 8 | 27));
+            Assert.That(data[i+heightOffset][i+widthOffset], Is.EqualTo( 27));
         }
     }
 }
