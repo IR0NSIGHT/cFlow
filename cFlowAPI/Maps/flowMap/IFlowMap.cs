@@ -47,6 +47,20 @@
                     throw new Exception("unknown flow");
             }
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is Flow flow)
+            {
+                return this.Down == flow.Down &&
+                       this.Up == flow.Up &&
+                       this.Left == flow.Left &&
+                       this.Right == flow.Right &&
+                       this.Unknown == flow.Unknown;
+            }
+
+            return false;
+        }
     }
 
     Flow GetFlow((int x, int y) point);
@@ -54,4 +68,6 @@
     void SetFlow((int x, int y) point, Flow flow);
 
     List<(int x, int y)> FollowFlow((int x, int y) point);
+
+  
 }

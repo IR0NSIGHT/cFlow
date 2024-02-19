@@ -5,6 +5,29 @@ namespace tests
     [TestFixture]
     public class FlowMapTest
     {
+        [Test]
+        public void BasicFlowMap()
+        {
+            var flowMap = new SimpleFlowMap((10, 20));
+            var flow = new IFlowMap.Flow(true, false, false, false, false);
+            flowMap.SetFlow((5, 7), flow);
+            Assert.That(flowMap.GetFlow((5, 7)),Is.EqualTo(flow));
+
+            flow = new IFlowMap.Flow(false, true, false, true, false);
+            flowMap.SetFlow((5, 7), flow);
+            Assert.That(flowMap.GetFlow((5, 7)), Is.EqualTo(flow));
+
+            flow = new IFlowMap.Flow(false, false, true, false, true);
+            flowMap.SetFlow((5, 7), flow);
+            Assert.That(flowMap.GetFlow((5, 7)), Is.EqualTo(flow));
+
+            flow = new IFlowMap.Flow(false, true, true, true, true);
+            flowMap.SetFlow((5, 7), flow);
+            Assert.That(flowMap.GetFlow((5, 7)), Is.EqualTo(flow));
+        }
+
+
+
         //[Test] //FIXME suspected to lead to issues with test runner for some reason?
         public void TestMapOrientation()
         {

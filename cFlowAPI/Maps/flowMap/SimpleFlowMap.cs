@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 
 public class SimpleFlowMap : IFlowMap
 {
-    private IFlowMap.Flow[][] flowMap;
+    private byte[][] flowMap;
 
     public SimpleFlowMap((int x, int y) dimension)
     {
@@ -17,12 +17,12 @@ public class SimpleFlowMap : IFlowMap
         Debug.WriteLine("finished flowmap");
     }
 
-    private static IFlowMap.Flow[][] emptyFlowMap((int x, int y) dimensions)
+    private static byte[][] emptyFlowMap((int x, int y) dimensions)
     {
-        IFlowMap.Flow[][] flowMap = new IFlowMap.Flow[dimensions.x][];
+        byte[][] flowMap = new byte[dimensions.x][];
         for (int i = 0; i < dimensions.x; i++)
         {
-            flowMap[i] = new IFlowMap.Flow[dimensions.y];
+            flowMap[i] = new byte[dimensions.y];
         }
 
         return flowMap;
@@ -35,11 +35,17 @@ public class SimpleFlowMap : IFlowMap
         return this;
     }
 
+    private static readonly byte UNKNOWN = 0b10000000;
+    private static readonly byte RIGHT = 0b1000;
+    private static readonly byte LEFT = 0b0100;
+    private static readonly byte UP = 0b0010;
+    private static readonly byte DOWN = 0b0001;
+
     private void FillWithUnknown()
     {
         for (int x = 0; x < flowMap.Length; x++)
         {
-            Array.Fill(flowMap[x], new IFlowMap.Flow(true,false,false,false,false));
+            Array.Fill(flowMap[x], UNKNOWN);
         }
     }
 
@@ -244,7 +250,7 @@ public class SimpleFlowMap : IFlowMap
             cycle++;
         }
     }
-    
+
     public static Bitmap ToColorImage(IFlowMap flowMap, Func<IFlowMap.Flow, Color> flowToColor)
     {
         var (width, height) = flowMap.Bounds();
@@ -280,7 +286,7 @@ public class SimpleFlowMap : IFlowMap
             return new IFlowMap.Flow(true, false, false, false, false);
         return new IFlowMap.Flow(false, up, down, left, right);
     }
-    
+
     public List<(int x, int y)> FollowFlow((int x, int y) point)
     {
         IFlowMap.Flow flow = GetFlow(point);
@@ -304,12 +310,30 @@ public class SimpleFlowMap : IFlowMap
 
     public IFlowMap.Flow GetFlow((int x, int y) point)
     {
-        return flowMap[point.x][point.y];
+        var value = flowMap[point.x][point.y];
+        return new IFlowMap.Flow(
+            (value & UNKNOWN) != 0,
+            (value & UP) != 0,
+            (value & DOWN) != 0,
+            (value & LEFT) != 0,
+            (value & RIGHT) != 0
+            );
     }
 
     public void SetFlow((int x, int y) point, IFlowMap.Flow flow)
     {
-        flowMap[point.x][point.y] = flow;
+        byte value = 0;
+        if (flow.Right)
+            value |= RIGHT;
+        if (flow.Left)
+            value |= LEFT;
+        if (flow.Up)
+            value |= UP;
+        if (flow.Down)
+            value |= DOWN;
+        if (flow.Unknown)
+            value |= UNKNOWN;
+        flowMap[point.x][point.y] = value;
     }
 
     public bool inBounds(int x, int y)
