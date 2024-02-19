@@ -1,10 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
+﻿using System.Drawing;
 using cFlowApi.Heightmap;
-using TerraFX.Interop.Windows;
 
 namespace unittest;
 
