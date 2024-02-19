@@ -8,7 +8,12 @@ namespace cFlowForms;
 
 public class Backend
 {
+    public Backend()
+    {
+        instance = this;
+    }
 
+    public static Backend instance;
     
     private CFlowGenerator? heightmapApi;
     private BackendEventChannel backendChannel;

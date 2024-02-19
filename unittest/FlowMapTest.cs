@@ -1,4 +1,6 @@
-﻿namespace tests
+﻿using cFlowApi.Heightmap;
+
+namespace tests
 {
     [TestFixture]
     public class FlowMapTest

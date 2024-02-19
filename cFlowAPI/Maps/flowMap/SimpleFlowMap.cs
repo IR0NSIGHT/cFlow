@@ -257,7 +257,7 @@ public class SimpleFlowMap : IFlowMap
         return bitmap;
     }
 
-    private static bool isLowerThan((int x, int y) pos, IHeightMap heightMap, short height, bool safeBounds)
+    private static bool isLowerThan((int x, int y) pos, IHeightMap heightMap, ushort height, bool safeBounds)
     {
         return (safeBounds || heightMap.inBounds(pos.x, pos.y)) && heightMap.GetHeight(pos) < height;
     }
@@ -270,7 +270,7 @@ public class SimpleFlowMap : IFlowMap
     /// <returns></returns>
     private static IFlowMap.Flow pointFlowByHeight((int X, int Y) p, IHeightMap heightMap)
     {
-        short height = heightMap.GetHeight(p);
+        ushort height = heightMap.GetHeight(p);
         bool safeBounds = insideReducedBounds((p.X, p.Y), heightMap.Bounds());
         bool left = isLowerThan(Point.Left(p), heightMap, height, safeBounds);
         bool right = isLowerThan(Point.Right(p), heightMap, height, safeBounds);

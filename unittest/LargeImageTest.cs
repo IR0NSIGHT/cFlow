@@ -1,6 +1,9 @@
-﻿using System.Drawing.Imaging;
+﻿using System;
+using System.Diagnostics;
 using System.Drawing;
-using ComputeSharp;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using cFlowApi.Heightmap;
 using TerraFX.Interop.Windows;
 
 namespace unittest;
@@ -8,30 +11,46 @@ namespace unittest;
 [TestFixture]
 public class LargeImageTest
 {
-
-    //TODO use this maybe? https://github.com/drewnoakes/metadata-extractor-dotnet/tree/main
     [Test]
     public void LargeImgTest()
     {
         string imagePath = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\30x30_testmap.png";
-        var tileSize = 1028;
-        using (var fileStream = new FileStream(imagePath, FileMode.Open))
-        {
-            using (var image = Image.FromStream(fileStream, false, false))
-            {
-                int width = image.Width;
-                int height = image.Height;
-                var bitmap =  new Bitmap(1028, 1028);
-                Rectangle sourceRect = new Rectangle(0, 0, Math.Min(width, bitmap.Width), Math.Min(height, bitmap.Height));
-                // Create a graphics object from the bitmap
-                using (Graphics graphics = Graphics.FromImage(bitmap))
-                {
-                    // Use Graphics.DrawImage() to paint the original PNG image onto the bitmap
-                    graphics.DrawImage(image, sourceRect, sourceRect, GraphicsUnit.Pixel);
+        DummyDimension.ImportFromFile(imagePath);
+    }
 
-                }
-                bitmap.Save("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\tinyboi.png");
-            }
+    [Test]
+    public void correctPixelData()
+    {
+        Bitmap bmp = new Bitmap(10, 20);
+        for (int i = 0; i < bmp.Width; i++)
+        {
+            bmp.SetPixel(i,i,Color.FromArgb(255,19,15,27));
+        }
+
+        var data = DummyDimension.pixel16bitHeighmapArray(bmp);
+        for (int i = 0; i < bmp.Width; i++)
+        {
+            Assert.That(data[i][i], Is.EqualTo(15<<8 | 27));
+        }
+    }
+
+    [Test]
+    public void shiftedPixelData()
+    {
+        Bitmap bmp = new Bitmap(10, 20);
+        for (int i = 0; i < bmp.Width; i++)
+        {
+            bmp.SetPixel(i, i, Color.FromArgb(255, 19, 15, 27));
+        }
+
+        int widthOffset = 20;
+        int heightOffset = 30;
+        var data = DummyDimension.arrayOfSize(100, 100);
+
+        DummyDimension.pixel16bitHeighmapArray(bmp, data, widthOffset, heightOffset);
+        for (int i = 0; i < bmp.Width; i++)
+        {
+            Assert.That(data[i+heightOffset][i+widthOffset], Is.EqualTo(15 << 8 | 27));
         }
     }
 }

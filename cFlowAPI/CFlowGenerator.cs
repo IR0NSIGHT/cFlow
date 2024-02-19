@@ -2,6 +2,7 @@
 using System.Drawing;
 using src.Maps.riverMap;
 using System.Text;
+using cFlowApi.Heightmap;
 
 namespace cFlowApi
 {
@@ -19,13 +20,17 @@ namespace cFlowApi
 
         public CFlowGenerator(string imagePath)
         {
-            var _heightmapImg = ImageApi.LoadBitmapFromPng(imagePath);
-            Debug.WriteLine("Loaded bitmap");
-            Heightmap = new DummyDimension((30000, 30000),64);
+            Debug.WriteLine("Start reading image");
+
+            Heightmap = DummyDimension.ImportFromFile(imagePath);
+
             Debug.WriteLine("Converted image to heightmap");
+
 
             _flowMap = new SimpleFlowMap(Heightmap.Bounds());
             Debug.WriteLine("loaded flowmap");
+
+
             RiverMap = new RiverMap(_flowMap, Heightmap);
             Debug.WriteLine("loaded rivermap");
 
