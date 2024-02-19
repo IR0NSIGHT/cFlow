@@ -1,5 +1,7 @@
-﻿using cFlowAPI.Maps.riverMap;
+﻿using System.Diagnostics;
+using cFlowAPI.Maps.riverMap;
 using System.Drawing;
+using cFlowApi.Heightmap;
 
 namespace src.Maps.riverMap
 {
@@ -21,14 +23,21 @@ namespace src.Maps.riverMap
             }
         }
 
-        public Bitmap ToImage()
+        public Bitmap ToImage(int x = 0, int y = 0, int width = -1, int height = -1)
         {
-            //FIXME create an image
-            var bitmap = new Bitmap(_heightMap.Bounds().x, _heightMap.Bounds().y);
+            if (width == -1) width = _heightMap.Bounds().x;
+            if (height == -1) height = _heightMap.Bounds().y;
+
+            Debug.Assert(width <= DummyDimension.chunkSize);
+            Debug.Assert(height <= DummyDimension.chunkSize);
+
+            Debug.Assert(x >= 0 && y >= 0);
+            Debug.Assert(x + width <= _heightMap.Bounds().x && y + height <= _heightMap.Bounds().y, $"out of bounds with heightmap: {_heightMap.Bounds()}");
+            var bitmap = new Bitmap(width, height);
             foreach (var point in _iterator.Points())
             {
                 if (IsRiver(point.x, point.y))
-                    bitmap.SetPixel(point.x, point.y, Color.Blue);
+                    bitmap.SetPixel(point.x-x, point.y-y, Color.Blue);
             }
             return bitmap;
         }

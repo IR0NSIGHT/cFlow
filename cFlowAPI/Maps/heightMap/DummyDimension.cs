@@ -8,6 +8,7 @@ namespace cFlowApi.Heightmap
 {
     public class DummyDimension : IHeightMap
     {
+        public static readonly int chunkSize = 10000;
         private Map2dIterator _iterator;
         private Bitmap _thumbNail;
         public DummyDimension((int x, int y) size, ushort height)
@@ -26,16 +27,14 @@ namespace cFlowApi.Heightmap
             var dim = new DummyDimension((width, height), 0);
 
             var dataArray = dim.heightMap;
-
-            int chunksize = 10000;
-
-            dim._thumbNail = thumbNail(image, Math.Min(image.Width, chunksize), Math.Min(image.Height, chunksize));
-            for (int x = 0; x < width; x += chunksize)
+            
+            dim._thumbNail = thumbNail(image, Math.Min(image.Width, chunkSize), Math.Min(image.Height, chunkSize));
+            for (int x = 0; x < width; x += chunkSize)
             {
                 int yChunk = 0;
-                for (int y = 0; y < height; y += chunksize)
+                for (int y = 0; y < height; y += chunkSize)
                 {
-                    var chunk = readChunk(image, x, y, Math.Min(width - x, chunksize), Math.Min(height - y, chunksize));
+                    var chunk = readChunk(image, x, y, Math.Min(width - x, chunkSize), Math.Min(height - y, chunkSize));
                     pixel16bitHeighmapArray(chunk, dataArray, x, y);
                 }
             }
@@ -92,8 +91,8 @@ namespace cFlowApi.Heightmap
         private ushort[][] heightMap = { [0, 0, 0], [0, 2, 3], [0, 1, 1] };
         public (int x, int y) Bounds()
         {
-            int x = heightMap.Length;
-            int y = heightMap[0].Length;
+            int x = heightMap[0].Length;
+            int y = heightMap.Length;
             return (x, y);
         }
 
