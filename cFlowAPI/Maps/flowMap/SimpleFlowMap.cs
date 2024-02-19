@@ -35,11 +35,11 @@ public class SimpleFlowMap : IFlowMap
         return this;
     }
 
-    private static readonly byte UNKNOWN = 0b10000000;
-    private static readonly byte RIGHT = 0b1000;
-    private static readonly byte LEFT = 0b0100;
-    private static readonly byte UP = 0b0010;
-    private static readonly byte DOWN = 0b0001;
+    public static readonly byte UNKNOWN = 0b10000000;
+    public static readonly byte RIGHT = 0b1000;
+    public static readonly byte LEFT = 0b0100;
+    public static readonly byte UP = 0b0010;
+    public static readonly byte DOWN = 0b0001;
 
     private void FillWithUnknown()
     {
