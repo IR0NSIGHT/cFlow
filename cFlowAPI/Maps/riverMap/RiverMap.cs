@@ -24,7 +24,13 @@ namespace src.Maps.riverMap
         public Bitmap ToImage()
         {
             //FIXME create an image
-            return new Bitmap(100,100);
+            var bitmap = new Bitmap(_heightMap.Bounds().x, _heightMap.Bounds().y);
+            foreach (var point in _iterator.Points())
+            {
+                if (IsRiver(point.x, point.y))
+                    bitmap.SetPixel(point.x, point.y, Color.Blue);
+            }
+            return bitmap;
         }
 
         public void SetAsRiver(int x, int y)
