@@ -20,10 +20,11 @@ namespace cFlowApi.Heightmap
         public static bool hasLowerNeighbours((int x, int y) point, IHeightMap heightMap)
         {
             var height = heightMap.GetHeight(point);
-            return heightMap.GetHeight(Point.Up(point)) < height ||
-                   heightMap.GetHeight(Point.Down(point)) < height ||
-                   heightMap.GetHeight(Point.Left(point)) < height ||
-                   heightMap.GetHeight(Point.Right(point)) < height;
+            var dim = (DummyDimension)heightMap;
+            return dim.inBounds(Point.Up(point)) && heightMap.GetHeight(Point.Up(point)) < height ||
+                   dim.inBounds(Point.Down(point)) && heightMap.GetHeight(Point.Down(point)) < height ||
+                   dim.inBounds(Point.Left(point)) && heightMap.GetHeight(Point.Left(point)) < height ||
+                   dim.inBounds(Point.Right(point)) && heightMap.GetHeight(Point.Right(point)) < height;
         }
 
         public static DummyDimension ImportFromFile(string filePath)
@@ -129,6 +130,10 @@ namespace cFlowApi.Heightmap
         {
             heightMap[pos.y][pos.x] = z;
         }
+
+        public bool inBounds((int x, int y) point) =>
+            inBounds(point.x, point.y);
+
 
         public bool inBounds(int x, int y) =>
             x >= 0 && x < Bounds().x && y >= 0 && y < Bounds().y;
