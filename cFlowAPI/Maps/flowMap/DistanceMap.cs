@@ -3,6 +3,8 @@ using cFlowApi.Heightmap;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using cFlowAPI.Maps.Shader;
+using ComputeSharp;
 
 namespace application.Maps.flowMap;
 
@@ -40,14 +42,40 @@ public class DistanceMap : Map2d
         if (Bounds() != heightMap.Bounds())
             throw new Exception($"map sizes dont match!: fMap:{Bounds()}, hMap:{heightMap.Bounds()}");
         //set Flow for all natural edges
+        uint[,] pointData = ((DummyDimension)heightMap).ToGPUdata();
+
+        using ReadOnlyTexture2D<uint> heightmap = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D<uint>(pointData);
+        using ReadWriteTexture2D<uint> flowmap = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(heightmap.Width, heightmap.Height);
+
+        var shader = new FindEdgeDistanceShader(heightmap, flowmap);
+        GraphicsDevice.GetDefault().For(heightmap.Width, heightmap.Height, shader);
+        flowmap.CopyTo(pointData);
+        this.FromGPUdata(pointData);
+
+
+
+        //collect all marked points
         List<((int x, int y) point, DistancePoint distance)> outList =
             new List<((int x, int y) point, DistancePoint distance)>();
         foreach (var point in heightMap.iterator().Points())
         {
-            if (DummyDimension.hasLowerNeighbours(point, heightMap))
-                outList.Add((point, new DistancePoint(10, true)));
+            if (IsSet(point))
+                outList.Add((point, GetDistanceOf(point)));
         }
         return outList;
+    }
+
+    public void FromGPUdata(uint[,] data)
+    {
+        for (int y = 0; y < data.GetLength(1); y++)
+        {
+            for (int x = 0; x < data.GetLength(0); x++)
+            {
+                SetDistanceToEdge((x, y), new DistancePoint((int)data[x, y], data[x,y]!=0));
+            }
+        }
     }
 
     public void CalculateFromHeightmap()
