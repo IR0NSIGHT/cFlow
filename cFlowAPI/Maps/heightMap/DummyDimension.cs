@@ -55,6 +55,21 @@ namespace cFlowApi.Heightmap
             return bitmap;
         }
 
+        public uint[,] ToGPUdata()
+        {
+            return convert(this.heightMap);
+        }
+
+        public void FromGPUdata(int[,] data)
+        {
+            for (int y = 0; y < data.GetLength(1); y++)
+            {
+                for (int x = 0; x < data.GetLength(0); x++)
+                {
+                    SetHeight((x, y), (ushort)data[x,y]);
+                }
+            }
+        }
 
         private static Bitmap thumbNail(Image img, int width, int height)
         {
@@ -163,6 +178,37 @@ namespace cFlowApi.Heightmap
                 // Unlock the bits.
                 bitmap.UnlockBits(bmpData);
             }
+        }
+
+        private uint[,] convert(ushort[][] data)
+        {
+            uint[,] result = new uint[data[0].Length, data.Length];
+            for (int y = 0; y < data.Length; y++)
+            {
+                for (int x = 0; x < data[0].Length; x++)
+                {
+                    result[x, y] = data[y][x];
+                }
+            }
+
+            return result;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is DummyDimension dim)
+            {
+                if (Bounds() != dim.Bounds())
+                    return false;
+                foreach (var point in iterator().Points())
+                {
+                    if (GetHeight(point) !=  dim.GetHeight(point))
+                        return false;
+                }
+                return true;
+            }
+
+            return false;
         }
     }
 }

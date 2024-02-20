@@ -1,4 +1,5 @@
-﻿using cFlowAPI.Maps.Shader;
+﻿using cFlowApi.Heightmap;
+using cFlowAPI.Maps.Shader;
 using ComputeSharp;
 
 namespace unittest.Shader;
@@ -33,9 +34,25 @@ public class NaturalEdgeShaderTest
         flowmap.CopyTo(flowData);
         Assert.That(flowData, Is.EqualTo(new uint[,]
         {
-            { NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.LEFT, NaturalEdgeShader.UNKNOWN, },
-            { NaturalEdgeShader.DOWN, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN,},
+            { NaturalEdgeShader.UNKNOWN,  NaturalEdgeShader.KNOWN | NaturalEdgeShader.LEFT, NaturalEdgeShader.UNKNOWN, },
+            { NaturalEdgeShader.KNOWN | NaturalEdgeShader.DOWN, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN,},
             { NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN }
         }));
+    }
+
+    [Test]
+    public void DimensionToGPUTexture()
+    {
+        var dim = new DummyDimension((5, 7), 17);
+        dim.SetHeight((3,6),27);
+        dim.SetHeight((1,2), 315);
+        dim.SetHeight((4,6), 1);
+        dim.SetHeight((0,0), 1);
+
+        uint[,] arr = dim.ToGPUdata();
+        foreach (var point in dim.iterator().Points())
+        {
+            Assert.That(dim.GetHeight(point) == arr[point.x, point.y]);
+        }
     }
 }

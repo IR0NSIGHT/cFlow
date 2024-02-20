@@ -4,6 +4,11 @@
 
     struct Flow(bool unknown, bool up, bool down, bool left, bool right)
     {
+        public override string ToString()
+        {
+            return $"?:{unknown},u:{up},d:{down},l:{left},r:{right}";
+        }
+
         public bool Unknown => unknown; public bool Up => up; public bool Down => down; public bool Left => left; public bool Right => right;
         public static String FlowToString(IFlowMap.Flow p)
         {

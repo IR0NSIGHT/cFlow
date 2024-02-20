@@ -11,7 +11,7 @@ namespace tests
             var flowMap = new SimpleFlowMap((10, 20));
             var flow = new IFlowMap.Flow(true, false, false, false, false);
             flowMap.SetFlow((5, 7), flow);
-            Assert.That(flowMap.GetFlow((5, 7)),Is.EqualTo(flow));
+            Assert.That(flowMap.GetFlow((5, 7)), Is.EqualTo(flow));
 
             flow = new IFlowMap.Flow(false, true, false, true, false);
             flowMap.SetFlow((5, 7), flow);
@@ -55,7 +55,8 @@ namespace tests
         }
 
         [Test]
-        public void NaturalFlow() {
+        public void NaturalFlow()
+        {
             //test if depressresions in the terrain will cause neighboursing blocks to be marked as natural edge flow
 
             var heightmap = new DummyDimension((10, 3), 17);
@@ -63,16 +64,18 @@ namespace tests
 
             var flowMap = new SimpleFlowMap(heightmap.Bounds());
             SimpleFlowMap.ApplyNaturalEdgeFlow(heightmap, flowMap);
-            foreach ( var point in flowMap.iterator().Points())
+            foreach (var point in flowMap.iterator().Points())
             {
-                var (x,y) = (point.x, point.y);
-                if ((x,y) == (0,1) )
+                var (x, y) = (point.x, point.y);
+                if ((x, y) == (0, 1))
                 {
                     Assert.AreEqual(new IFlowMap.Flow(false, false, true, false, false), flowMap.GetFlow(point));
-                } else if ((x, y) == (1, 0))
+                }
+                else if ((x, y) == (1, 0))
                 {
                     Assert.AreEqual(new IFlowMap.Flow(false, false, false, true, false), flowMap.GetFlow(point));
-                } else
+                }
+                else
                 {
                     Assert.AreEqual(new IFlowMap.Flow(true, false, false, false, false), flowMap.GetFlow(point));
                 }
@@ -82,8 +85,8 @@ namespace tests
         [Test]
         public void TestEdgesNaturalFlow()
         {
-            var heightMap = new DummyDimension((30, 40),17);
-            //make rectangle from 10..20, 15..25 that is raised => water will flow away from triangle
+            var heightMap = new DummyDimension((30, 40), 17);
+            //make rectangle from 10..20, 15..25 that is raised => water will flow away from rectangle
             for (int x = 10; x <= 20; x++)
             {
                 for (int y = 15; y <= 25; y++)
@@ -109,23 +112,79 @@ namespace tests
             //left right lines
             for (int y = 16; y < 25; y++)
             {
-                Assert.That(flowMap.GetFlow((10, y)), Is.EqualTo( new IFlowMap.Flow(false, false, false, true, false)));
-                Assert.That(flowMap.GetFlow((20, y)), Is.EqualTo( new IFlowMap.Flow(false, false, false, false, true)));
+                Assert.That(flowMap.GetFlow((10, y)), Is.EqualTo(new IFlowMap.Flow(false, false, false, true, false)));
+                Assert.That(flowMap.GetFlow((20, y)), Is.EqualTo(new IFlowMap.Flow(false, false, false, false, true)));
+            }
+        }
+
+        [Test]
+        public void MostBasicNaturalFlow()
+        {
+            var flowMap = new SimpleFlowMap((6, 12));
+            var heightMap = new DummyDimension(flowMap.Bounds(), 17);
+            heightMap.SetHeight((2, 3), 5);
+
+            SimpleFlowMap.ApplyNaturalEdgeFlow(heightMap, flowMap);
+
+            Assert.That(flowMap.GetFlow((2, 3)).Unknown);
+            Assert.That(flowMap.GetFlow((1, 3)),
+                Is.EqualTo(new IFlowMap.Flow(false, false, false, false, true)));
+
+            Assert.That(flowMap.GetFlow((3, 3)),
+                Is.EqualTo(new IFlowMap.Flow(false, false, false, true, false)));
+
+            Assert.That(flowMap.GetFlow((2, 2)),
+                Is.EqualTo(new IFlowMap.Flow(false, true, false, false, false)));
+
+            Assert.That(flowMap.GetFlow((2, 4)),
+                Is.EqualTo(new IFlowMap.Flow(false, false, true, false, false)));
+        }
+
+        [Test]
+        public void OneDirectionalNaturalFlow()
+        {
+            var flowMap = new SimpleFlowMap((6, 12));
+            var heightMap = new DummyDimension(flowMap.Bounds(), 17);
+            for (int x = 0; x < 6; x++)
+            {
+                heightMap.SetHeight((x, 3), 5);
+            }
+
+            SimpleFlowMap.ApplyNaturalEdgeFlow(heightMap, flowMap);
+
+            foreach (var point in flowMap.iterator().Points())
+            {
+                if (point.y == 2)
+                {
+                    Assert.That(flowMap.GetFlow(point),
+                    Is.EqualTo(new IFlowMap.Flow(false, true, false, false, false)));
+                }
+                else if (point.y == 4)
+                {
+                    Assert.That(flowMap.GetFlow(point),
+                        Is.EqualTo(new IFlowMap.Flow(false, false, true, false, false)));
+                }
+                else
+                {
+                    Assert.That(flowMap.GetFlow(point),
+                        Is.EqualTo(new IFlowMap.Flow(true, false, false, false, false)));
+
+                }
             }
         }
 
         [Test]
         public void FlowFromHeightMapSimple()
         {
-            var flowMap = new SimpleFlowMap((6,6));
+            var flowMap = new SimpleFlowMap((6, 12));
             var someFlow = new IFlowMap.Flow(false, true, false, false, false);
             var heightMap = new DummyDimension(flowMap.Bounds(), 17);
             //all but a 4x4 square in the center has a flow
             for (int x = 1; x < 5; x++)
             {
-                for (int y = 1; y <5; y++)
+                for (int y = 1; y < 7; y++)
                 {
-                    heightMap.SetHeight((x, y),77);
+                    heightMap.SetHeight((x, y), 77);
                 }
             }
 
@@ -137,26 +196,28 @@ namespace tests
             SimpleFlowMap.CalculateFlowFromHeightMap(heightMap, flowMap);
 
 
-            Func<(int, int), Boolean> insideShape = ((int x, int y) pos) =>
+            Func<(int, int), Boolean> insideMountainRect = ((int x, int y) pos) =>
             {
-                if (pos.x == 0 || pos.x == 5 || pos.y == 0 || pos.y == 5)
-                    return false;
-                return true;
+                if (pos.x >= 1 && pos.x < 5 && pos.y >= 1 && pos.y < 7)
+                    return true;
+                return false;
             };
 
-            foreach(var point in flowMap.iterator().Points())
+            foreach (var point in flowMap.iterator().Points())
             {
-                if (insideShape((point.x, point.y))) {
-                    Assert.That(flowMap.GetFlow(point).Unknown, Is.Not.True);
-                } else
+                if (insideMountainRect((point.x, point.y)))
                 {
-                    Assert.That(flowMap.GetFlow(point).Unknown, Is.True);
+                    Assert.That(flowMap.GetFlow(point).Unknown, Is.Not.True,$"incorrect known marked: {point},{flowMap.GetFlow(point)}");
+                }
+                else
+                {
+                    Assert.That(flowMap.GetFlow(point).Unknown, Is.True, $"incorrect known marked: {point},{flowMap.GetFlow(point)}");
                 }
             }
 
             var downLeft = new IFlowMap.Flow(false, false, true, true, false);
-            Assert.That(flowMap.GetFlow((1,1)), Is.EqualTo(downLeft));
-            Assert.That(flowMap.GetFlow((2,2)), Is.EqualTo(downLeft));
+            Assert.That(flowMap.GetFlow((1, 1)), Is.EqualTo(downLeft));
+            Assert.That(flowMap.GetFlow((2, 2)), Is.EqualTo(downLeft));
 
             var downRight = new IFlowMap.Flow(false, false, true, false, true);
             Assert.That(flowMap.GetFlow((4, 1)), Is.EqualTo(downRight));
@@ -164,12 +225,12 @@ namespace tests
 
 
             var upLeft = new IFlowMap.Flow(false, true, false, true, false);
-            Assert.That(flowMap.GetFlow((1,4)), Is.EqualTo(upLeft));
-            Assert.That(flowMap.GetFlow((2,3)), Is.EqualTo(upLeft));
+            Assert.That(flowMap.GetFlow((1, 6)), Is.EqualTo(upLeft));
+            Assert.That(flowMap.GetFlow((2, 5)), Is.EqualTo(upLeft));
 
             var upRight = new IFlowMap.Flow(false, true, false, false, true);
-            Assert.That(flowMap.GetFlow((4, 4)), Is.EqualTo(upRight));
-            Assert.That(flowMap.GetFlow((3, 3)), Is.EqualTo(upRight));
+            Assert.That(flowMap.GetFlow((4, 6)), Is.EqualTo(upRight));
+            Assert.That(flowMap.GetFlow((3, 5)), Is.EqualTo(upRight));
 
         }
     }

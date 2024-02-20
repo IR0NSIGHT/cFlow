@@ -2,10 +2,14 @@
 using application.Maps;
 using System.Drawing;
 using System.Drawing.Imaging;
+using cFlowApi.Heightmap;
+using cFlowAPI.Maps.Shader;
+using ComputeSharp;
 
 
 public class SimpleFlowMap : IFlowMap
 {
+    //y first
     private byte[][] flowMap;
 
     public SimpleFlowMap((int x, int y) dimension)
@@ -13,16 +17,15 @@ public class SimpleFlowMap : IFlowMap
         Debug.WriteLine("instantiate empty flowmap");
         flowMap = emptyFlowMap(dimension);
         Debug.WriteLine("fill with unknown flow");
-        FillWithUnknown();
         Debug.WriteLine("finished flowmap");
     }
 
     private static byte[][] emptyFlowMap((int x, int y) dimensions)
     {
-        byte[][] flowMap = new byte[dimensions.x][];
-        for (int i = 0; i < dimensions.x; i++)
+        byte[][] flowMap = new byte[dimensions.y][];
+        for (int i = 0; i < dimensions.y; i++)
         {
-            flowMap[i] = new byte[dimensions.y];
+            flowMap[i] = new byte[dimensions.x];
         }
 
         return flowMap;
@@ -30,23 +33,8 @@ public class SimpleFlowMap : IFlowMap
 
     public SimpleFlowMap FromHeightMap(IHeightMap heightMap)
     {
-        FillWithUnknown();
         CalculateFlowFromHeightMap(heightMap, this);
         return this;
-    }
-
-    public static readonly byte UNKNOWN = 0b10000000;
-    public static readonly byte RIGHT = 0b1000;
-    public static readonly byte LEFT = 0b0100;
-    public static readonly byte UP = 0b0010;
-    public static readonly byte DOWN = 0b0001;
-
-    private void FillWithUnknown()
-    {
-        for (int x = 0; x < flowMap.Length; x++)
-        {
-            Array.Fill(flowMap[x], UNKNOWN);
-        }
     }
 
     /// <summary>
@@ -59,12 +47,28 @@ public class SimpleFlowMap : IFlowMap
     {
         if (flowMap.Bounds() != heightMap.Bounds())
             throw new Exception($"map sizes dont match!: fMap:{flowMap.Bounds()}, hMap:{heightMap.Bounds()}");
-        //set Flow for all natural edges
-        foreach (var point in heightMap.iterator().Points())
+
+        uint[,] pointData = ((DummyDimension)heightMap).ToGPUdata();
+
+        using ReadOnlyTexture2D<uint> heightmap = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D<uint>(pointData);
+        using ReadWriteTexture2D<uint> flowmap = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(heightmap.Width, heightmap.Height);
+
+        var shader = new NaturalEdgeShader(heightmap, flowmap);
+        GraphicsDevice.GetDefault().For(heightmap.Width, heightmap.Height, shader);
+        flowmap.CopyTo(pointData);
+        ((SimpleFlowMap)flowMap).FromGPUdata(pointData);
+    }
+
+    public void FromGPUdata(uint[,] data)
+    {
+        for (int y = 0; y < data.GetLength(1); y++)
         {
-            IFlowMap.Flow flow = pointFlowByHeight(point, heightMap);
-            if (!flow.Unknown)
-                flowMap.SetFlow(point, flow);
+            for (int x = 0; x < data.GetLength(0); x++)
+            {
+                SetFlow((x, y), (byte)data[x, y]);
+            }
         }
     }
 
@@ -269,7 +273,7 @@ public class SimpleFlowMap : IFlowMap
     }
 
     /// <summary>
-    /// will flow towards all lower neighbours. if ZERO lower neighbours are found, flow will be UNKNOWN
+    /// will flow towards all lower neighbours. if ZERO lower neighbours are found, flow will be KNOWN
     /// </summary>
     /// <param name="p"></param>
     /// <param name="heightMap"></param>
@@ -305,35 +309,40 @@ public class SimpleFlowMap : IFlowMap
 
     public (int x, int y) Bounds()
     {
-        return (flowMap.Length, flowMap[0].Length);
+        return (flowMap[0].Length, flowMap.Length);
     }
 
     public IFlowMap.Flow GetFlow((int x, int y) point)
     {
-        var value = flowMap[point.x][point.y];
+        var value = flowMap[point.y][point.x];
         return new IFlowMap.Flow(
-            (value & UNKNOWN) != 0,
-            (value & UP) != 0,
-            (value & DOWN) != 0,
-            (value & LEFT) != 0,
-            (value & RIGHT) != 0
+            (value & NaturalEdgeShader.KNOWN) == 0,
+            (value & NaturalEdgeShader.UP) != 0,
+            (value & NaturalEdgeShader.DOWN) != 0,
+            (value & NaturalEdgeShader.LEFT) != 0,
+            (value & NaturalEdgeShader.RIGHT) != 0
             );
+    }
+
+    public void SetFlow((int x, int y) point, byte flow)
+    {
+        flowMap[point.y][point.x] = flow;
     }
 
     public void SetFlow((int x, int y) point, IFlowMap.Flow flow)
     {
         byte value = 0;
         if (flow.Right)
-            value |= RIGHT;
+            value |= (byte)NaturalEdgeShader.RIGHT;
         if (flow.Left)
-            value |= LEFT;
+            value |= (byte)NaturalEdgeShader.LEFT;
         if (flow.Up)
-            value |= UP;
+            value |= (byte)NaturalEdgeShader.UP;
         if (flow.Down)
-            value |= DOWN;
-        if (flow.Unknown)
-            value |= UNKNOWN;
-        flowMap[point.x][point.y] = value;
+            value |= (byte)NaturalEdgeShader.DOWN;
+        if (!flow.Unknown)  //set a 1 if its known
+            value |= (byte)NaturalEdgeShader.KNOWN;
+        SetFlow(point, value);
     }
 
     public bool inBounds(int x, int y)
