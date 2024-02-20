@@ -17,6 +17,15 @@ namespace cFlowApi.Heightmap
             _iterator = new Map2dIterator(size);
         }
 
+        public static bool hasLowerNeighbours((int x, int y) point, IHeightMap heightMap)
+        {
+            var height = heightMap.GetHeight(point);
+            return heightMap.GetHeight(Point.Up(point)) < height ||
+                   heightMap.GetHeight(Point.Down(point)) < height ||
+                   heightMap.GetHeight(Point.Left(point)) < height ||
+                   heightMap.GetHeight(Point.Right(point)) < height;
+        }
+
         public static DummyDimension ImportFromFile(string filePath)
         {
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);

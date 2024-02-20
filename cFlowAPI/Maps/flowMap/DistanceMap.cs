@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using SkiaSharp;
-using Xamarin.Forms.Internals;
+﻿using System.Diagnostics;
+using cFlowApi.Heightmap;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace application.Maps.flowMap;
 
@@ -74,11 +75,13 @@ public class DistanceMap : Map2d
             Point.Neighbours(current.point)
                 .Where(filter)
                 .Select(n => (n, current.value + 10))
+                .ToList()
                 .ForEach(x => queue.TryInsert(x.n, x.Item2));
 
             Point.Diagonal(current.point)
                 .Where(filter)
                 .Select(n => (n, current.value + 14))
+                .ToList()
                 .ForEach(x => queue.TryInsert(x.n, x.Item2));
         }
 
@@ -96,29 +99,29 @@ public class DistanceMap : Map2d
         return GetDistanceOf(point).isSet;
     }
 
-    public SKBitmap ToCycleImage()
-    {
-        var (width, height) = Bounds();
-        SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
-        //float ratio = int.MaxValue / Math.Max(Bounds().y, Bounds().x);
-        var max = 0;
-
-        foreach (var points in iterator().Points())
-        {
-            var origin = GetDistanceOf(points);
-            if (origin.isSet)
-            {
-                var dist = (byte)((origin.DistanceSquared));
-                bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
-            }
-            else
-            {
-                bitmap.SetPixel(points.x, points.y, new SKColor(255, 0, 0));
-            }
-        }
-
-        return bitmap;
-    }
+    //public SKBitmap ToCycleImage()
+    //{
+    //    var (width, height) = Bounds();
+    //    SKBitmap bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888, SKAlphaType.Opaque));
+    //    //float ratio = int.MaxValue / Math.Max(Bounds().y, Bounds().x);
+    //    var max = 0;
+    //
+    //    foreach (var points in iterator().Points())
+    //    {
+    //        var origin = GetDistanceOf(points);
+    //        if (origin.isSet)
+    //        {
+    //            var dist = (byte)((origin.DistanceSquared));
+    //            bitmap.SetPixel(points.x, points.y, new SKColor(0, (byte)(255 - dist), dist));
+    //        }
+    //        else
+    //        {
+    //            bitmap.SetPixel(points.x, points.y, new SKColor(255, 0, 0));
+    //        }
+    //    }
+    //
+    //    return bitmap;
+    //}
 
     public List<List<(int x, int y)>> FlowFrom((int x, int y) startPoint, List<(int x, int y)> lastUsed)
     {

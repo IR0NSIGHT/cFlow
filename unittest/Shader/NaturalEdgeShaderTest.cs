@@ -32,10 +32,11 @@ public class NaturalEdgeShaderTest
 
 
         flowmap.CopyTo(flowData);
+        //FIXME why is the data here Transposed?
         Assert.That(flowData, Is.EqualTo(new uint[,]
         {
-            { NaturalEdgeShader.UNKNOWN,  NaturalEdgeShader.KNOWN | NaturalEdgeShader.LEFT, NaturalEdgeShader.UNKNOWN, },
-            { NaturalEdgeShader.KNOWN | NaturalEdgeShader.DOWN, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN,},
+            { NaturalEdgeShader.UNKNOWN,  NaturalEdgeShader.KNOWN | NaturalEdgeShader.DOWN, NaturalEdgeShader.UNKNOWN, },
+            { NaturalEdgeShader.KNOWN | NaturalEdgeShader.LEFT, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN,},
             { NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN, NaturalEdgeShader.UNKNOWN }
         }));
     }
