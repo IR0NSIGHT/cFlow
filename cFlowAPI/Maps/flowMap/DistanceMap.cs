@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using cFlowAPI.Maps.Shader;
 using ComputeSharp;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace application.Maps.flowMap;
 
@@ -34,9 +35,21 @@ public class DistanceMap : Map2d
         {
             distanceMap[i] = new DistancePoint[bounds.y];
         }
-
     }
 
+    public uint[,] toGpuData()
+    {
+        uint[,] result = new uint[Bounds().y, Bounds().x];
+        for (int y = 0; y < Bounds().y; y++)
+        {
+            for (int x = 0; x < Bounds().x; x++)
+            {
+                result[y,x] = (uint)GetDistanceOf((x,y)).distance;
+            }
+        }
+
+        return result;
+    }
     private List<((int x, int y) point, DistancePoint distance)> MarkNaturalEdges()
     {
         if (Bounds() != heightMap.Bounds())
@@ -69,11 +82,11 @@ public class DistanceMap : Map2d
 
     public void FromGPUdata(uint[,] data)
     {
-        for (int y = 0; y < data.GetLength(1); y++)
+        for (int y = 0; y < data.GetLength(0); y++)
         {
-            for (int x = 0; x < data.GetLength(0); x++)
+            for (int x = 0; x < data.GetLength(1); x++)
             {
-                SetDistanceToEdge((x, y), new DistancePoint((int)data[x, y], data[x,y]!=0));
+                SetDistanceToEdge((x, y), new DistancePoint((int)data[y,x], data[y,x]!=0));
             }
         }
     }

@@ -166,8 +166,8 @@ namespace cFlowApi.Heightmap
         {
             Debug.Assert(bitmap.Width * bitmap.Height < int.MaxValue);
             Debug.Assert(bitmap.PixelFormat == PixelFormat.Format32bppArgb);
-            Debug.Assert(rows.Length >= heightOffset + bitmap.Height, "input array is not tall enough to hold all data");
-            Debug.Assert(rows[0].Length >= widthOffset + bitmap.Width, "input array is not wide enough to hold all data");
+            Debug.Assert(rows.Length >= heightOffset + bitmap.Height, "inputDistanceMap array is not tall enough to hold all data");
+            Debug.Assert(rows[0].Length >= widthOffset + bitmap.Width, "inputDistanceMap array is not wide enough to hold all data");
 
             Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadOnly, bitmap.PixelFormat);

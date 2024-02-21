@@ -14,10 +14,10 @@ public class SimpleFlowMap : IFlowMap
 
     public SimpleFlowMap((int x, int y) dimension)
     {
-        Debug.WriteLine("instantiate empty flowmap");
+        Debug.WriteLine("instantiate empty distanceMap");
         flowMap = emptyFlowMap(dimension);
         Debug.WriteLine("fill with unknown flow");
-        Debug.WriteLine("finished flowmap");
+        Debug.WriteLine("finished distanceMap");
     }
 
     private static byte[][] emptyFlowMap((int x, int y) dimensions)
@@ -206,7 +206,7 @@ public class SimpleFlowMap : IFlowMap
         var changedCandidates = calculateExpandedFlowFor(candidates, flowMap, heightMap);
         bool changeOccured = changedCandidates.Length != 0;
 
-        //apply all changes to flowmap
+        //apply all changes to distanceMap
         if (changeOccured)
         {
             foreach (var flowPoint in changedCandidates)
@@ -220,7 +220,7 @@ public class SimpleFlowMap : IFlowMap
 
 
     /// <summary>
-    /// will mutate flowmap, calculating flow based on the heightmap provided.
+    /// will mutate distanceMap, calculating flow based on the inputDistanceMap provided.
     /// flow will go from high to low points
     /// blocks without natural flow will be written as Unknown
     /// </summary>

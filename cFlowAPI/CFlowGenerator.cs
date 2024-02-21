@@ -24,11 +24,11 @@ namespace cFlowApi
 
             Heightmap = DummyDimension.ImportFromFile(imagePath);
 
-            Debug.WriteLine("Converted image to heightmap");
+            Debug.WriteLine("Converted image to inputDistanceMap");
 
 
             _flowMap = new SimpleFlowMap(Heightmap.Bounds());
-            Debug.WriteLine("loaded flowmap");
+            Debug.WriteLine("loaded distanceMap");
 
 
             RiverMap = new RiverMap(_flowMap, Heightmap);

@@ -32,7 +32,7 @@ namespace src.Maps.riverMap
             Debug.Assert(height <= DummyDimension.chunkSize);
 
             Debug.Assert(x >= 0 && y >= 0);
-            Debug.Assert(x + width <= _heightMap.Bounds().x && y + height <= _heightMap.Bounds().y, $"out of bounds with heightmap: {_heightMap.Bounds()}");
+            Debug.Assert(x + width <= _heightMap.Bounds().x && y + height <= _heightMap.Bounds().y, $"out of bounds with inputDistanceMap: {_heightMap.Bounds()}");
             var bitmap = new Bitmap(width, height);
             foreach (var point in _iterator.Points())
             {

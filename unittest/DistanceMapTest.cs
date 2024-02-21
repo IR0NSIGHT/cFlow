@@ -1,5 +1,8 @@
-﻿using application.Maps.flowMap;
+﻿using System.Diagnostics;
+using application.Maps.flowMap;
 using cFlowApi.Heightmap;
+using cFlowAPI.Maps.Shader;
+using ComputeSharp;
 
 namespace unittest;
 
@@ -9,18 +12,18 @@ public class DistanceMapTest
     [Test]
     public void ApplyFromHeightmap()
     {
-        var hMap = new DummyDimension((5, 5), 7);
+        var hMap = new DummyDimension((6, 5), 7);
         hMap.SetHeight((2, 2), 4);
         var dMap = new DistanceMap(hMap);
         dMap.CalculateFromHeightmap();
 
         short[][] shouldBe =
         {
-            [34, 24, 20, 24, 34],
-            [24, 20, 10, 20, 24],
-            [20, 10,  0, 10, 20],    //hole in middle at  24,24
-            [24, 20, 10, 20, 24],
-            [34, 24, 20, 24, 34]
+            [34, 24, 20, 24, 34,38],
+            [24, 20, 10, 20, 24,34],
+            [20, 10,  0, 10, 20,30],    //hole in middle at  24,24
+            [24, 20, 10, 20, 24,34],
+            [34, 24, 20, 24, 34,38]
         };
         Assert.That(dMap.IsSet((2, 2)), Is.False);
        
@@ -58,6 +61,44 @@ public class DistanceMapTest
             Assert.That(value.distance, Is.EqualTo(shouldBe[point.y][point.x]));
         }
     }
+
+    [Test]
+    public void simpleShaderRun()
+    {
+        DummyDimension dimension = new DummyDimension((5, 7), 17);
+        dimension.SetHeight((0,0),12);
+        DistanceMap distanceMap = new DistanceMap(dimension);
+        distanceMap.SetDistanceToEdge((1,0),new DistanceMap.DistancePoint(10,true));
+        distanceMap.SetDistanceToEdge((0,1), new DistanceMap.DistancePoint(10, true));
+
+
+
+        uint[,] pointData = distanceMap.toGpuData();
+        using ReadWriteTexture2D<uint> distanceData = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(pointData);
+
+        uint[,] heightData = dimension.ToGPUdata();
+        using ReadOnlyTexture2D<uint> heightTexture = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D(heightData);
+
+        var changedFlag = new bool[100];
+        changedFlag[0] = true;
+        using ReadWriteBuffer<bool> changedBuffer =
+            GraphicsDevice.GetDefault().AllocateReadWriteBuffer<bool>(changedFlag);
+
+        var shader = new ExpandDistanceShader(distanceData, heightTexture, changedBuffer);
+
+        while (changedFlag[0])
+        {
+            changedFlag[0] = false;
+            GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+            distanceData.CopyTo(pointData);
+            changedBuffer.CopyTo(changedFlag);
+        }
+        distanceData.CopyTo(pointData);
+        (distanceMap).FromGPUdata(pointData);
+    }
+
 
     [Test]
     public void MultipleHoles()
