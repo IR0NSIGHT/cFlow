@@ -5,10 +5,11 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
 {
     public readonly ReadWriteTexture2D<uint> distanceMap;
     public readonly ReadOnlyTexture2D<uint> heightMap;
-    public readonly ReadWriteTexture2D<int> changed;
-    public readonly ReadWriteTexture2D<int2> idText;
+    public readonly ReadWriteBuffer<bool> changed;
 
-    public static readonly uint EDGE = 10;
+    public static readonly uint STRAIGHT = 10;
+    public static readonly uint DIAGONAL = 14;
+
     public static uint ignore = uint.MaxValue - 1000;
     public uint getHeight(int x, int y, int2 xy)
     {
@@ -51,24 +52,23 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
 
         //choose the neighbour with the lowest value and add 10
         distance = distance == 0 ? uint.MaxValue : distance;
-        distance = chooseSmaller(distance, distanceOrDefault(0, -1, XY, ownHeight) + 10);
-        distance = chooseSmaller(distance, distanceOrDefault(0, 1, XY, ownHeight) + 10);
-        distance = chooseSmaller(distance, distanceOrDefault(1, 0, XY, ownHeight) + 10);
-        distance = chooseSmaller(distance, distanceOrDefault(-1, 0, XY, ownHeight) + 10);
+        distance = chooseSmaller(distance, distanceOrDefault(0, -1, XY, ownHeight) + STRAIGHT);
+        distance = chooseSmaller(distance, distanceOrDefault(0, 1, XY, ownHeight) + STRAIGHT);
+        distance = chooseSmaller(distance, distanceOrDefault(1, 0, XY, ownHeight) + STRAIGHT);
+        distance = chooseSmaller(distance, distanceOrDefault(-1, 0, XY, ownHeight) + STRAIGHT);
 
-        distance = chooseSmaller(distance, distanceOrDefault(1, -1, XY, ownHeight) + 14);
-        distance = chooseSmaller(distance, distanceOrDefault(-1, -1, XY, ownHeight) + 14);
-        distance = chooseSmaller(distance, distanceOrDefault(-1, 1, XY, ownHeight) + 14);
-        distance = chooseSmaller(distance, distanceOrDefault(1, 1, XY, ownHeight) + 14);
+        distance = chooseSmaller(distance, distanceOrDefault(1, -1, XY, ownHeight) + DIAGONAL);
+        distance = chooseSmaller(distance, distanceOrDefault(-1, -1, XY, ownHeight) + DIAGONAL);
+        distance = chooseSmaller(distance, distanceOrDefault(-1, 1, XY, ownHeight) + DIAGONAL);
+        distance = chooseSmaller(distance, distanceOrDefault(1, 1, XY, ownHeight) + DIAGONAL);
 
         //distance is not default value and has changed
         if (distance < ignore && distance != distanceMap[ThreadIds.XY])
         {
-            changed[0, 0] = 1;
-            changed[ThreadIds.XY] = 1;
+            changed[0] = true;
             distanceMap[ThreadIds.XY] = distance;
         }
+        changed[ThreadIds.X] = true;
 
-        idText[ThreadIds.XY] = ThreadIds.XY;
     }
 }

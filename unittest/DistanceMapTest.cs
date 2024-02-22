@@ -26,7 +26,7 @@ public class DistanceMapTest
             [34, 24, 20, 24, 34,38]
         };
         Assert.That(dMap.IsSet((2, 2)), Is.False);
-       
+
         foreach (var point in dMap.iterator().Points())
         {
             var value = dMap.GetDistanceOf(point);
@@ -62,13 +62,37 @@ public class DistanceMapTest
         }
     }
 
+
+    private static ExpandDistanceShader FromMaps(uint[,] distanceMap, uint[,] heightMap)
+    {
+        var distanceData = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(distanceMap);
+
+        var heightTexture = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D(heightMap);
+
+        bool[] changed = new bool[100];
+        changed[0] = true;
+        var changedTexture = GraphicsDevice.GetDefault()
+            .AllocateReadWriteBuffer<bool>(changed);
+
+        return new ExpandDistanceShader(distanceData, heightTexture, changedTexture); ;
+    }
+
+    public static bool didChange(ExpandDistanceShader shader)
+    {
+       bool[] result = new bool[1];
+       shader.changed.CopyTo(result);
+       return result[0];
+    }
+
     [Test]
     public void simpleShaderRun()
     {
         DummyDimension dimension = new DummyDimension((5, 7), 17);
         DistanceMap distanceMap = new DistanceMap(dimension);
         for (int x = 0; x < dimension.Bounds().x; x++)
-            distanceMap.SetDistanceToEdge((x, 2), new DistanceMap.DistancePoint(10,true));
+            distanceMap.SetDistanceToEdge((x, 2), new DistanceMap.DistancePoint(10, true));
 
 
         uint[,] pointData = distanceMap.toGpuData();
@@ -78,20 +102,6 @@ public class DistanceMapTest
         Assert.That(pointData.GetLength(1) == heightData.GetLength(1));
 
 
-        using ReadWriteTexture2D<uint> distanceData = GraphicsDevice.GetDefault()
-            .AllocateReadWriteTexture2D<uint>(pointData);
-
-        using ReadOnlyTexture2D<uint> heightTexture = GraphicsDevice.GetDefault()
-            .AllocateReadOnlyTexture2D(heightData);
-
-        int[,] changed = new int[heightTexture.Width, heightTexture.Height];
-        changed[0, 0] = 1;
-        using ReadWriteTexture2D<int> changedTexture = GraphicsDevice.GetDefault()
-            .AllocateReadWriteTexture2D<int>(changed);
-
-        using ReadWriteTexture2D<int2> idText = GraphicsDevice.GetDefault()
-            .AllocateReadWriteTexture2D<int2>(changedTexture.Width, changedTexture.Height);
-        var shader = new ExpandDistanceShader(distanceData, heightTexture, changedTexture, idText);
 
         //check before first run
         var shouldBe = new uint[,]
@@ -106,13 +116,13 @@ public class DistanceMapTest
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
 
-
+        var shader = FromMaps(pointData, heightData);
 
         //first run
-        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+        shader.changed.CopyFrom(new bool[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
-        distanceData.CopyTo(pointData);
-        changedTexture.CopyTo(changed);
+        shader.distanceMap.CopyTo(pointData);
 
         shouldBe = new uint[,]
         {
@@ -125,12 +135,14 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
 
         //second run
-        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+        shader.changed.CopyFrom(new bool[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
-        distanceData.CopyTo(pointData);
-        changedTexture.CopyTo(changed);
+        shader.distanceMap.CopyTo(pointData);
+
 
         shouldBe = new uint[,]
         {
@@ -143,12 +155,14 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
 
         //third run
-        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+        shader.changed.CopyFrom(new bool[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
-        distanceData.CopyTo(pointData);
-        changedTexture.CopyTo(changed);
+        shader.distanceMap.CopyTo(pointData);
+
 
         shouldBe = new uint[,]
         {
@@ -161,12 +175,14 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
 
         //forth run
-        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+        shader.changed.CopyFrom(new bool[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
-        distanceData.CopyTo(pointData);
-        changedTexture.CopyTo(changed);
+        shader.distanceMap.CopyTo(pointData);
+
 
         shouldBe = new uint[,]
         {
@@ -179,12 +195,14 @@ public class DistanceMapTest
             { 50, 50, 50, 50, 50 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
 
         //fifth and last run => no change
-        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+        shader.changed.CopyFrom(new bool[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
-        distanceData.CopyTo(pointData);
-        changedTexture.CopyTo(changed);
+        shader.distanceMap.CopyTo(pointData);
+
 
         shouldBe = new uint[,]
         {
@@ -197,7 +215,7 @@ public class DistanceMapTest
             { 50, 50, 50, 50, 50 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-
+        Assert.That(didChange(shader), Is.False);
 
     }
 
@@ -221,7 +239,7 @@ public class DistanceMapTest
             [40, 30, 20, 10,  0]
         };
         Assert.That(dMap.IsSet((0, 0)), Is.False);
-        Assert.That(dMap.IsSet((4,4)), Is.False);
+        Assert.That(dMap.IsSet((4, 4)), Is.False);
 
         foreach (var point in dMap.iterator().Points())
         {
@@ -233,8 +251,8 @@ public class DistanceMapTest
     [Test]
     public void LargeDistances()
     {
-        var hMap = new DummyDimension((1001,1001), 7);
-        hMap.SetHeight((0,1000), 4);
+        var hMap = new DummyDimension((1001, 1001), 7);
+        hMap.SetHeight((0, 1000), 4);
 
         var dMap = new DistanceMap(hMap);
         dMap.CalculateFromHeightmap();
@@ -242,13 +260,13 @@ public class DistanceMapTest
         Assert.That(dMap.IsSet((0, 1000)), Is.False);
         foreach (var point in dMap.iterator().Points())
         {
-            if (point == (0,1000))
+            if (point == (0, 1000))
                 continue;
             Assert.That(dMap.GetDistanceOf(point).isSet, Is.True, "undefined point after whole map should have a value");
         }
 
         var edge = dMap.GetDistanceOf((1000, 0));
-        Assert.That(edge.distance, Is.EqualTo(20+ (14 * 999)));
+        Assert.That(edge.distance, Is.EqualTo(20 + (14 * 999)));
 
     }
 }
