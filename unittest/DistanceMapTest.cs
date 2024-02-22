@@ -71,19 +71,18 @@ public class DistanceMapTest
         var heightTexture = GraphicsDevice.GetDefault()
             .AllocateReadOnlyTexture2D(heightMap);
 
-        bool[] changed = new bool[100];
-        changed[0] = true;
-        var changedTexture = GraphicsDevice.GetDefault()
-            .AllocateReadWriteBuffer<bool>(changed);
+        var changedArr = new int[1];
+        var changed = GraphicsDevice.GetDefault()
+            .AllocateReadWriteBuffer<int>(changedArr);
 
-        return new ExpandDistanceShader(distanceData, heightTexture, changedTexture); ;
+        return new ExpandDistanceShader(distanceData, heightTexture, changed); ;
     }
 
     public static bool didChange(ExpandDistanceShader shader)
     {
-       bool[] result = new bool[1];
+       var result = new int[1];
        shader.changed.CopyTo(result);
-       return result[0];
+       return result[0] != 0 ;
     }
 
     [Test]
@@ -119,7 +118,7 @@ public class DistanceMapTest
         var shader = FromMaps(pointData, heightData);
 
         //first run
-        shader.changed.CopyFrom(new bool[1]);
+        shader.changed.CopyFrom(new int[1]);
         GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
         shader.distanceMap.CopyTo(pointData);
@@ -138,7 +137,7 @@ public class DistanceMapTest
         Assert.That(didChange(shader));
 
         //second run
-        shader.changed.CopyFrom(new bool[1]);
+        shader.changed.CopyFrom(new int[1]);
         GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
         shader.distanceMap.CopyTo(pointData);
@@ -158,7 +157,7 @@ public class DistanceMapTest
         Assert.That(didChange(shader));
 
         //third run
-        shader.changed.CopyFrom(new bool[1]);
+        shader.changed.CopyFrom(new int[1]);
         GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
         shader.distanceMap.CopyTo(pointData);
@@ -178,7 +177,7 @@ public class DistanceMapTest
         Assert.That(didChange(shader));
 
         //forth run
-        shader.changed.CopyFrom(new bool[1]);
+        shader.changed.CopyFrom(new int[1]);
         GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
         shader.distanceMap.CopyTo(pointData);
@@ -198,7 +197,7 @@ public class DistanceMapTest
         Assert.That(didChange(shader));
 
         //fifth and last run => no change
-        shader.changed.CopyFrom(new bool[1]);
+        shader.changed.CopyFrom(new int[1]);
         GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
 
         shader.distanceMap.CopyTo(pointData);

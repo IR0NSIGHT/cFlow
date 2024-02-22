@@ -5,7 +5,7 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
 {
     public readonly ReadWriteTexture2D<uint> distanceMap;
     public readonly ReadOnlyTexture2D<uint> heightMap;
-    public readonly ReadWriteBuffer<bool> changed;
+    public readonly ReadWriteBuffer<int> changed;
 
     public static readonly uint STRAIGHT = 10;
     public static readonly uint DIAGONAL = 14;
@@ -65,10 +65,8 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
         //distance is not default value and has changed
         if (distance < ignore && distance != distanceMap[ThreadIds.XY])
         {
-            changed[0] = true;
+            changed[0] = 1;
             distanceMap[ThreadIds.XY] = distance;
         }
-        changed[ThreadIds.X] = true;
-
     }
 }
