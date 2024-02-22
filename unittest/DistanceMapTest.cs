@@ -63,28 +63,6 @@ public class DistanceMapTest
     }
 
 
-    private static ExpandDistanceShader FromMaps(uint[,] distanceMap, uint[,] heightMap)
-    {
-        var distanceData = GraphicsDevice.GetDefault()
-            .AllocateReadWriteTexture2D<uint>(distanceMap);
-
-        var heightTexture = GraphicsDevice.GetDefault()
-            .AllocateReadOnlyTexture2D(heightMap);
-
-        var changedArr = new int[1];
-        var changed = GraphicsDevice.GetDefault()
-            .AllocateReadWriteBuffer<int>(changedArr);
-
-        return new ExpandDistanceShader(distanceData, heightTexture, changed); ;
-    }
-
-    public static bool didChange(ExpandDistanceShader shader)
-    {
-        var result = new int[1];
-        shader.changed.CopyTo(result);
-        return result[0] != 0;
-    }
-
     [Test]
     public void simpleShaderRun()
     {
@@ -115,7 +93,7 @@ public class DistanceMapTest
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
 
-        var shader = FromMaps(pointData, heightData);
+        var shader = DistanceMap.FromMaps(pointData, heightData);
 
         //first run
         shader.changed.CopyFrom(new int[1]);
@@ -134,7 +112,7 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //second run
         shader.changed.CopyFrom(new int[1]);
@@ -154,7 +132,7 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //third run
         shader.changed.CopyFrom(new int[1]);
@@ -174,7 +152,7 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //forth run
         shader.changed.CopyFrom(new int[1]);
@@ -194,7 +172,7 @@ public class DistanceMapTest
             { 50, 50, 50, 50, 50 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //fifth and last run => no change
         shader.changed.CopyFrom(new int[1]);
@@ -214,7 +192,7 @@ public class DistanceMapTest
             { 50, 50, 50, 50, 50 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader), Is.False);
+        Assert.That(DistanceMap.didChange(shader), Is.False);
 
     }
 
@@ -259,7 +237,7 @@ public class DistanceMapTest
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
 
-        var shader = FromMaps(pointData, heightData);
+        var shader = DistanceMap.FromMaps(pointData, heightData);
 
         //first run
         shader.changed.CopyFrom(new int[1]);
@@ -278,7 +256,7 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //second run
         shader.changed.CopyFrom(new int[1]);
@@ -299,7 +277,7 @@ public class DistanceMapTest
         };
         print(pointData);
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //third run
         shader.changed.CopyFrom(new int[1]);
@@ -319,7 +297,7 @@ public class DistanceMapTest
             { 0, 0, 0, 0, 0 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //forth run
         shader.changed.CopyFrom(new int[1]);
@@ -340,7 +318,7 @@ public class DistanceMapTest
         };
 
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader));
+        Assert.That(DistanceMap.didChange(shader));
 
         //fifth and last run => no change
         shader.changed.CopyFrom(new int[1]);
@@ -351,7 +329,7 @@ public class DistanceMapTest
 
         shouldBe = new uint[,]
         {
-            { 38,  34, 30, 34, 38 },
+            { 38, 34, 30, 34, 38 },
             { 34, 24, 20, 24, 34 },
             { 30, 20, 10, 20, 30, },
             { 34, 24, 20, 24, 34 },
@@ -360,7 +338,7 @@ public class DistanceMapTest
             { 58, 54, 50, 54, 58 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
-        Assert.That(didChange(shader), Is.False);
+        Assert.That(DistanceMap.didChange(shader), Is.False);
 
     }
 

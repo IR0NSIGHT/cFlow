@@ -94,40 +94,27 @@ public class DistanceMap : Map2d
 
         var queue = new SortedQueue();
         var edges = MarkNaturalEdges();
-        foreach (var origin in edges)
+
+
+
+        uint[,] pointData = this.toGpuData();
+        uint[,] heightData =((DummyDimension)this.heightMap).ToGPUdata();
+        var shader = FromMaps(pointData, heightData);
+
+
+        var changed = true;
+        for (int i = 0; i < Math.Max(Bounds().x, Bounds().y); i++)
         {
-            queue.TryInsert(origin.point, origin.distance.distance);
-        }
-        while (!queue.isEmpty())
-        {
-            var current = queue.Take();
-            SetDistanceToEdge(current.point, new DistancePoint() { distance = current.value, isSet = true });
-            var currentHeight = heightMap.GetHeight(current.point);
+            if (!changed)
+                break;
 
-            var filter = ((int x, int y) p) =>
-            {
-                return inBounds(p.x, p.y) && !IsSet(p) && heightMap.GetHeight(p) >= currentHeight;
-            };
+            shader.changed.CopyFrom(new int[1]);
+            GraphicsDevice.GetDefault().For(Bounds().x, Bounds().y, shader);
 
-            Point.Neighbours(current.point)
-                .Where(filter)
-                .Select(n => (n, current.value + 10))
-                .ToList()
-                .ForEach(x => queue.TryInsert(x.n, x.Item2));
-
-            Point.Diagonal(current.point)
-                .Where(filter)
-                .Select(n => (n, current.value + 14))
-                .ToList()
-                .ForEach(x => queue.TryInsert(x.n, x.Item2));
+            changed = didChange(shader);
         }
 
-        foreach (var point in iterator().Points())
-        {
-            var d = GetDistanceOf(point);
-            if ((IsSet(point) && d.distance == 0))
-                Debug.WriteLine(":(");
-        }
+        this.FromGPUdata(shader.distanceMap.ToArray());
     }
 
 
@@ -262,5 +249,27 @@ public class DistanceMap : Map2d
     public IMapIterator<(int x, int y)> iterator()
     {
         return new Map2dIterator(Bounds());
+    }
+
+    public static ExpandDistanceShader FromMaps(uint[,] distanceMap, uint[,] heightMap)
+    {
+        var distanceData = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<uint>(distanceMap);
+
+        var heightTexture = GraphicsDevice.GetDefault()
+            .AllocateReadOnlyTexture2D(heightMap);
+
+        var changedArr = new int[1];
+        var changed = GraphicsDevice.GetDefault()
+            .AllocateReadWriteBuffer<int>(changedArr);
+
+        return new ExpandDistanceShader(distanceData, heightTexture, changed); ;
+    }
+
+    public static bool didChange(ExpandDistanceShader shader)
+    {
+        var result = new int[1];
+        shader.changed.CopyTo(result);
+        return result[0] != 0;
     }
 }
