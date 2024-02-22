@@ -80,9 +80,9 @@ public class DistanceMapTest
 
     public static bool didChange(ExpandDistanceShader shader)
     {
-       var result = new int[1];
-       shader.changed.CopyTo(result);
-       return result[0] != 0 ;
+        var result = new int[1];
+        shader.changed.CopyTo(result);
+        return result[0] != 0;
     }
 
     [Test]
@@ -212,6 +212,152 @@ public class DistanceMapTest
             { 30, 30, 30, 30, 30 },
             { 40, 40, 40, 40, 40 },
             { 50, 50, 50, 50, 50 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader), Is.False);
+
+    }
+
+    public void print(uint[,] pointData)
+    {
+        for (int y = 0; y < pointData.GetLength(0); y++)
+        {
+            for (int x = 0; x < pointData.GetLength(1); x++)
+            {
+                Debug.Write(pointData[y,x] +",\t");
+            }
+            Debug.Write("\n");
+        }
+    }
+
+    [Test]
+    public void simpleShaderRunDiagonal()
+    {
+        DummyDimension dimension = new DummyDimension((5, 7), 17);
+        DistanceMap distanceMap = new DistanceMap(dimension);
+
+        distanceMap.SetDistanceToEdge((2, 2), new DistanceMap.DistancePoint(10, true));
+
+        uint[,] pointData = distanceMap.toGpuData();
+        uint[,] heightData = dimension.ToGPUdata();
+
+        Assert.That(pointData.GetLength(0) == heightData.GetLength(0));
+        Assert.That(pointData.GetLength(1) == heightData.GetLength(1));
+
+
+
+        //check before first run
+        var shouldBe = new uint[,]
+        {
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 10, 0, 0, },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+        var shader = FromMaps(pointData, heightData);
+
+        //first run
+        shader.changed.CopyFrom(new int[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
+
+        shader.distanceMap.CopyTo(pointData);
+
+        shouldBe = new uint[,]
+        {
+            { 0, 0, 0, 0, 0 },
+            { 0, 24, 20, 24, 0 },
+            { 0, 20, 10, 20, 0, },
+            { 0, 24, 20, 24, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
+
+        //second run
+        shader.changed.CopyFrom(new int[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
+
+        shader.distanceMap.CopyTo(pointData);
+
+
+        shouldBe = new uint[,]
+        {
+            { 38,  34, 30, 34, 38 },
+            { 34, 24, 20, 24, 34 },
+            { 30, 20, 10, 20, 30, },
+            { 34, 24, 20, 24, 34 },
+            { 38, 34, 30, 34, 38 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        print(pointData);
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
+
+        //third run
+        shader.changed.CopyFrom(new int[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
+
+        shader.distanceMap.CopyTo(pointData);
+
+
+        shouldBe = new uint[,]
+        {
+            { 38,  34, 30, 34, 38 },
+            { 34, 24, 20, 24, 34 },
+            { 30, 20, 10, 20, 30, },
+            { 34, 24, 20, 24, 34 },
+            { 38, 34, 30, 34, 38 },
+            { 48, 44, 40, 44, 48 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
+
+        //forth run
+        shader.changed.CopyFrom(new int[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
+
+        shader.distanceMap.CopyTo(pointData);
+
+
+        shouldBe = new uint[,]
+        {
+            { 38,  34, 30, 34, 38 },
+            { 34, 24, 20, 24, 34 },
+            { 30, 20, 10, 20, 30, },
+            { 34, 24, 20, 24, 34 },
+            { 38, 34, 30, 34, 38 },
+            { 48, 44, 40, 44, 48 },
+            { 58, 54, 50, 54, 58 },
+        };
+
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+        Assert.That(didChange(shader));
+
+        //fifth and last run => no change
+        shader.changed.CopyFrom(new int[1]);
+        GraphicsDevice.GetDefault().For(dimension.Bounds().x, dimension.Bounds().y, shader);
+
+        shader.distanceMap.CopyTo(pointData);
+
+
+        shouldBe = new uint[,]
+        {
+            { 38,  34, 30, 34, 38 },
+            { 34, 24, 20, 24, 34 },
+            { 30, 20, 10, 20, 30, },
+            { 34, 24, 20, 24, 34 },
+            { 38, 34, 30, 34, 38 },
+            { 48, 44, 40, 44, 48 },
+            { 58, 54, 50, 54, 58 },
         };
         Assert.That(pointData, Is.EqualTo(shouldBe));
         Assert.That(didChange(shader), Is.False);
