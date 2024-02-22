@@ -40,7 +40,7 @@ public class LargeImageTest
 
         int widthOffset = 20;
         int heightOffset = 30;
-        var data = DummyDimension.arrayOfSize(100, 100);
+        var data = DummyDimension.arrayOfSize<ushort>(100, 100);
 
         DummyDimension.pixel16bitHeighmapArray(bmp, data, widthOffset, heightOffset);
         for (int i = 0; i < bmp.Width; i++)

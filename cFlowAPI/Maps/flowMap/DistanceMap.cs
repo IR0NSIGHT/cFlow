@@ -30,11 +30,7 @@ public class DistanceMap : Map2d
     {
         this.bounds = heightMap.Bounds();
         this.heightMap = heightMap;
-        this.distanceMap = new DistancePoint[bounds.x][];
-        for (int i = 0; i < bounds.x; i++)
-        {
-            distanceMap[i] = new DistancePoint[bounds.y];
-        }
+        this.distanceMap = DummyDimension.arrayOfSize<DistancePoint>(Bounds().x, Bounds().y);
     }
 
     public uint[,] toGpuData()
@@ -244,12 +240,12 @@ public class DistanceMap : Map2d
 
     public void SetDistanceToEdge((int x, int y) point, DistancePoint distance)
     {
-        this.distanceMap[point.x][point.y] = distance;
+        this.distanceMap[point.y][point.x] = distance;
     }
 
     public DistancePoint GetDistanceOf((int x, int y) point)
     {
-        var val = distanceMap[point.x][point.y];
+        var val = distanceMap[point.y][point.x];
         return val;
     }
 

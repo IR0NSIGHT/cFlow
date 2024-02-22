@@ -66,37 +66,139 @@ public class DistanceMapTest
     public void simpleShaderRun()
     {
         DummyDimension dimension = new DummyDimension((5, 7), 17);
-        dimension.SetHeight((0,0),12);
         DistanceMap distanceMap = new DistanceMap(dimension);
-        distanceMap.SetDistanceToEdge((1,0),new DistanceMap.DistancePoint(10,true));
-        distanceMap.SetDistanceToEdge((0,1), new DistanceMap.DistancePoint(10, true));
-
+        for (int x = 0; x < dimension.Bounds().x; x++)
+            distanceMap.SetDistanceToEdge((x, 2), new DistanceMap.DistancePoint(10,true));
 
 
         uint[,] pointData = distanceMap.toGpuData();
+        uint[,] heightData = dimension.ToGPUdata();
+
+        Assert.That(pointData.GetLength(0) == heightData.GetLength(0));
+        Assert.That(pointData.GetLength(1) == heightData.GetLength(1));
+
+
         using ReadWriteTexture2D<uint> distanceData = GraphicsDevice.GetDefault()
             .AllocateReadWriteTexture2D<uint>(pointData);
 
-        uint[,] heightData = dimension.ToGPUdata();
         using ReadOnlyTexture2D<uint> heightTexture = GraphicsDevice.GetDefault()
             .AllocateReadOnlyTexture2D(heightData);
 
-        var changedFlag = new bool[100];
-        changedFlag[0] = true;
-        using ReadWriteBuffer<bool> changedBuffer =
-            GraphicsDevice.GetDefault().AllocateReadWriteBuffer<bool>(changedFlag);
+        int[,] changed = new int[heightTexture.Width, heightTexture.Height];
+        changed[0, 0] = 1;
+        using ReadWriteTexture2D<int> changedTexture = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<int>(changed);
 
-        var shader = new ExpandDistanceShader(distanceData, heightTexture, changedBuffer);
+        using ReadWriteTexture2D<int2> idText = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<int2>(changedTexture.Width, changedTexture.Height);
+        var shader = new ExpandDistanceShader(distanceData, heightTexture, changedTexture, idText);
 
-        while (changedFlag[0])
+        //check before first run
+        var shouldBe = new uint[,]
         {
-            changedFlag[0] = false;
-            GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
-            distanceData.CopyTo(pointData);
-            changedBuffer.CopyTo(changedFlag);
-        }
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 10, 10, 10, 10, 10, },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+
+
+        //first run
+        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+
         distanceData.CopyTo(pointData);
-        (distanceMap).FromGPUdata(pointData);
+        changedTexture.CopyTo(changed);
+
+        shouldBe = new uint[,]
+        {
+            { 0, 0, 0, 0, 0 },
+            { 20, 20, 20, 20, 20, },
+            { 10, 10, 10, 10, 10, },
+            { 20, 20, 20, 20, 20, },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+        //second run
+        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+
+        distanceData.CopyTo(pointData);
+        changedTexture.CopyTo(changed);
+
+        shouldBe = new uint[,]
+        {
+            { 30, 30, 30, 30, 30 },
+            { 20, 20, 20, 20, 20, },
+            { 10, 10, 10, 10, 10, },
+            { 20, 20, 20, 20, 20, },
+            { 30, 30, 30, 30, 30 },
+            { 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+        //third run
+        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+
+        distanceData.CopyTo(pointData);
+        changedTexture.CopyTo(changed);
+
+        shouldBe = new uint[,]
+        {
+            { 30, 30, 30, 30, 30 },
+            { 20, 20, 20, 20, 20, },
+            { 10, 10, 10, 10, 10, },
+            { 20, 20, 20, 20, 20, },
+            { 30, 30, 30, 30, 30 },
+            { 40, 40, 40, 40, 40 },
+            { 0, 0, 0, 0, 0 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+        //forth run
+        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+
+        distanceData.CopyTo(pointData);
+        changedTexture.CopyTo(changed);
+
+        shouldBe = new uint[,]
+        {
+            { 30, 30, 30, 30, 30 },
+            { 20, 20, 20, 20, 20, },
+            { 10, 10, 10, 10, 10, },
+            { 20, 20, 20, 20, 20, },
+            { 30, 30, 30, 30, 30 },
+            { 40, 40, 40, 40, 40 },
+            { 50, 50, 50, 50, 50 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+        //fifth and last run => no change
+        GraphicsDevice.GetDefault().For(distanceData.Width, distanceData.Height, shader);
+
+        distanceData.CopyTo(pointData);
+        changedTexture.CopyTo(changed);
+
+        shouldBe = new uint[,]
+        {
+            { 30, 30, 30, 30, 30 },
+            { 20, 20, 20, 20, 20, },
+            { 10, 10, 10, 10, 10, },
+            { 20, 20, 20, 20, 20, },
+            { 30, 30, 30, 30, 30 },
+            { 40, 40, 40, 40, 40 },
+            { 50, 50, 50, 50, 50 },
+        };
+        Assert.That(pointData, Is.EqualTo(shouldBe));
+
+
     }
 
 

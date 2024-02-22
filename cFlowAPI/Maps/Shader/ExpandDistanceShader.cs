@@ -5,43 +5,71 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
 {
     public readonly ReadWriteTexture2D<uint> distanceMap;
     public readonly ReadOnlyTexture2D<uint> heightMap;
-    public readonly ReadWriteBuffer<bool> changed;
+    public readonly ReadWriteTexture2D<int> changed;
+    public readonly ReadWriteTexture2D<int2> idText;
 
     public static readonly uint EDGE = 10;
 
+    public uint getHeight(int x, int y, int2 xy)
+    {
+        return heightMap[xy + new int2(x, y)];
+    }
+
+    public uint getDistance(int x, int y, int2 xy)
+    {
+        return distanceMap[xy + new int2(x, y)];
+    }
+
+    public uint distanceOrDefault(int x, int y, int2 XY, uint ownHeight)
+    {
+        if (XY.Y + y >= 0 &&
+            XY.Y + y < distanceMap.Height &&
+            XY.X + x >= 0 &&
+            XY.X + x < distanceMap.Width &&
+            getHeight(x, y, XY) == ownHeight &&
+            getDistance(x, y, XY) != 0)
+        {
+            return getDistance(x, y, XY) + 10;
+        }
+        else
+        {
+            uint ignore = uint.MaxValue;
+            return ignore;
+        }
+    }
+
     public void Execute()
     {
-        uint ownHeight = heightMap[ThreadIds.XY];
+        int2 XY = ThreadIds.XY;
+        uint ownHeight = getHeight(0, 0, XY);
         //threadId.X == x value == column in image
         //threadId.Y 
+        uint ignore = uint.MaxValue;
+        uint down = distanceOrDefault(0, -1, XY, ownHeight);
+
+        uint up = distanceOrDefault(0, 1, XY, ownHeight);
+
+        uint left = distanceOrDefault(-1, 0, XY, ownHeight);
+
+        uint right = distanceOrDefault(1, 0, XY, ownHeight);
+
         uint distance = distanceMap[ThreadIds.XY];
-        uint ignore = 0;
-        uint down = ThreadIds.Y > 0 && heightMap[ThreadIds.XY + new int2(0, -1)] == ownHeight ?
-            distanceMap[ThreadIds.XY + new int2(0, -1)] : ignore;
-
-        uint up = ThreadIds.Y + 1 < distanceMap.Height && heightMap[ThreadIds.XY + new int2(0, 1)] == ownHeight ?
-            distanceMap[ThreadIds.XY + new int2(0, 1)] : ignore;
-
-        uint left = ThreadIds.X > 0 && heightMap[ThreadIds.XY + new int2(-1, 0)] == ownHeight ?
-            distanceMap[ThreadIds.XY + new int2(-1, 0)] : ignore;
-
-
-        uint right = ThreadIds.X + 1 < distanceMap.Width && heightMap[ThreadIds.XY + new int2(1, 0)] == ownHeight
-            ? distanceMap[ThreadIds.XY + new int2(1, 0)] : ignore;
-
-        //zero means untouched => choose greatest value to choose a neighbour guaranteed
-        uint baseValue = distance == 0 ? uint.MaxValue : distance;
 
         //choose the neighbour with the lowest value and add 10
-        baseValue = left != ignore && left < baseValue ? left + 10 : baseValue;
-        baseValue = right != ignore && right < baseValue ? right + 10 : baseValue;
-        baseValue = down != ignore && down < baseValue ? down + 10 : baseValue;
-        baseValue = up != ignore && up < baseValue ? up + 10 : baseValue;
+        distance = distance == 0 ? uint.MaxValue : distance;
+        distance = left < distance ? left : distance;
+        distance = right < distance ? right : distance;
+        distance = down < distance ? down : distance;
+        distance = up < distance ? up : distance;
 
-        if (baseValue != uint.MaxValue && distance != baseValue)
+        //distance is not default value and has changed
+        if (distance != uint.MaxValue && distance != distanceMap[ThreadIds.XY])
         {
-            changed[0] = true;
-            distanceMap[ThreadIds.XY] = baseValue;//(uint)((ThreadIds.Y << 8 & 0xFF00) | (ThreadIds.X & 0x00FF));
+            changed[0, 0] = 1;
+            changed[ThreadIds.XY] = 1;
+            distanceMap[ThreadIds.XY] = distance;
         }
+
+        idText[ThreadIds.XY] = ThreadIds.XY;
     }
 }

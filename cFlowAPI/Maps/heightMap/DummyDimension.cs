@@ -105,7 +105,7 @@ namespace cFlowApi.Heightmap
 
         private static ushort[][] filledHeightmap((int x, int y) size, ushort height)
         {
-            ushort[][] heightMap = arrayOfSize(size.x, size.y);
+            ushort[][] heightMap = arrayOfSize<ushort>(size.x, size.y);
             foreach (var row in heightMap)
             {
                 Array.Fill(row, height);
@@ -143,12 +143,12 @@ namespace cFlowApi.Heightmap
             return _iterator;
         }
 
-        public static ushort[][] arrayOfSize(int width, int height)
+        public static A[][] arrayOfSize<A>(int width, int height)
         {
-            var rows = new ushort[height][];
+            var rows = new A[height][];
             for (int i = 0; i < rows.Length; i++)
             {
-                rows[i] = new ushort[width];
+                rows[i] = new A[width];
             }
 
             return rows;
@@ -156,7 +156,7 @@ namespace cFlowApi.Heightmap
 
         public static ushort[][] pixel16bitHeighmapArray(Bitmap bitmap)
         {
-            var rows = arrayOfSize(bitmap.Width, bitmap.Height);
+            var rows = arrayOfSize<ushort>(bitmap.Width, bitmap.Height);
             pixel16bitHeighmapArray(bitmap, rows, 0, 0);
 
             return rows;
@@ -196,12 +196,12 @@ namespace cFlowApi.Heightmap
 
         private uint[,] convert(ushort[][] data)
         {
-            uint[,] result = new uint[data[0].Length, data.Length];
+            uint[,] result = new uint[data.Length, data[0].Length];
             for (int y = 0; y < data.Length; y++)
             {
                 for (int x = 0; x < data[0].Length; x++)
                 {
-                    result[x, y] = data[y][x];
+                    result[y,x] = data[y][x];
                 }
             }
 
