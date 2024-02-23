@@ -85,7 +85,7 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="maxZ"></param>
         /// <param name="maxSurfaceBeforeExceeded">lenght of border ring before aborting search, disable with -1 (default)</param>
         /// <returns></returns>
-        public (List<(int x, int y)> outerMostRing, BooleanMap toBecomeRiver, bool exceededMax, List<(int x, int y)> lowerEscapePoints) collectPlaneAtOrBelow(List<(int x, int y)> startingPositions, int maxZ, Func<(int x, int y), bool> isIgnoredPoint, int maxSurfaceBeforeExceeded = -1)
+        public (List<(int x, int y)> outerMostRing, BooleanMap toBecomeRiver, bool exceededMax, List<(int x, int y)> lowerEscapePoints) collectPlaneAtOrBelow(List<(int x, int y)> startingPositions, int maxZ, Func<(int x, int y), bool> isIgnoredPoint, int maxSurfaceBeforeExceeded = -1, bool abortOnLowerFound = false)
         {
             BooleanMap toBecomeRiver = new BooleanMap(_heightMap.Bounds());
             Func<(int x, int y), bool> isEqualZ = pos =>
@@ -103,12 +103,12 @@ namespace cFlowAPI.Maps.riverMap
 
             while (true)
             {
-                var (nextRing, didFindLower) = GetTouchingUnseen(nextPositions, isEqualZ, isBelowZ, toBecomeRiver, isIgnoredPoint);
+                var (nextRing, didFindLower) = GetTouchingUnseen(nextPositions, isEqualZ, isBelowZ, toBecomeRiver, isIgnoredPoint, abortOnLowerFound);
                 //ring has found everything, nothing more to do
                 if (nextRing.Count == 0)
                     break;
 
-                if (didFindLower)   //we found an escape from this plane => return all points that were flooded and the escape points.
+                if (didFindLower && abortOnLowerFound)   //we found an escape from this plane => return all points that were flooded and the escape points.
                 {
                     return ([],
                         toBecomeRiver,
@@ -141,7 +141,7 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="toBecomeRiver"></param>
         /// <returns></returns>
         private static (List<(int x, int y)> points, bool isLower)
-            GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isEqualZ, Func<(int x, int y), bool> isBelowZ, BooleanMap toBecomeRiver, Func<(int x, int y), bool> isIgnoredPoint)
+            GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isEqualZ, Func<(int x, int y), bool> isBelowZ, BooleanMap toBecomeRiver, Func<(int x, int y), bool> isIgnoredPoint, bool returnLower = false)
         {
             List<(int x, int y)> lowerHeight = new List<(int x, int y)>();
             List<(int x, int y)> equalHeight = new List<(int x, int y)>();
@@ -156,7 +156,7 @@ namespace cFlowAPI.Maps.riverMap
                         !toBecomeRiver.isMarked(neighbour.x, neighbour.y) &&
                         !isIgnoredPoint(neighbour))
                     {
-                        if (isEqualZ(neighbour))
+                        if (isEqualZ(neighbour) || (!returnLower && isBelowZ(neighbour)))
                         {
                             toBecomeRiver.setMarked(neighbour.x, neighbour.y);
                             equalHeight.Add(neighbour);
