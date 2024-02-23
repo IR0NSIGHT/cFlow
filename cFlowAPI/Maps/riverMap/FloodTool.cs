@@ -49,10 +49,6 @@ namespace cFlowAPI.Maps.riverMap
                 {
                     return escapePoints;
                 }
-
-
-
-
             }
 
             return new List<(int x, int y)>();
@@ -100,6 +96,10 @@ namespace cFlowAPI.Maps.riverMap
             foreach (var (x, y) in startingPositions)
             {
                 toBecomeRiver.setMarked(x, y);
+
+                if (isBorderPoint((x, y), p => !isEqualZ(p) && !isBelowZ(p)))//TODO is this check not guaranteed implicitly by GetTouchingUnseen?
+                    outerMostRing.Add((x, y));
+
             }
 
             while (true)
