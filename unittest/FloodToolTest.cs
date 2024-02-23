@@ -205,7 +205,7 @@ namespace unittest
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 25) },
-                74,
+                17,
                 p => false,
                 13
                 );
