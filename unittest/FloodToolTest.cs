@@ -1,4 +1,5 @@
 ﻿using application.Maps;
+using application.Maps.flowMap;
 using cFlowApi.Heightmap;
 using src.Maps.riverMap;
 
@@ -34,7 +35,7 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
+            var (ring, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
                 17, p => false
                 );
@@ -86,7 +87,7 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seen17, exceeded) = flood.collectPlaneAtOrBelow(
+            var (ring, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
                 34,  //not z of bottom plain, but higher but still below rest of map,
                 p => false
@@ -142,7 +143,7 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
+            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (0, 0) },
                 74, //map is all 74 or lower => flood all
                 p => false
@@ -180,7 +181,7 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seenMap, exceeded) = flood.collectPlaneAtOrBelow(
+            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25,25) },
                 74,  
                 p => false,
@@ -219,7 +220,7 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var riverMap = new RiverMap(new SimpleFlowMap(heightMap.Bounds()), heightMap);
+            var riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
             flood.FloodArea(
                 (35, 25),
                 riverMap, 

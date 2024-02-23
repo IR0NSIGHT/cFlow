@@ -53,7 +53,7 @@ public class NaturalEdgeShaderTest
         uint[,] arr = dim.ToGPUdata();
         foreach (var point in dim.iterator().Points())
         {
-            Assert.That(dim.GetHeight(point) == arr[point.x, point.y]);
+            Assert.That(dim.GetHeight(point) == arr[point.y, point.x]);
         }
     }
 }
