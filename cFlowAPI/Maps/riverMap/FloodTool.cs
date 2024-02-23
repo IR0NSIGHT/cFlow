@@ -28,11 +28,11 @@ namespace cFlowAPI.Maps.riverMap
                     lakeMap.setMarked(point.x, point.y);
                 }
 
-                var (outerMost, toBeRiver, exceeded, escapePoints) = 
+                var (outerMost, toBeRiver, exceeded, escapePoints) =
                     collectPlaneAtOrBelow(
                         currentOuterMost,
                         maxZ,
-                        p => lakeMap.isMarked(p.x,p.y),
+                        p => lakeMap.isMarked(p.x, p.y),
                         maxSurfaceBeforeExceeded);
 
                 if (exceeded)
@@ -49,9 +49,9 @@ namespace cFlowAPI.Maps.riverMap
                     return escapePoints;
                 }
 
-  
 
-                
+
+
             }
 
             return new List<(int x, int y)>();
@@ -59,18 +59,18 @@ namespace cFlowAPI.Maps.riverMap
         }
 
         /// <summary>
-        /// test if this point has a neighbour that is not belowZ
+        /// test if this point has a neighbour that is aboveZ
         /// => point is touching the border of the plane defined by belowZ
         /// </summary>
         /// <param name="pos"></param>
-        /// <param name="isBelowZ"></param>
+        /// <param name="isAboveZ"></param>
         /// <returns></returns>
-        private bool isBorderPoint((int x, int y) pos, Func<(int x, int y), bool> isBelowZ)
+        private bool isBorderPoint((int x, int y) pos, Func<(int x, int y), bool> isAboveZ)
         {
             var neighs = new (int x, int y)[] { Up(pos), Down(pos), Left(pos), Right(pos) };
             foreach (var neigh in neighs)
             {
-                if (_heightMap.inBounds(neigh.x, neigh.y) && !isBelowZ(neigh))
+                if (_heightMap.inBounds(neigh.x, neigh.y) && isAboveZ(neigh))
                 {
                     return true;
                 }
@@ -87,7 +87,7 @@ namespace cFlowAPI.Maps.riverMap
         /// <returns></returns>
         public (List<(int x, int y)> outerMostRing, BooleanMap toBecomeRiver, bool exceededMax, List<(int x, int y)> lowerEscapePoints) collectPlaneAtOrBelow(List<(int x, int y)> startingPositions, int maxZ, Func<(int x, int y), bool> isIgnoredPoint, int maxSurfaceBeforeExceeded = -1)
         {
-            BooleanMap seenMap = new BooleanMap(_heightMap.Bounds());
+            BooleanMap toBecomeRiver = new BooleanMap(_heightMap.Bounds());
             Func<(int x, int y), bool> isEqualZ = pos =>
                 _heightMap.GetHeight(pos) == maxZ;
             Func<(int x, int y), bool> isBelowZ = pos =>
@@ -98,12 +98,12 @@ namespace cFlowAPI.Maps.riverMap
             var nextPositions = startingPositions;
             foreach (var (x, y) in startingPositions)
             {
-                seenMap.setMarked(x, y);
+                toBecomeRiver.setMarked(x, y);
             }
 
             while (true)
             {
-                var (nextRing, didFindLower) = GetTouchingUnseen(nextPositions, isEqualZ, isBelowZ,seenMap, isIgnoredPoint);
+                var (nextRing, didFindLower) = GetTouchingUnseen(nextPositions, isEqualZ, isBelowZ, toBecomeRiver, isIgnoredPoint);
                 //ring has found everything, nothing more to do
                 if (nextRing.Count == 0)
                     break;
@@ -111,37 +111,37 @@ namespace cFlowAPI.Maps.riverMap
                 if (didFindLower)   //we found an escape from this plane => return all points that were flooded and the escape points.
                 {
                     return ([],
-                        seenMap,
+                        toBecomeRiver,
                         false,
                         nextRing);
                 }
 
                 nextPositions = nextRing;
 
-                foreach (var pos in nextRing)   
+                foreach (var pos in nextRing)
                 {
-                    if (isBorderPoint(pos, isEqualZ)) //TODO is this check not guaranteed implicitly by GetTouchingUnseen?
+                    if (isBorderPoint(pos, p => !isEqualZ(p) && !isBelowZ(p)))//TODO is this check not guaranteed implicitly by GetTouchingUnseen?
                         outerMostRing.Add(pos);
                 }
 
                 //ring has exceeded maximum size
-                if (maxSurfaceBeforeExceeded != -1 && seenMap.getMarkedAmount() > maxSurfaceBeforeExceeded)
+                if (maxSurfaceBeforeExceeded != -1 && toBecomeRiver.getMarkedAmount() > maxSurfaceBeforeExceeded)
                 {
                     break;
                 }
             }
 
-            return (outerMostRing, seenMap, maxSurfaceBeforeExceeded != -1 && seenMap.getMarkedAmount() > maxSurfaceBeforeExceeded, new List<(int x, int y)>());
+            return (outerMostRing, toBecomeRiver, maxSurfaceBeforeExceeded != -1 && toBecomeRiver.getMarkedAmount() > maxSurfaceBeforeExceeded, new List<(int x, int y)>());
         }
 
         /// <summary>
         /// </summary>
         /// <param name="startingPositions"></param>
         /// <param name="isEqualZ"></param>
-        /// <param name="seenMap"></param>
+        /// <param name="toBecomeRiver"></param>
         /// <returns></returns>
         private static (List<(int x, int y)> points, bool isLower)
-            GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isEqualZ, Func<(int x, int y), bool> isBelowZ, BooleanMap seenMap, Func<(int x, int y), bool> isIgnoredPoint)
+            GetTouchingUnseen(IEnumerable<(int x, int y)> startingPositions, Func<(int x, int y), bool> isEqualZ, Func<(int x, int y), bool> isBelowZ, BooleanMap toBecomeRiver, Func<(int x, int y), bool> isIgnoredPoint)
         {
             List<(int x, int y)> lowerHeight = new List<(int x, int y)>();
             List<(int x, int y)> equalHeight = new List<(int x, int y)>();
@@ -152,17 +152,20 @@ namespace cFlowAPI.Maps.riverMap
                 var neighbours = new (int x, int y)[] { Up(origin), Left(origin), Right(origin), Down(origin) };
                 foreach (var neighbour in neighbours)
                 {
-                    if (seenMap.inBounds(neighbour.x, neighbour.y) &&
-                        !seenMap.isMarked(neighbour.x, neighbour.y) &&
+                    if (toBecomeRiver.inBounds(neighbour.x, neighbour.y) &&
+                        !toBecomeRiver.isMarked(neighbour.x, neighbour.y) &&
                         !isIgnoredPoint(neighbour))
                     {
-                        seenMap.setMarked(neighbour.x, neighbour.y);
                         if (isEqualZ(neighbour))
                         {
+                            toBecomeRiver.setMarked(neighbour.x, neighbour.y);
                             equalHeight.Add(neighbour);
-                        } else if (isBelowZ(neighbour)) {
+                        }
+                        else if (isBelowZ(neighbour))
+                        {
                             foundLower = true;
                             lowerHeight.Add(neighbour);
+                            toBecomeRiver.setMarked(neighbour.x, neighbour.y);
                         }
                     }
                 }

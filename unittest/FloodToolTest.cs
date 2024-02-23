@@ -30,7 +30,7 @@ namespace unittest
         {
             DummyDimension heightMap = new DummyDimension((5, 7), 74);
             (int x, int y) rectStart = (1, 2);
-            (int x, int y) rectEnd = (3, 5);
+            (int x, int y) rectEnd = (5, 5);
             //make hole in the middle
             foreach (var point in iterateRect(rectStart, rectEnd))
                 heightMap.SetHeight(point, 17);
@@ -39,9 +39,9 @@ namespace unittest
             {
                 { 74, 74, 74, 74, 74 },
                 { 74, 74, 74, 74, 74 },
-                { 74, 17, 17, 74, 74 },
-                { 74, 17, 17, 74, 74 },
-                { 74, 17, 17, 74, 74 },
+                { 74, 17, 17, 17, 17 },
+                { 74, 17, 17, 17, 17 },
+                { 74, 17, 17, 17, 17 },
                 { 74, 74, 74, 74, 74 },
                 { 74, 74, 74, 74, 74 },
 
@@ -50,7 +50,7 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var (outerMostRing, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (2, 3) },
                 17, p => false
                 );
@@ -61,41 +61,34 @@ namespace unittest
             {
                 { false, false, false, false, false },
                 { false, false, false, false, false },
-                { false, true,  true,  false, false },
-                { false, true,  true,  false, false },
-                { false, true,  true,  false, false },
+                { false, true,  true,  true, true },
+                { false, true,  true,  true, true },
+                { false, true,  true,  true, true },
                 { false, false, false, false, false },
                 { false, false, false, false, false },
             };
             Assert.That(seen17.ToGpuData(), Is.EqualTo(shouldBeFlooded));
 
 
+            bool[,] shouldBeRing = new bool[,]
+            {
+                { false, false, false, false, false },
+                { false, false, false, false, false },
+                { false, true,  true,  true,  true },
+                { false, true,  false, false, false },
+                { false, true,  true,  true,  true },
+                { false, false, false, false, false },
+                { false, false, false, false, false },
+            };
 
             foreach (var point in heightMap.iterator().Points())
             {
-                if (isInRect(point, rectStart, rectEnd))
-                {
-                    Assert.That(seen17.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
-                }
+                var supposedToBeRing = shouldBeRing[point.y, point.x];
+                if (supposedToBeRing)
+                    Assert.That(outerMostRing.Contains(point));
                 else
-                {
-                    Assert.That(seen17.isMarked(point.x, point.y), Is.False, $"point {point} is marked wrong");
-                }
+                    Assert.That(outerMostRing.Contains(point), Is.False);
             }
-
-            for (var x = rectStart.x; x < rectEnd.x; x++)
-            {
-                Assert.That(ring.Contains((x, rectStart.y)), Is.True, $"point {(x, rectStart.y)} is marked wrong");
-                Assert.That(ring.Contains((x, rectEnd.y - 1)), Is.True, $"point {(x, rectEnd.y - 1)} is marked wrong");
-            }
-
-            for (var y = rectStart.y; y < rectEnd.y; y++)
-            {
-                Assert.That(ring.Contains((rectStart.x, y)), Is.True);
-                Assert.That(ring.Contains((rectEnd.x - 1, y)), Is.True);
-            }
-
-
         }
 
         [Test]
@@ -211,8 +204,8 @@ namespace unittest
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
-                new List<(int x, int y)> { (25,25) },
-                74,  
+                new List<(int x, int y)> { (25, 25) },
+                74,
                 p => false,
                 13
                 );
@@ -252,7 +245,7 @@ namespace unittest
             var riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
             flood.FloodArea(
                 (35, 25),
-                riverMap, 
+                riverMap,
                 100,
                 500 //big enough for small hole, to small for middle hole
                 );
