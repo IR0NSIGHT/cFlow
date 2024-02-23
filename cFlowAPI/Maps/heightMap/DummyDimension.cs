@@ -72,11 +72,11 @@ namespace cFlowApi.Heightmap
 
         public void FromGPUdata(int[,] data)
         {
-            for (int y = 0; y < data.GetLength(1); y++)
+            for (int y = 0; y < data.GetLength(0); y++)
             {
-                for (int x = 0; x < data.GetLength(0); x++)
+                for (int x = 0; x < data.GetLength(1); x++)
                 {
-                    SetHeight((x, y), (ushort)data[x,y]);
+                    SetHeight((x, y), (ushort)data[y,x]);
                 }
             }
         }
