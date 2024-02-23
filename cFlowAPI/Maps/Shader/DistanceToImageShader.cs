@@ -1,4 +1,9 @@
-﻿using ComputeSharp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ComputeSharp;
 
 namespace cFlowAPI.Maps.Shader
 {
@@ -19,6 +24,7 @@ namespace cFlowAPI.Maps.Shader
             {
                 argb32Image[ThreadIds.XY] = new Float4(0f, 1f - ((distanceMap[ThreadIds.XY] % 255) / 255f), 0f, 1f /*Alpha*/);
             }
+
         }
     }
 }

@@ -136,13 +136,13 @@ public class DistanceMap : Map2d
         using var outputRgba32 = GraphicsDevice.GetDefault()
             .AllocateReadWriteTexture2D<Rgba32, float4>(distanceTexture.Width, distanceTexture.Height);
         var shader = new DistanceToImageShader(distanceTexture, outputRgba32);
-        GraphicsDevice.GetDefault().For(distanceTexture.Height, distanceTexture.Width, shader);
+        GraphicsDevice.GetDefault().For(distanceTexture.Width, distanceTexture.Height, shader);
 
         Stream stream = new MemoryStream();
         outputRgba32.Save(stream, ImageFormat.Png);
         using (Image image = Image.FromStream(stream))
         {
-            var bmp = new Bitmap(image);
+            var bmp = new Bitmap(image, Bounds().x, Bounds().y);
             return bmp;
         }
     }
