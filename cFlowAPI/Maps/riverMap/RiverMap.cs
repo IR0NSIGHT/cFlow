@@ -85,7 +85,7 @@ namespace src.Maps.riverMap
             //FIXME smart way to escape flooded area an continue river
             if (stopped)
             {
-                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this);
+                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this, 100);
                 escapePoints.ForEach(p => AddRiverFrom(p,-1));
             }
         }
