@@ -186,6 +186,42 @@ namespace unittest
         }
 
         [Test]
+        public void AbortWhenFindingHole()
+        {
+            /** high/low
+            *   h h h h
+            *   h l l h
+            *   h h h h
+            */
+
+
+            IHeightMap heightMap = new DummyDimension((50, 50), 74);
+            (int x, int y) rectStart = (10, 20);
+            (int x, int y) rectEnd = (30, 40);
+            //make hole in the middle
+            foreach (var point in iterateRect(rectStart, rectEnd))
+                heightMap.SetHeight(point, 17);
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+                new List<(int x, int y)> { (0, 0) },
+                74, //map is all 74 or lower => flood all
+                p => false,
+                -1,
+                true
+            );
+
+            Assert.That(exceeded, Is.False);
+            Assert.That(escapePoints.Count != 0);
+            //all points on map were flooded
+            foreach (var point in escapePoints)
+            {
+                Assert.That(isInRect(point, rectStart, rectEnd), Is.True, $"point {point} is marked wrong");
+            }
+        }
+
+
+        [Test]
         public void AbortWhenBorderExceeded()
         {
             /** high/low
