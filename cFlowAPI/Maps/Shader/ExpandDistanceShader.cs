@@ -9,6 +9,7 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
 
     public static readonly uint STRAIGHT = 10;
     public static readonly uint DIAGONAL = 14;
+    public static readonly uint DIAGONAL2 = 22;
 
     public static uint ignore = uint.MaxValue - 1000;
     public uint getHeight(int x, int y, int2 xy)
@@ -61,6 +62,20 @@ public readonly partial struct ExpandDistanceShader : IComputeShader
         distance = chooseSmaller(distance, distanceOrDefault(-1, -1, XY, ownHeight) + DIAGONAL);
         distance = chooseSmaller(distance, distanceOrDefault(-1, 1, XY, ownHeight) + DIAGONAL);
         distance = chooseSmaller(distance, distanceOrDefault(1, 1, XY, ownHeight) + DIAGONAL);
+
+        //2,1 diagonal = sqrt(5) * 10 = 22
+        //TODO active diagonal 2x1 jump after not being to lazy to adjust unit tests
+    //   distance = chooseSmaller(distance, distanceOrDefault(2, -1, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(-2, -1, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(-2, 1, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(2, 1, XY, ownHeight) + DIAGONAL2);
+    //
+    //   distance = chooseSmaller(distance, distanceOrDefault(1, -2, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(-1, -2, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(-1, 2, XY, ownHeight) + DIAGONAL2);
+    //   distance = chooseSmaller(distance, distanceOrDefault(1, 2, XY, ownHeight) + DIAGONAL2);
+
+
 
         //distance is not default value and has changed
         if (distance < ignore && distance != distanceMap[ThreadIds.XY])

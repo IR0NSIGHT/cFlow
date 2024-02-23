@@ -121,10 +121,10 @@ public class DistanceMap : Map2d
             GraphicsDevice.GetDefault().For(Bounds().x, Bounds().y, shader);
 
             changed = didChange(shader);
-            Debug.WriteLine($"shader iteration {i} took: {sw.ElapsedMilliseconds} millis.");
-            sw.Restart();
-
         }
+
+        Debug.WriteLine($"shader iterations took: {sw.ElapsedMilliseconds} millis.");
+        sw.Restart();
 
         this.FromGPUdata(shader.distanceMap.ToArray());
     }
