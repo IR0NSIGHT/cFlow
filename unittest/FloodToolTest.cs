@@ -220,6 +220,37 @@ namespace unittest
             }
         }
 
+        [Test]
+        public void CanEscapeHole()
+        {
+            /** high/low
+            *   h h h h
+            *   h l l h
+            *   h h h h
+            */
+
+
+            DummyDimension heightMap = new DummyDimension((5, 4), 7);
+            heightMap.FromGPUdata(new int[,] {
+                { 7, 7, 7, 7, 7},
+                { 7, 3, 4, 7, 3},
+                { 7, 7, 7, 7, 7},
+                { 7, 1, 2, 6, 6}
+            });
+            RiverMap riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
+
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var escapePoints = flood.FloodArea((1, 1), riverMap);
+            escapePoints.Sort();
+
+            var shouldBeEscapePoints = new List<(int x, int y)>() { (4,1),(1,3),(2,3) };
+            shouldBeEscapePoints.Sort();
+
+            Assert.That(escapePoints, Is.EqualTo(shouldBeEscapePoints));
+
+        }
+
 
         [Test]
         public void AbortWhenBorderExceeded()
