@@ -33,7 +33,8 @@ namespace cFlowAPI.Maps.riverMap
                         currentOuterMost,
                         maxZ,
                         p => lakeMap.isMarked(p.x, p.y),
-                        maxSurfaceBeforeExceeded);
+                        maxSurfaceBeforeExceeded,
+                        true);
 
                 if (exceeded)
                     return new List<(int x, int y)>();
