@@ -1,4 +1,6 @@
-﻿namespace application.Maps
+﻿using cFlowApi.Heightmap;
+
+namespace application.Maps
 {
     public class BooleanMap : Map2d
     {
@@ -13,11 +15,7 @@
             this._bounds = bounds;
             this._iterator = new Map2dIterator(bounds);
             upperBoundsMarked = bounds;
-            seenMap = new bool[bounds.x][];
-            for (int x = 0; x < bounds.x; x++)
-            {
-                seenMap[x] = new bool[bounds.y];
-            }
+            seenMap = DummyDimension.arrayOfSize<bool>(bounds.x, bounds.y);
         }
 
         /// <summary>
@@ -29,6 +27,21 @@
             {
                 Array.Clear(subArr);
             }
+        }
+
+        public bool[,] ToGpuData()
+        {
+            var data = this.seenMap;
+            bool[,] result = new bool[Bounds().y, Bounds().x];
+            for (int y = 0; y < Bounds().y; y++)
+            {
+                for (int x = 0; x < Bounds().x; x++)
+                {
+                    result[y, x] = data[y][x];
+                }
+            }
+
+            return result;
         }
 
         public (int x, int y) Bounds()
@@ -48,7 +61,7 @@
 
         public bool isMarked(int x, int y)
         {
-            return seenMap[x][y];
+            return seenMap[y][x];
         }
 
         public void setMarked(int x, int y)
@@ -58,7 +71,7 @@
                 return;
             }
             marked++;
-            seenMap[x][y] = true;
+            seenMap[y][x] = true;
 
             if (x < lowerBoundsMarked.x)
                 lowerBoundsMarked.x = x;
