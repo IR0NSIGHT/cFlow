@@ -3,6 +3,7 @@ using application.Maps.flowMap;
 using cFlowApi.Heightmap;
 using src.Maps.riverMap;
 
+
 namespace unittest
 {
     [TestFixture]
@@ -27,20 +28,48 @@ namespace unittest
         [Test]
         public void FloodConfinedHoleUpTo()
         {
-            IHeightMap heightMap = new DummyDimension((50, 50), 74);
-            (int x, int y) rectStart = (10, 20);
-            (int x, int y) rectEnd = (30, 40);
+            DummyDimension heightMap = new DummyDimension((5, 7), 74);
+            (int x, int y) rectStart = (1, 2);
+            (int x, int y) rectEnd = (3, 5);
             //make hole in the middle
             foreach (var point in iterateRect(rectStart, rectEnd))
                 heightMap.SetHeight(point, 17);
 
+            uint[,] shouldBeHeight = new uint[,]
+            {
+                { 74, 74, 74, 74, 74 },
+                { 74, 74, 74, 74, 74 },
+                { 74, 17, 17, 74, 74 },
+                { 74, 17, 17, 74, 74 },
+                { 74, 17, 17, 74, 74 },
+                { 74, 74, 74, 74, 74 },
+                { 74, 74, 74, 74, 74 },
+
+            };
+            Assert.That(heightMap.ToGPUdata(), Is.EqualTo(shouldBeHeight));
+
+
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
             var (ring, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
-                new List<(int x, int y)> { (25, 30) },
+                new List<(int x, int y)> { (2, 3) },
                 17, p => false
                 );
 
             Assert.That(exceeded, Is.False);
+
+            bool[,] shouldBeFlooded = new bool[,]
+            {
+                { false, false, false, false, false },
+                { false, false, false, false, false },
+                { false, true,  true,  false, false },
+                { false, true,  true,  false, false },
+                { false, true,  true,  false, false },
+                { false, false, false, false, false },
+                { false, false, false, false, false },
+            };
+            Assert.That(seen17.ToGpuData(), Is.EqualTo(shouldBeFlooded));
+
+
 
             foreach (var point in heightMap.iterator().Points())
             {
