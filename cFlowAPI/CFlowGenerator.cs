@@ -2,6 +2,7 @@
 using System.Drawing;
 using src.Maps.riverMap;
 using System.Text;
+using application.Maps.flowMap;
 using cFlowApi.Heightmap;
 
 namespace cFlowApi
@@ -12,7 +13,7 @@ namespace cFlowApi
         private Bitmap _rivermapImg;
 
         public DummyDimension Heightmap { get; }
-        private IFlowMap _flowMap;
+        private DistanceMap _flowMap;
         public Bitmap FlowmapImgColored { get => _flowmapImgColored; }
         public Bitmap RivermapImg { get => _rivermapImg; }
 
@@ -27,9 +28,8 @@ namespace cFlowApi
             Debug.WriteLine("Converted image to inputDistanceMap");
 
 
-            _flowMap = new SimpleFlowMap(Heightmap.Bounds());
+            _flowMap = new DistanceMap(heightMap: Heightmap);
             Debug.WriteLine("loaded distanceMap");
-
 
             RiverMap = new RiverMap(_flowMap, Heightmap);
             Debug.WriteLine("loaded rivermap");
@@ -38,8 +38,12 @@ namespace cFlowApi
 
         public void GenerateFlow()
         {
-            SimpleFlowMap.CalculateFlowFromHeightMap(Heightmap, _flowMap);
-            _flowmapImgColored = SimpleFlowMap.ToColorImage(_flowMap, FlowTranslation.FlowToColor);
+            var sw = Stopwatch.StartNew();
+            _flowMap.CalculateFromHeightmap();
+            Debug.WriteLine($"calculating distance map for {_flowMap.Bounds().x/ 1000}x{_flowMap.Bounds().y/ 1000} image took {sw.ElapsedMilliseconds} millis.");
+            sw.Restart();
+            _flowmapImgColored = _flowMap.toImage();
+            Debug.WriteLine($"distance map´toImage for {_flowMap.Bounds().x/1000}x{_flowMap.Bounds().y/1000} image took {sw.ElapsedMilliseconds} millis.");
         }
 
         public void SpamRivers(int xSpacing, int ySpacing)

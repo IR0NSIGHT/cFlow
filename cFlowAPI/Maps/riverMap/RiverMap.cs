@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using cFlowAPI.Maps.riverMap;
 using System.Drawing;
+using application.Maps.flowMap;
 using cFlowApi.Heightmap;
 
 namespace src.Maps.riverMap
@@ -8,18 +9,18 @@ namespace src.Maps.riverMap
     public class RiverMap : Map2d
     {
         private readonly bool[][] map;
-        private readonly IFlowMap flowMap;
+        private readonly DistanceMap _distanceMap;
         private Map2dIterator _iterator;
         private IHeightMap _heightMap;
-        public RiverMap(IFlowMap flowMap, IHeightMap heightMap)
+        public RiverMap(DistanceMap distanceMap, IHeightMap heightMap)
         {
-            this.flowMap = flowMap;
+            this._distanceMap = distanceMap;
             this._heightMap = heightMap;
-            map = new bool[flowMap.Bounds().x][];
-            _iterator = new Map2dIterator(flowMap.Bounds());
-            for (int i = 0; i < flowMap.Bounds().x; i++)
+            map = new bool[distanceMap.Bounds().x][];
+            _iterator = new Map2dIterator(distanceMap.Bounds());
+            for (int i = 0; i < distanceMap.Bounds().x; i++)
             {
-                map[i] = new bool[flowMap.Bounds().y];
+                map[i] = new bool[distanceMap.Bounds().y];
             }
         }
 
@@ -94,7 +95,7 @@ namespace src.Maps.riverMap
         /// <returns></returns>
         private (bool stopped, List<(int x, int y)> next) AdvanceRiver((int x, int y) startFlow, Random random, int branches = 1)
         {
-            var candidates = flowMap.FollowFlow(startFlow);
+            var candidates = _distanceMap.AdvanceFromPoint(startFlow);
             if (candidates.Count == 0)
                 return (true, [startFlow]);
             var outList = new List<(int x, int y)>();
@@ -114,12 +115,12 @@ namespace src.Maps.riverMap
 
         public (int x, int y) Bounds()
         {
-            return flowMap.Bounds();
+            return _distanceMap.Bounds();
         }
 
         public bool inBounds(int x, int y)
         {
-            return flowMap.inBounds(x, y);
+            return _distanceMap.inBounds(x, y);
         }
 
         public IMapIterator<(int x, int y)> iterator()

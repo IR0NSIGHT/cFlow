@@ -2,10 +2,13 @@
 using cFlowApi.Heightmap;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using cFlowAPI.Maps.Shader;
 using ComputeSharp;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using TerraFX.Interop.Windows;
+using System.IO;
 
 namespace application.Maps.flowMap;
 
@@ -40,7 +43,7 @@ public class DistanceMap : Map2d
         {
             for (int x = 0; x < Bounds().x; x++)
             {
-                result[y,x] = (uint)GetDistanceOf((x,y)).distance;
+                result[y, x] = (uint)GetDistanceOf((x, y)).distance;
             }
         }
 
@@ -82,7 +85,7 @@ public class DistanceMap : Map2d
         {
             for (int x = 0; x < data.GetLength(1); x++)
             {
-                SetDistanceToEdge((x, y), new DistancePoint((int)data[y,x], data[y,x]!=0));
+                SetDistanceToEdge((x, y), new DistancePoint((int)data[y, x], data[y, x] != 0));
             }
         }
     }
@@ -95,11 +98,17 @@ public class DistanceMap : Map2d
         var queue = new SortedQueue();
         var edges = MarkNaturalEdges();
 
-
-
+        var sw = Stopwatch.StartNew();
         uint[,] pointData = this.toGpuData();
-        uint[,] heightData =((DummyDimension)this.heightMap).ToGPUdata();
+        Debug.WriteLine($"transforming distance data took: {sw.ElapsedMilliseconds} millis.");
+        sw.Restart();
+        uint[,] heightData = ((DummyDimension)this.heightMap).ToGPUdata();
+        Debug.WriteLine($"transforming height data took: {sw.ElapsedMilliseconds} millis.");
+        sw.Restart();
+
         var shader = FromMaps(pointData, heightData);
+        Debug.WriteLine($"loading data to GPU took: {sw.ElapsedMilliseconds} millis.");
+        sw.Restart();
 
 
         var changed = true;
@@ -112,9 +121,47 @@ public class DistanceMap : Map2d
             GraphicsDevice.GetDefault().For(Bounds().x, Bounds().y, shader);
 
             changed = didChange(shader);
+            Debug.WriteLine($"shader iteration {i} took: {sw.ElapsedMilliseconds} millis.");
+            sw.Restart();
+
         }
 
         this.FromGPUdata(shader.distanceMap.ToArray());
+    }
+
+    public Bitmap toImage()
+    {
+        var distanceData = toGpuData();
+        using var distanceTexture = GraphicsDevice.GetDefault().AllocateReadOnlyTexture2D(distanceData);
+        using var outputRgba32 = GraphicsDevice.GetDefault()
+            .AllocateReadWriteTexture2D<Rgba32, float4>(distanceTexture.Width, distanceTexture.Height);
+        var shader = new DistanceToImageShader(distanceTexture, outputRgba32);
+        GraphicsDevice.GetDefault().For(distanceTexture.Height, distanceTexture.Width, shader);
+
+        Stream stream = new MemoryStream();
+        outputRgba32.Save(stream, ImageFormat.Png);
+        using (Image image = Image.FromStream(stream))
+        {
+            var bmp = new Bitmap(image);
+            return bmp;
+        }
+    }
+
+    public List<(int x, int y)> AdvanceFromPoint((int x, int y) startFlow)
+    {
+        var ownHeight = this.heightMap.GetHeight(startFlow);
+        var ownDistance = GetDistanceOf(startFlow).distance;
+        var outList = new List<(int x, int y)>();
+        outList.AddRange(Point.Diagonal(startFlow));
+        outList.AddRange(Point.Neighbours(startFlow));
+        var cliffs = outList.Where(p => heightMap.GetHeight(p) < ownHeight);
+        if (cliffs.Any())
+            return cliffs.ToList();
+
+        return
+            outList.Where(p => heightMap.GetHeight(p) == ownHeight)
+            .Where(p => GetDistanceOf(p).distance < ownDistance)
+            .ToList();
     }
 
 
@@ -152,7 +199,7 @@ public class DistanceMap : Map2d
         var startPointDist = GetDistanceOf(startPoint).DistanceSquared;
         var startPointHeight = heightMap.GetHeight(startPoint);
         var ns = Point.Neighbours(startPoint).Select(a => a);
-            
+
 
         var lowerNeighbours = ns
             .Where(n => inBounds(n.x, n.y))
@@ -185,7 +232,7 @@ public class DistanceMap : Map2d
             var d3 = heightMap.GetHeight(point1) == heightMap.GetHeight(point2);
 
             return
-            lastUsed[0] != point1  &&
+            lastUsed[0] != point1 &&
             lastUsed[0] != point2 &&
             (lastUsed.Count == 1 || (lastUsed[1] != point1 && lastUsed[1] != point2)) &&
             inBounds(point1.x, point1.y) &&
@@ -213,8 +260,8 @@ public class DistanceMap : Map2d
         var acceptedDiag = xx
             .Where(ps => canBeReachedFlat(ps.p1, ps.p2))
             .Select(ps =>
-                //TODO: include ps.p1 here, after we made sure that river doesnt try to revisit any points.
-            new List<(int x, int y)>() {  ps.p2 })
+            //TODO: include ps.p1 here, after we made sure that river doesnt try to revisit any points.
+            new List<(int x, int y)>() { ps.p2 })
             .ToList();
 
         outList.AddRange(acceptedDiag);
