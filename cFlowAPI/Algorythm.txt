@@ -1,0 +1,58 @@
+﻿# Riverpathing algorythm
+
+## flowing downhill
+a river paths downhill by following neighbours that are lower in z value.
+if it has no neighbours that are lower, the river has reached a flat spot.
+To get to the next true "edge", the distancemap has calculated the distance value to the clostest edge point for every block on the map.
+by advancing to neighbours with true lower distance values, the river is guaranteed to reach the next edge.
+
+This is repeated until the river reaches a hole.
+a hole is a flat spot that is the lowest local point. it is fully enclosed by blocks that are higher.
+
+## escaping a hole
+when water flows into a hole, the hole naturally fills up until it spills over.
+- flood one level
+- flood the next level
+- etc
+
+if we find a block that is lower than the current level while flooding a level, we have found an escape point
+
+we can then continue flowing downhill from the escape point
+
+to finally finish the river, we define some stop conditions:
+- flowing into the ocean
+- reaching a certain z level (eg waterlevel of the map)
+- while overflowing a hole, the created lake exceeds a maximum surface area
+
+## invariants
+- every river is a non circular tree.
+- every finished river is final and goes as far as possible
+	=> it has overflown/escaped all holes where it was possible
+	=> if a new river meets an existing river, it can flow into the existing river and stop
+	=> if a lake "A" expanding finds another existing lake "B" that means:
+		- lake B is maximum size or has an outflow BUT the outflow might be a source of lake "A"
+		- we can ignore all points in lake b from being considere outflow
+
+
+
+current <- startpoint
+currentHeight <- height of startPoint
+while (current not empty) {
+	neighbours <- all blocks touching a block in current 
+	current <- all neighbours that are of height == currentHeight
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
