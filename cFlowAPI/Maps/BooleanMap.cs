@@ -20,6 +20,21 @@ namespace application.Maps
             seenMap = DummyDimension.arrayOfSize<bool>(bounds.x, bounds.y);
         }
 
+        /// <summary>
+        /// 1 = true, 0 = false
+        /// </summary>
+        /// <param name="data"></param>
+        public void FromGpuData(int[,] data)
+        {
+            for (int y = 0; y < Bounds().y; y++)
+            {
+                for (int x = 0; x < Bounds().x; x++)
+                {
+                    seenMap[y][x] = data[y, x] == 1;
+                }
+            }
+        }
+
         public Bitmap ToImage(int x = 0, int y = 0, int width = -1, int height = -1)
         {
             if (width == -1) width = Bounds().x;
@@ -50,15 +65,19 @@ namespace application.Maps
             }
         }
 
-        public bool[,] ToGpuData()
+        /// <summary>
+        ///  1 = true, 0 = false
+        /// </summary>
+        /// <returns></returns>
+        public int[,] ToGpuData()
         {
             var data = this.seenMap;
-            bool[,] result = new bool[Bounds().y, Bounds().x];
+            int[,] result = new int[Bounds().y, Bounds().x];
             for (int y = 0; y < Bounds().y; y++)
             {
                 for (int x = 0; x < Bounds().x; x++)
                 {
-                    result[y, x] = data[y][x];
+                    result[y, x] = data[y][x] ? 1 : 0;
                 }
             }
 

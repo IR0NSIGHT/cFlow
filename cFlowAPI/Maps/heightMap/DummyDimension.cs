@@ -81,6 +81,17 @@ namespace cFlowApi.Heightmap
             }
         }
 
+        public static void FillFromGPUdata<A>(A[,] data, A[][] target)
+        {
+            for (int y = 0; y < data.GetLength(0); y++)
+            {
+                for (int x = 0; x < data.GetLength(1); x++)
+                {
+                    target[y][x] = data[y, x];
+                }
+            }
+        }
+
         private static Bitmap thumbNail(Image img, int width, int height)
         {
             var bitmap = new Bitmap(width, height);

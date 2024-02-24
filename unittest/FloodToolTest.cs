@@ -1,6 +1,8 @@
 ﻿using application.Maps;
 using application.Maps.flowMap;
 using cFlowApi.Heightmap;
+using cFlowAPI.Maps.Shader;
+using ComputeSharp;
 using src.Maps.riverMap;
 
 
@@ -242,7 +244,7 @@ namespace unittest
             var escapePoints = flood.FloodArea((1, 1), riverMap);
             escapePoints.Sort();
 
-            var shouldBeEscapePoints = new List<(int x, int y)>() { (4,1),(1,3),(2,3) };
+            var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1), (1, 3), (2, 3) };
             shouldBeEscapePoints.Sort();
 
             Assert.That(escapePoints, Is.EqualTo(shouldBeEscapePoints));
@@ -355,6 +357,7 @@ namespace unittest
         }
 
 
+
         [Test]
         public void FloodShader()
         {
@@ -362,20 +365,71 @@ namespace unittest
             heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7},
                 { 7, 3, 3, 7, 3},
-                { 7, 3, 3, 7, 7},
-                { 7, 3, 3, 6, 6}
+                { 4, 3, 3, 4, 7},
+                { 5, 3, 3, 6, 6}
             });
-            RiverMap riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
+            BooleanMap booleanMap = new BooleanMap(heightMap.Bounds());
+            booleanMap.setMarked(1, 2);
+
+            //check before running
+            var shouldBeFlooded = new int[,]
+            {
+                { 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 0, 0 },
+                { 0, 1, 0, 0, 0 },
+                { 0, 0, 0, 0, 0 }
+            };
+            var flooded = booleanMap.ToGpuData();
+            Assert.That(flooded, Is.EqualTo(shouldBeFlooded));
 
 
-            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var escapePoints = flood.FloodArea((1, 1), riverMap);
-            escapePoints.Sort();
+            //run flood shader
+            var shader = FloodPlaneComputer.FromMaps(heightMap, booleanMap, 3);
+            GraphicsDevice.GetDefault().For(heightMap.Bounds().x, heightMap.Bounds().y, shader);
 
-            var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1) };
-            shouldBeEscapePoints.Sort();
+            //verify first iteration
+            flooded = FloodPlaneComputer.MarkedMapFromShader(shader).ToGpuData();
+            shouldBeFlooded = new int[,]
+            {
+                { 0, 0, 0, 0, 0 },
+                { 0, 1, 0, 0, 0 },
+                { 0, 1, 1, 0, 0 },
+                { 0, 1, 0, 0, 0 }
+            };
+            Assert.That(flooded, Is.EqualTo(shouldBeFlooded));
+            Assert.That(FloodPlaneComputer.didChangeAndReset(shader));
 
-            Assert.That(escapePoints, Is.EqualTo(shouldBeEscapePoints));
+
+            //run second time
+            GraphicsDevice.GetDefault().For(heightMap.Bounds().x, heightMap.Bounds().y, shader);
+
+            //verify first iteration
+            flooded = FloodPlaneComputer.MarkedMapFromShader(shader).ToGpuData();
+            shouldBeFlooded = new int[,]
+            {
+                { 0, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 0 },
+                { 0, 1, 1, 0, 0 },
+                { 0, 1, 1, 0, 0 }
+            };
+            Assert.That(flooded, Is.EqualTo(shouldBeFlooded));
+            Assert.That(FloodPlaneComputer.didChangeAndReset(shader));
+
+            //run third time => nothing changed
+            GraphicsDevice.GetDefault().For(heightMap.Bounds().x, heightMap.Bounds().y, shader);
+
+            //verify first iteration
+            flooded = FloodPlaneComputer.MarkedMapFromShader(shader).ToGpuData();
+            shouldBeFlooded = new int[,]
+            {
+                { 0, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 0 },
+                { 0, 1, 1, 0, 0 },
+                { 0, 1, 1, 0, 0 }
+            };
+            Assert.That(flooded, Is.EqualTo(shouldBeFlooded));
+            Assert.That(FloodPlaneComputer.didChangeAndReset(shader), Is.False);
+
 
         }
 
