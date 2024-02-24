@@ -54,10 +54,11 @@ public class Backend
         backendChannel.RaiseHeightmapChanged(new ImageEventArgs(shadedMap, MapType.Heightmap));
         backendChannel.RaiseHeightmapChanged(new ImageEventArgs(contours, MapType.ContourLines));
 
+        OnFlowGenerationRequested(this, EventArgs.Empty);
         FireLoadingEvent(false);
     }
 
-    public void OnFlowGenerationRequested(object? sender, EventArgs e)
+    public void OnFlowGenerationRequested(object? sender, EventArgs ignored)
     {
         if (heightmapApi == null)
         {

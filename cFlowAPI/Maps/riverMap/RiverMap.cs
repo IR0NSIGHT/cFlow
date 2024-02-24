@@ -78,7 +78,7 @@ namespace src.Maps.riverMap
                     AddRiverFrom(next[1], branchEveryX);
                     break;
                 }
-                start = next[0];
+                start = next[^1];
                 stopped = stop;
             }
 

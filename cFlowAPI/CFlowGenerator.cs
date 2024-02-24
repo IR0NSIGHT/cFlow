@@ -34,6 +34,7 @@ namespace cFlowApi
             RiverMap = new RiverMap(_flowMap, Heightmap);
             Debug.WriteLine("loaded rivermap");
 
+
         }
 
         public void GenerateFlow()

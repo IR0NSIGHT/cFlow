@@ -50,12 +50,12 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (outerMostRing, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var floodPlane = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (2, 3) },
                 17, p => false
                 );
 
-            Assert.That(exceeded, Is.False);
+            Assert.That(floodPlane.exceededMaxSurface, Is.False);
 
             bool[,] shouldBeFlooded = new bool[,]
             {
@@ -67,7 +67,7 @@ namespace unittest
                 { false, false, false, false, false },
                 { false, false, false, false, false },
             };
-            Assert.That(seen17.ToGpuData(), Is.EqualTo(shouldBeFlooded));
+            Assert.That(floodPlane.planeMap.ToGpuData(), Is.EqualTo(shouldBeFlooded));
 
 
             bool[,] shouldBeRing = new bool[,]
@@ -85,9 +85,9 @@ namespace unittest
             {
                 var supposedToBeRing = shouldBeRing[point.y, point.x];
                 if (supposedToBeRing)
-                    Assert.That(outerMostRing.Contains(point));
+                    Assert.That(floodPlane.borderRing.Contains(point));
                 else
-                    Assert.That(outerMostRing.Contains(point), Is.False);
+                    Assert.That(floodPlane.borderRing.Contains(point), Is.False);
             }
         }
 
@@ -109,24 +109,24 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seen17, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var floodPlane = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 30) },
                 34,  //not z of bottom plain, but higher but still below rest of map,
                 p => false
                 );
 
-            Assert.That(exceeded, Is.False);
+            Assert.That(floodPlane.exceededMaxSurface, Is.False);
 
             //test that points were marked correctly as "plain" or "not plain"
             foreach (var point in heightMap.iterator().Points())
             {
                 if (isInRect(point, rectStart, rectEnd))
                 {
-                    Assert.That(seen17.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
+                    Assert.That(floodPlane.planeMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
                 }
                 else
                 {
-                    Assert.That(seen17.isMarked(point.x, point.y), Is.False, $"point {point} is marked wrong");
+                    Assert.That(floodPlane.planeMap.isMarked(point.x, point.y), Is.False, $"point {point} is marked wrong");
                 }
             }
 
@@ -134,14 +134,14 @@ namespace unittest
             //test outmost points were correctly collected
             for (var x = rectStart.x; x < rectEnd.x; x++)
             {
-                Assert.That(ring.Contains((x, rectStart.y)), Is.True, $"point {(x, rectStart.y)} is marked wrong");
-                Assert.That(ring.Contains((x, rectEnd.y - 1)), Is.True, $"point {(x, rectEnd.y - 1)} is marked wrong");
+                Assert.That(floodPlane.borderRing.Contains((x, rectStart.y)), Is.True, $"point {(x, rectStart.y)} is marked wrong");
+                Assert.That(floodPlane.borderRing.Contains((x, rectEnd.y - 1)), Is.True, $"point {(x, rectEnd.y - 1)} is marked wrong");
             }
 
             for (var y = rectStart.y; y < rectEnd.y; y++)
             {
-                Assert.That(ring.Contains((rectStart.x, y)), Is.True);
-                Assert.That(ring.Contains((rectEnd.x - 1, y)), Is.True);
+                Assert.That(floodPlane.borderRing.Contains((rectStart.x, y)), Is.True);
+                Assert.That(floodPlane.borderRing.Contains((rectEnd.x - 1, y)), Is.True);
             }
 
 
@@ -165,23 +165,21 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var floodPlane = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (0, 0) },
                 74, //map is all 74 or lower => flood all
                 p => false
                 );
 
-            Assert.That(exceeded, Is.False);
+            Assert.That(floodPlane.exceededMaxSurface, Is.False);
             //all points on map were flooded
             foreach (var point in heightMap.iterator().Points())
             {
-                Assert.That(seenMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
+                Assert.That(floodPlane.planeMap.isMarked(point.x, point.y), Is.True, $"point {point} is marked wrong");
             }
 
             //no border exists, map is flooded
-            Assert.That(ring.Count, Is.EqualTo(0));
-
-            Assert.That(exceeded, Is.False);
+            Assert.That(floodPlane.borderRing.Count, Is.EqualTo(0));
 
         }
 
@@ -203,7 +201,7 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var floodPlane = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (0, 0) },
                 74, //map is all 74 or lower => flood all
                 p => false,
@@ -211,10 +209,10 @@ namespace unittest
                 true
             );
 
-            Assert.That(exceeded, Is.False);
-            Assert.That(escapePoints.Count != 0);
+            Assert.That(floodPlane.exceededMaxSurface, Is.False);
+            Assert.That(floodPlane.escapePoints.Count != 0);
             //all points on map were flooded
-            foreach (var point in escapePoints)
+            foreach (var point in floodPlane.escapePoints)
             {
                 Assert.That(isInRect(point, rectStart, rectEnd), Is.True, $"point {point} is marked wrong");
             }
@@ -251,6 +249,29 @@ namespace unittest
 
         }
 
+        [Test]
+        public void CanEscapeHoleWideBottom()
+        {
+            DummyDimension heightMap = new DummyDimension((5, 4), 7);
+            heightMap.FromGPUdata(new int[,] {
+                { 7, 7, 7, 7, 7},
+                { 7, 3, 3, 7, 3},
+                { 7, 3, 3, 7, 7},
+                { 7, 3, 3, 6, 6}
+            });
+            RiverMap riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
+
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var escapePoints = flood.FloodArea((1, 1), riverMap);
+            escapePoints.Sort();
+
+            var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1) };
+            shouldBeEscapePoints.Sort();
+
+            Assert.That(escapePoints, Is.EqualTo(shouldBeEscapePoints));
+
+        }
 
         [Test]
         public void AbortWhenBorderExceeded()
@@ -270,14 +291,14 @@ namespace unittest
                 heightMap.SetHeight(point, 17);
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var (ring, seenMap, exceeded, escapePoints) = flood.collectPlaneAtOrBelow(
+            var floodPlane = flood.collectPlaneAtOrBelow(
                 new List<(int x, int y)> { (25, 25) },
                 17,
                 p => false,
                 13
                 );
 
-            Assert.That(exceeded, Is.True);
+            Assert.That(floodPlane.exceededMaxSurface, Is.True);
         }
 
         [Test]
@@ -331,8 +352,32 @@ namespace unittest
                     Assert.That(riverMap.IsRiver(point.x, point.y), Is.False, $"incorreclty marked point: {point}");
                 }
             }
-
-            bool IsHoleEdge((int x, int y) p) => IsInHole(p) && !isInRect(p, (rectStart.x + 1, rectStart.y + 1), (rectEnd.x - 1, rectEnd.y - 1));
         }
+
+
+        [Test]
+        public void FloodShader()
+        {
+            DummyDimension heightMap = new DummyDimension((5, 4), 7);
+            heightMap.FromGPUdata(new int[,] {
+                { 7, 7, 7, 7, 7},
+                { 7, 3, 3, 7, 3},
+                { 7, 3, 3, 7, 7},
+                { 7, 3, 3, 6, 6}
+            });
+            RiverMap riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
+
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            var escapePoints = flood.FloodArea((1, 1), riverMap);
+            escapePoints.Sort();
+
+            var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1) };
+            shouldBeEscapePoints.Sort();
+
+            Assert.That(escapePoints, Is.EqualTo(shouldBeEscapePoints));
+
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using cFlowApi.Heightmap;
+﻿using System.Diagnostics;
+using System.Drawing;
+using cFlowApi.Heightmap;
 
 namespace application.Maps
 {
@@ -16,6 +18,25 @@ namespace application.Maps
             this._iterator = new Map2dIterator(bounds);
             upperBoundsMarked = bounds;
             seenMap = DummyDimension.arrayOfSize<bool>(bounds.x, bounds.y);
+        }
+
+        public Bitmap ToImage(int x = 0, int y = 0, int width = -1, int height = -1)
+        {
+            if (width == -1) width = Bounds().x;
+            if (height == -1) height = Bounds().y;
+
+            Debug.Assert(width <= DummyDimension.chunkSize);
+            Debug.Assert(height <= DummyDimension.chunkSize);
+
+            Debug.Assert(x >= 0 && y >= 0);
+            Debug.Assert(x + width <= Bounds().x && y + height <= Bounds().y, $"out of bounds with inputDistanceMap: {Bounds()}");
+            var bitmap = new Bitmap(width, height);
+            foreach (var point in _iterator.Points())
+            {
+                if (isMarked(point.x, point.y))
+                    bitmap.SetPixel(point.x - x, point.y - y, Color.Red);
+            }
+            return bitmap;
         }
 
         /// <summary>
