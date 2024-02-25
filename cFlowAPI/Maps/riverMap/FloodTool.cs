@@ -1,6 +1,8 @@
 ﻿
 using System.Diagnostics;
 using application.Maps;
+using cFlowApi.Heightmap;
+using cFlowAPI.Maps.Shader;
 using src.Maps.riverMap;
 using static Point;
 
@@ -22,61 +24,32 @@ namespace cFlowAPI.Maps.riverMap
             public bool exceededMaxSurface;
         }
 
-        public List<(int x, int y)> FloodArea((int x, int y) start, RiverMap targetRiverMap, int maxDepth = 10, int maxSurfaceBeforeExceeded = 100000)
+        /// <summary>
+        /// floods an area. returns list of escape points that were found from the area
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="targetRiverMap"></param>
+        /// <param name="maxDepth"></param>
+        /// <param name="maxSurfaceBeforeExceeded"></param>
+        /// <returns>escape points</returns>
+        public List<(int x, int y)> FloodArea((int x, int y) start, RiverMap targetRiverMap, BooleanMap lakeMap, int maxDepth = 10, int maxSurfaceBeforeExceeded = 100000)
         {
             int startZ = _heightMap.GetHeight(start);
 
-            var lakeMap = new BooleanMap(targetRiverMap.Bounds());
-            bool IsIgnoredPoint((int x, int y) p)
+            var shader = FloodPlaneComputer.FromMaps((DummyDimension)_heightMap, lakeMap, startZ);
+            var (floodedMap, escapePoints) = FloodPlaneComputer.ClimbHole(shader, start, (int)Math.Sqrt(maxSurfaceBeforeExceeded), startZ + maxDepth, startZ);
+            
+            floodedMap.ToImage().Save("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\debug\\floodmap.png");
+            foreach(var point in floodedMap.iterator().Points())
             {
-                var marked = lakeMap.isMarked(p.x, p.y);
-                return marked;
-            };
-
-            List<(int x, int y)> currentOuterMost = [start];
-            for (int i = 0; i < maxDepth; i++)
-            {
-                var maxZ = startZ + i;
-                currentOuterMost.Sort(); //TODO remove, is debug helper
-
-
-
-                //mark outermost ring on lakemap. planecollection will ignore this ring when finding neighbours
-                foreach (var point in currentOuterMost)
+                if (floodedMap.isMarked(point.x, point.y))
                 {
+                    targetRiverMap.SetAsRiver(point.x, point.y);
                     lakeMap.setMarked(point.x, point.y);
-                    Debug.Assert(lakeMap.isMarked(point.x, point.y));
-                }
-                lakeMap.ToImage().Save($"C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\debug\\lakemap_{i}_maxZ_{maxZ}.png");
-
-                var floodPlane =
-                    collectPlaneAtOrBelow(
-                        currentOuterMost,
-                        maxZ, IsIgnoredPoint
-                        ,
-                        maxSurfaceBeforeExceeded,
-                        true);
-
-                if (floodPlane.exceededMaxSurface)
-                    return new List<(int x, int y)>();
-
-                currentOuterMost = floodPlane.borderRing;
-                foreach (var p in floodPlane.planeMap.IterateMarked())
-                {
-                    targetRiverMap.SetAsRiver(p.x, p.y);
-                    lakeMap.setMarked(p.x, p.y);
                 }
 
-                if (floodPlane.escapePoints.Count != 0)
-                {
-                    floodPlane.escapePoints.ForEach(p =>
-                        Debug.Assert(!lakeMap.isMarked(p.x, p.y)));
-                    return floodPlane.escapePoints;
-                }
             }
-
-            return new List<(int x, int y)>();
-
+            return escapePoints.ToList();
         }
 
         /// <summary>

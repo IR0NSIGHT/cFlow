@@ -3,6 +3,7 @@ using cFlowAPI.Maps.riverMap;
 using System.Drawing;
 using application.Maps.flowMap;
 using cFlowApi.Heightmap;
+using application.Maps;
 
 namespace src.Maps.riverMap
 {
@@ -53,8 +54,9 @@ namespace src.Maps.riverMap
             return map[x][y];
         }
 
-        public void AddRiverFrom((int x, int y) pos, int branchEveryX = 100)
+        private void AddRiverFrom((int x, int y) pos, BooleanMap lakeMap, int branchEveryX = 100)
         {
+
             Random random = new Random();
             var start = pos;
             var stopped = false;
@@ -85,9 +87,15 @@ namespace src.Maps.riverMap
             //FIXME smart way to escape flooded area an continue river
             if (stopped)
             {
-                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this, 100);
-                escapePoints.ForEach(p => AddRiverFrom(p,-1));
+                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this, lakeMap, 100);
+                escapePoints.ForEach(p => AddRiverFrom(p, lakeMap, -1));
             }
+        }
+
+        public void AddRiverFrom((int x, int y) pos, int branchEveryX = 100)
+        {
+            var myLakeMap = new BooleanMap(this.Bounds());
+            AddRiverFrom(pos, myLakeMap, branchEveryX);
         }
 
         /// <summary>

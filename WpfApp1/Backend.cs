@@ -100,8 +100,9 @@ public class Backend
             FireLoadingEvent(true);
 
             new FloodTool(heightmapApi.Heightmap).FloodArea(
-                e.pos, 
+                e.pos,
                 heightmapApi.RiverMap,
+                new application.Maps.BooleanMap(heightmapApi.RiverMap.Bounds()),
                 e.MaxDepth,
                 e.MaxSurface
                 );
