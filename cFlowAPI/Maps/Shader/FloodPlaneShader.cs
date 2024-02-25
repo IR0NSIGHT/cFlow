@@ -42,6 +42,37 @@ namespace cFlowAPI.Maps.Shader
             return booleanMap;
         }
 
+        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader currentShader, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
+        {
+            currentShader = new Shader(
+            currentShader.heightTexture,
+            currentShader.BeforeMarkedTexture,
+            currentShader.AfterMarkedTexture,
+            currentShader.changed,
+            (uint)startDepth,
+            currentShader.escapeIdx,
+            currentShader.escapePoints
+            );
+            for (int i = startDepth; i < maxDepth; i++)
+            {
+                RunUntilEscapeFoundOrPlaneDone(currentShader, maxIterations);
+                if (GetFoundEscapePoints(currentShader).Length != 0)
+                {
+                    return (MarkedMapFromShader(currentShader), GetFoundEscapePoints(currentShader));
+                }
+                currentShader = new Shader(
+                currentShader.heightTexture,
+                currentShader.AfterMarkedTexture,
+                currentShader.BeforeMarkedTexture,
+                currentShader.changed,
+                (uint)i,
+                currentShader.escapeIdx,
+                currentShader.escapePoints
+                );
+            }
+            return (MarkedMapFromShader(currentShader), []);
+        }
+
         public static BooleanMap RunUntilEscapeFoundOrPlaneDone(Shader shader, int maxIterations = 10000)
         {
             var currentShader = shader;
@@ -111,7 +142,7 @@ namespace cFlowAPI.Maps.Shader
                        xy.Y >= 0 &&
                        xy.X < heightTexture.Width &&
                        xy.Y < heightTexture.Height &&
-                       getHeight(xy) == currentHeight &&
+            //TODO do i need this           getHeight(xy) == currentHeight &&
                        isMarked(xy);
             }
             public void Execute()
