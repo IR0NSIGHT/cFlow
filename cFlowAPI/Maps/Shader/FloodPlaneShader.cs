@@ -46,25 +46,33 @@ namespace cFlowAPI.Maps.Shader
             return booleanMap;
         }
 
-        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader currentShader, (int x, int y) source, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
+        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader floodShader, (int x, int y) source, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
         {
             //prime beforeMarkedTexture with the start positions
-            var startMap = new BooleanMap((currentShader.heightTexture.Width, currentShader.heightTexture.Height));
+            var startMap = new BooleanMap((floodShader.heightTexture.Width, floodShader.heightTexture.Height));
             startMap.setMarked(source.x, source.y);
-            currentShader.MarkedTexture.CopyFrom(startMap.ToGpuData());  
-           
+            floodShader.MarkedTexture.CopyFrom(startMap.ToGpuData());
+
             //Run shader
             for (int i = startDepth; i < maxDepth; i++)
             {
-                currentShader.currentHeight.CopyFrom(new int[] { i });
+                floodShader.currentHeight.CopyFrom(new int[] { i });
 
-                RunUntilEscapeFoundOrPlaneDone(currentShader, maxIterations);
-                if (GetFoundEscapePoints(currentShader).Length != 0)
+                RunUntilEscapeFoundOrPlaneDone(floodShader, maxIterations);
+                if (GetFoundEscapePoints(floodShader).Length != 0)
                 {
-                    return (MarkedMapFromShader(currentShader), GetFoundEscapePoints(currentShader));
+                    //TODO: remove currentheight marked points => this plane was not fully flooded.
+                    var cleaner = new CleanUpShader(
+                        floodShader.heightTexture,
+                        floodShader.MarkedTexture,
+                        floodShader.ignoredEscapes,
+                        floodShader.currentHeight
+                        );
+                    GraphicsDevice.GetDefault().For(floodShader.heightTexture.Width, floodShader.heightTexture.Height, cleaner);
+                    return (MarkedMapFromShader(floodShader), GetFoundEscapePoints(floodShader));
                 }
             }
-            return (MarkedMapFromShader(currentShader), []);
+            return (MarkedMapFromShader(floodShader), []);
         }
 
         public static BooleanMap RunUntilEscapeFoundOrPlaneDone(Shader shader, int maxIterations = 10000)
@@ -168,6 +176,31 @@ namespace cFlowAPI.Maps.Shader
 
                 }
 
+            }
+        }
+
+        /// <summary>
+        /// will unmark all points that are not ignored and at currentHeight.
+        /// </summary>
+        [AutoConstructor]
+        public partial struct CleanUpShader : IComputeShader
+        {
+            public readonly ReadOnlyTexture2D<uint> heightTexture;
+            public readonly ReadWriteTexture2D<int> MarkedTexture;
+
+            public readonly ReadOnlyTexture2D<int> ignoredEscapes;
+
+            public readonly ReadOnlyBuffer<int> currentHeight;
+
+
+            public void Execute()
+            {
+                int2 XY = ThreadIds.XY;
+                uint ownHeight = heightTexture[XY];
+                if (ownHeight == currentHeight[0] && ignoredEscapes[XY] == 0)
+                {
+                    MarkedTexture[XY] = 0;
+                }
             }
         }
     }

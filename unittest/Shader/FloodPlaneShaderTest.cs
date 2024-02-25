@@ -174,8 +174,8 @@ public class FloodPlaneShaderTest
         {
                 { 0, 0, 0, 0, 0 },
                 { 0, 1, 1, 1, 0 },
-                { 0, 1, 1, 1, 0 },
-                { 0, 0, 0, 1, 0 }
+                { 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0 }
         };
         flooded = marked.ToGpuData();
         Assert.That(flooded, Is.EqualTo(shouldBeFlooded));
@@ -191,7 +191,7 @@ public class FloodPlaneShaderTest
         heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7, 7, 7, 7},
                 { 7, 2, 2, 5, 4, 7, 7, 7}, /*4s are known lake which we ignore */
-                { 7, 2, 2, 5, 4, 5, 1, 7}, /*1 is exit point*/
+                { 7, 2, 2, 5, 4, 7, 1, 7}, /*1 is exit point*/
                 { 7, 7, 7, 7, 7, 7, 7, 7},
                 { 7, 7, 7, 7, 7, 7, 7, 7},
         });
@@ -223,7 +223,7 @@ public class FloodPlaneShaderTest
                {
                 { 0, 0, 0, 0, 0, 0, 0, 0 },
                 { 0, 1, 1, 1, 1, 0, 0, 0 },
-                { 0, 1, 1, 1, 1, 1, 0, 0 },
+                { 0, 1, 1, 1, 1, 0, 0, 0 },
                 { 0, 0, 0, 0, 0, 0, 0, 0 },
                 { 0, 0, 0, 0, 0, 0, 0, 0 },
 
