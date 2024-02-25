@@ -44,6 +44,24 @@ namespace cFlowAPI.Maps.Shader
             return booleanMap;
         }
 
+        public static BooleanMap RunUntilEscapeFoundOrPlaneDone(Shader shader, int maxIterations = 10000)
+        {
+            for (int i = 0; i < maxIterations; i++)
+            {
+                GraphicsDevice.GetDefault().For(shader.heightTexture.Width, shader.heightTexture.Height, shader);
+                var didChange = didChangeAndReset(shader);
+                if (!didChange)
+                    break;
+            }
+            var floodMap = new BooleanMap((shader.heightTexture.Width, shader.heightTexture.Height));
+            floodMap.FromGpuData(shader.MarkedTexture.ToArray());
+            return floodMap;
+        }
+
+        public static (int x, int y)[] GetFoundEscapePoints(Shader shader) {
+            return [];
+        }
+
         [AutoConstructor]
         public partial struct Shader : IComputeShader
         {
