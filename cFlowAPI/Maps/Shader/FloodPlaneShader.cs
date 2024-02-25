@@ -28,47 +28,41 @@ namespace cFlowAPI.Maps.Shader
             var escapePointIdxBuffer = GraphicsDevice.GetDefault().AllocateReadWriteBuffer(new int[1]);
             var escapePointBuffer = GraphicsDevice.GetDefault().AllocateReadWriteBuffer(new int2[100]);
             var shader = new FloodPlaneComputer.Shader(
-                GraphicsDevice.GetDefault().AllocateReadOnlyTexture2D<uint>(heightMap.ToGPUdata()),
-                GraphicsDevice.GetDefault().AllocateReadWriteTexture2D<int>(floodMap.ToGpuData()),
-                GraphicsDevice.GetDefault().AllocateReadWriteTexture2D<int>(floodMap.Bounds().x, floodMap.Bounds().y),
-                changedBuffer, (uint)height, escapePointIdxBuffer, escapePointBuffer);
+                heightTexture: GraphicsDevice.GetDefault().AllocateReadOnlyTexture2D<uint>(heightMap.ToGPUdata()),
+                MarkedTexture: GraphicsDevice.GetDefault().AllocateReadWriteTexture2D<int>(floodMap.Bounds().x, floodMap.Bounds().y),
+                didChangeMarkingTexture: GraphicsDevice.GetDefault().AllocateReadWriteTexture2D<int>(floodMap.Bounds().x, floodMap.Bounds().y),
+                ignoredEscapes: GraphicsDevice.GetDefault().AllocateReadOnlyTexture2D<int>(floodMap.ToGpuData()),
+                changed: changedBuffer,
+                currentHeight: GraphicsDevice.GetDefault().AllocateReadOnlyBuffer(new int[] { height }),
+                escapePointIdxBuffer,
+                escapePointBuffer);
             return shader;
         }
 
         public static BooleanMap MarkedMapFromShader(Shader shader)
         {
-            var booleanMap = new BooleanMap((shader.AfterMarkedTexture.Width, shader.AfterMarkedTexture.Height));
-            booleanMap.FromGpuData(shader.AfterMarkedTexture.ToArray());
+            var booleanMap = new BooleanMap((shader.MarkedTexture.Width, shader.MarkedTexture.Height));
+            booleanMap.FromGpuData(shader.MarkedTexture.ToArray());
             return booleanMap;
         }
 
-        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader currentShader, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
+        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader currentShader, (int x, int y) source, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
         {
-            currentShader = new Shader(
-            currentShader.heightTexture,
-            currentShader.BeforeMarkedTexture,
-            currentShader.AfterMarkedTexture,
-            currentShader.changed,
-            (uint)startDepth,
-            currentShader.escapeIdx,
-            currentShader.escapePoints
-            );
+            //prime beforeMarkedTexture with the start positions
+            var startMap = new BooleanMap((currentShader.heightTexture.Width, currentShader.heightTexture.Height));
+            startMap.setMarked(source.x, source.y);
+            currentShader.MarkedTexture.CopyFrom(startMap.ToGpuData());  
+           
+            //Run shader
             for (int i = startDepth; i < maxDepth; i++)
             {
+                currentShader.currentHeight.CopyFrom(new int[] { i });
+
                 RunUntilEscapeFoundOrPlaneDone(currentShader, maxIterations);
                 if (GetFoundEscapePoints(currentShader).Length != 0)
                 {
                     return (MarkedMapFromShader(currentShader), GetFoundEscapePoints(currentShader));
                 }
-                currentShader = new Shader(
-                currentShader.heightTexture,
-                currentShader.AfterMarkedTexture,
-                currentShader.BeforeMarkedTexture,
-                currentShader.changed,
-                (uint)i,
-                currentShader.escapeIdx,
-                currentShader.escapePoints
-                );
             }
             return (MarkedMapFromShader(currentShader), []);
         }
@@ -85,17 +79,6 @@ namespace cFlowAPI.Maps.Shader
                     break;
                 if (shader.escapeIdx.ToArray()[0] != 0)
                     break;
-
-                //apply output floodmap to new input
-                currentShader = new Shader(
-                    currentShader.heightTexture,
-                    currentShader.AfterMarkedTexture,
-                    currentShader.BeforeMarkedTexture,
-                    currentShader.changed,
-                   currentShader.currentHeight,
-                   currentShader.escapeIdx,
-                   currentShader.escapePoints
-                    );
             }
 
             return MarkedMapFromShader(currentShader);
@@ -113,12 +96,14 @@ namespace cFlowAPI.Maps.Shader
         public partial struct Shader : IComputeShader
         {
             public readonly ReadOnlyTexture2D<uint> heightTexture;
-            public readonly ReadWriteTexture2D<int> BeforeMarkedTexture;
-            public readonly ReadWriteTexture2D<int> AfterMarkedTexture;
+            public readonly ReadWriteTexture2D<int> MarkedTexture;
+            public readonly ReadWriteTexture2D<int> didChangeMarkingTexture;
+
+            public readonly ReadOnlyTexture2D<int> ignoredEscapes;
 
 
             public readonly ReadWriteBuffer<int> changed;
-            public readonly uint currentHeight;
+            public readonly ReadOnlyBuffer<int> currentHeight;
             public readonly ReadWriteBuffer<int> escapeIdx;
             public readonly ReadWriteBuffer<int2> escapePoints;
 
@@ -129,7 +114,7 @@ namespace cFlowAPI.Maps.Shader
 
             public bool isMarked(int2 xy)
             {
-                return BeforeMarkedTexture[xy] == 1;
+                return MarkedTexture[xy] == 1;
             }
 
             public int2 neighbour(int x, int y, int2 self)
@@ -142,7 +127,7 @@ namespace cFlowAPI.Maps.Shader
                        xy.Y >= 0 &&
                        xy.X < heightTexture.Width &&
                        xy.Y < heightTexture.Height &&
-            //TODO do i need this           getHeight(xy) == currentHeight &&
+                       didChangeMarkingTexture[xy] == 0 &&  //neighbour xy wasnt changed in this shader run.
                        isMarked(xy);
             }
             public void Execute()
@@ -158,24 +143,24 @@ namespace cFlowAPI.Maps.Shader
                 uint ownHeight = heightTexture[XY];
 
                 //copy over existing values
-                AfterMarkedTexture[XY] = BeforeMarkedTexture[XY];
+                didChangeMarkingTexture[XY] = 0;
 
                 if (
-                    BeforeMarkedTexture[XY] == 0 &&
+                    MarkedTexture[XY] == 0 &&
                     (
                     FloodedNeighbourAtCurrentHeight(neighbour(-1, 0, XY)) ||
                     FloodedNeighbourAtCurrentHeight(neighbour(1, 0, XY)) ||
                     FloodedNeighbourAtCurrentHeight(neighbour(0, 1, XY)) ||
                     FloodedNeighbourAtCurrentHeight(neighbour(0, -1, XY))))
                 {
-                    if (ownHeight == currentHeight)
+                    if (ownHeight == currentHeight[0] || ignoredEscapes[XY] == 1)
                     {
-                        AfterMarkedTexture[XY] = 1;
+                        MarkedTexture[XY] = 1;
+                        didChangeMarkingTexture[XY] = 1;
                         changed[0] = 1;
                     }
-                    else if (ownHeight < currentHeight)
+                    else if (ownHeight < currentHeight[0] && ignoredEscapes[XY] != 1)
                     {
-                        //TBD
                         int idx = 0;
                         Hlsl.InterlockedAdd(ref escapeIdx[0], 1, out idx);
                         escapePoints[idx] = ThreadIds.XY;
