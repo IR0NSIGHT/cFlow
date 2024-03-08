@@ -44,7 +44,7 @@ public class NaturalEdgeShaderTest
     [Test]
     public void DimensionToGPUTexture()
     {
-        var dim = new DummyDimension((5, 7), 17);
+        var dim = new HeightMap((5, 7), 17);
         dim.SetHeight((3,6),27);
         dim.SetHeight((1,2), 315);
         dim.SetHeight((4,6), 1);

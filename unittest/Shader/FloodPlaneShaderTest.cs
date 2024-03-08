@@ -11,7 +11,7 @@ public class FloodPlaneShaderTest
     [Test]
     public void FloodsHoleMultiLevel()
     {
-        DummyDimension heightMap = new DummyDimension((5, 4), 7);
+        HeightMap heightMap = new HeightMap((5, 4), 7);
         heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7},
                 { 7, 3, 3, 4, 7},
@@ -56,7 +56,7 @@ public class FloodPlaneShaderTest
     [Test]
     public void DoesntFlowBackIntoKnownHole()
     {
-        DummyDimension heightMap = new DummyDimension((8, 5), 7);
+        HeightMap heightMap = new HeightMap((8, 5), 7);
         heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7, 7, 7, 7},
                 { 7, 2, 2, 5, 4, 7, 7, 7}, /*4s are known lake which we ignore */

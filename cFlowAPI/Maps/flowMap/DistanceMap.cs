@@ -33,7 +33,7 @@ public class DistanceMap : Map2d
     {
         this.bounds = heightMap.Bounds();
         this.heightMap = heightMap;
-        this.distanceMap = DummyDimension.arrayOfSize<DistancePoint>(Bounds().x, Bounds().y);
+        this.distanceMap = HeightMap.arrayOfSize<DistancePoint>(Bounds().x, Bounds().y);
     }
 
     public uint[,] toGpuData()
@@ -54,7 +54,7 @@ public class DistanceMap : Map2d
         if (Bounds() != heightMap.Bounds())
             throw new Exception($"map sizes dont match!: fMap:{Bounds()}, hMap:{heightMap.Bounds()}");
         //set Flow for all natural edges
-        uint[,] pointData = ((DummyDimension)heightMap).ToGPUdata();
+        uint[,] pointData = ((HeightMap)heightMap).ToGPUdata();
 
         using ReadOnlyTexture2D<uint> heightmap = GraphicsDevice.GetDefault()
             .AllocateReadOnlyTexture2D<uint>(pointData);
@@ -102,7 +102,7 @@ public class DistanceMap : Map2d
         uint[,] pointData = this.toGpuData();
         Debug.WriteLine($"transforming distance data took: {sw.ElapsedMilliseconds} millis.");
         sw.Restart();
-        uint[,] heightData = ((DummyDimension)this.heightMap).ToGPUdata();
+        uint[,] heightData = ((HeightMap)this.heightMap).ToGPUdata();
         Debug.WriteLine($"transforming height data took: {sw.ElapsedMilliseconds} millis.");
         sw.Restart();
 

@@ -10,7 +10,7 @@ namespace TestProject1
         [Test]
         public void InitHeightMap()
         {
-            var heightmap = new DummyDimension((8, 12), 17);
+            var heightmap = new HeightMap((8, 12), 17);
             Assert.AreEqual((8, 12), heightmap.Bounds());
 
             foreach (var point in heightmap.iterator().Points())
@@ -23,7 +23,7 @@ namespace TestProject1
         [Test]
         public void ChangeHeight()
         {
-            var heightmap = new DummyDimension((8, 12), 17);
+            var heightmap = new HeightMap((8, 12), 17);
             heightmap.SetHeight((7, 5), 3);
             Assert.AreEqual(3, heightmap.GetHeight((7, 5)));
 
@@ -41,7 +41,7 @@ namespace TestProject1
             //iterates lines = increase y
             //start at zero
             //iterates row = increase x
-            var heightmap = new DummyDimension((8, 12), 17);
+            var heightmap = new HeightMap((8, 12), 17);
             int row = 0;
             foreach (var iterateLine in heightmap.iterator().PointsByRow())
             {
@@ -67,6 +67,110 @@ namespace TestProject1
             bitmap.SetPixel(9, 2, Color.FromArgb(255, 77, 77, 77));
 
             Assert.Fail("from image not implemented.");
+        }
+
+        [Test]
+        public void Merge2MapsSameSize()
+        {
+            //same size
+            var merged = HeightMap.Merge(new HeightMap((10, 20), 17), new HeightMap((10, 20), 13), (0, 0));
+            foreach (var point in merged.iterator().Points())
+            {
+                Assert.That(merged.GetHeight(point), Is.EqualTo(17 + 13));
+            }
+        }
+
+        [Test]
+        public void Merge2MapsDifferentSizeNoOffset()
+        {
+            var aMap = new HeightMap((10, 20), 17);
+            var bMap = new HeightMap((100, 200), 13);
+            var merged = HeightMap.Merge(aMap, bMap, (0, 0));
+
+            Assert.That(merged.Bounds(), Is.EqualTo(bMap.Bounds()));
+            foreach (var point in merged.iterator().Points())
+            {
+                if (aMap.inBounds(point) && bMap.inBounds(point))
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(17 + 13));
+
+                }
+                else
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(13));
+                }
+            }
+
+            Assert.That(merged.ToGPUdata(), Is.EqualTo(HeightMap.Merge(aMap, bMap, (0, 0)).ToGPUdata()));
+        }
+
+        [Test]
+        public void Merge2MapsDifferentSizeWithOffsetNoResize()
+        {
+            var staticMap = new HeightMap((5, 10), 13);
+            var shiftedMap = new HeightMap((2, 4), 17);
+            var shift = (2, 3);
+            var merged = HeightMap.Merge(staticMap, shiftedMap, shift);
+
+            Assert.That(merged.Bounds(), Is.EqualTo(staticMap.Bounds()));
+
+            foreach (var point in merged.iterator().Points())
+            {
+                var unshiftedPoint = (point.x - shift.Item1, point.y - shift.Item2);
+
+                if (shiftedMap.inBounds(unshiftedPoint))
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(17 + 13), $"point {point} (unshifted:{unshiftedPoint}) is off");
+                }
+                else
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(staticMap.GetHeight(point)));
+                }
+            }
+
+            var data = new ushort[,]
+            {
+                { 13 ,13 ,13 ,13 ,13 },
+                { 13 ,13 ,13 ,13 ,13 },
+                { 13 ,13 ,13 ,13 ,13 },
+                { 13 ,13 ,30 ,30 ,13 },
+                { 13 ,13 ,30 ,30 ,13 },
+                { 13 ,13 ,30 ,30 ,13 },
+                { 13 ,13 ,30 ,30 ,13 },
+                { 13 ,13 ,13 ,13 ,13 },
+                { 13 ,13 ,13 ,13 ,13 },
+                { 13 ,13 ,13 ,13 ,13 },
+
+            };
+
+            Assert.That(merged.ToGPUdata(), Is.EqualTo(data));
+        }
+
+        [Test]
+        public void Merge2MapsDifferentShapes()
+        {
+            var staticMap = new HeightMap((1, 10), 13);
+            var shiftedMap = new HeightMap((10, 1), 17);
+            var shift = (0,0);
+            var merged = HeightMap.Merge(staticMap, shiftedMap, shift);
+
+            Assert.That(merged.Bounds(), Is.EqualTo((10,10)));
+
+            foreach (var point in merged.iterator().Points())
+            {
+                if (shiftedMap.inBounds(point) && staticMap.inBounds(point))
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(17 + 13));
+                } else if (shiftedMap.inBounds(point)) {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(17));
+                } else if(staticMap.inBounds(point))
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(13));
+                } else
+                {
+                    Assert.That(merged.GetHeight(point), Is.EqualTo(0));
+                }
+            }
         }
     }
 }

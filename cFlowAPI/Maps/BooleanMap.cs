@@ -17,7 +17,7 @@ namespace application.Maps
             this._bounds = bounds;
             this._iterator = new Map2dIterator(bounds);
             upperBoundsMarked = bounds;
-            seenMap = DummyDimension.arrayOfSize<bool>(bounds.x, bounds.y);
+            seenMap = HeightMap.arrayOfSize<bool>(bounds.x, bounds.y);
         }
 
         /// <summary>
@@ -40,8 +40,8 @@ namespace application.Maps
             if (width == -1) width = Bounds().x;
             if (height == -1) height = Bounds().y;
 
-            Debug.Assert(width <= DummyDimension.chunkSize);
-            Debug.Assert(height <= DummyDimension.chunkSize);
+            Debug.Assert(width <= HeightMap.chunkSize);
+            Debug.Assert(height <= HeightMap.chunkSize);
 
             Debug.Assert(x >= 0 && y >= 0);
             Debug.Assert(x + width <= Bounds().x && y + height <= Bounds().y, $"out of bounds with inputDistanceMap: {Bounds()}");

@@ -12,7 +12,7 @@ namespace cFlowApi
         private Bitmap _flowmapImgColored;
         private Bitmap _rivermapImg;
 
-        public DummyDimension Heightmap { get; }
+        public HeightMap Heightmap { get; }
         private DistanceMap _flowMap;
         public Bitmap FlowmapImgColored { get => _flowmapImgColored; }
         public Bitmap RivermapImg { get => _rivermapImg; }
@@ -23,7 +23,7 @@ namespace cFlowApi
         {
             Debug.WriteLine("Start reading image");
 
-            Heightmap = DummyDimension.ImportFromFile(imagePath);
+            Heightmap = HeightMap.ImportFromFile(imagePath);
 
             Debug.WriteLine("Converted image to inputDistanceMap");
 

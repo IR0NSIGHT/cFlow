@@ -33,8 +33,8 @@ namespace src.Maps.riverMap
             if (width == -1) width = _heightMap.Bounds().x;
             if (height == -1) height = _heightMap.Bounds().y;
 
-            Debug.Assert(width <= DummyDimension.chunkSize);
-            Debug.Assert(height <= DummyDimension.chunkSize);
+            Debug.Assert(width <= HeightMap.chunkSize);
+            Debug.Assert(height <= HeightMap.chunkSize);
 
             Debug.Assert(x >= 0 && y >= 0);
             Debug.Assert(x + width <= _heightMap.Bounds().x && y + height <= _heightMap.Bounds().y, $"out of bounds with inputDistanceMap: {_heightMap.Bounds()}");

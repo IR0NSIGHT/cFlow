@@ -12,7 +12,7 @@ public class DistanceMapTest
     [Test]
     public void ApplyFromHeightmap()
     {
-        var hMap = new DummyDimension((6, 5), 7);
+        var hMap = new HeightMap((6, 5), 7);
         hMap.SetHeight((2, 2), 4);
         var dMap = new DistanceMap(hMap);
         dMap.CalculateFromHeightmap();
@@ -37,7 +37,7 @@ public class DistanceMapTest
     [Test]
     public void ApplyFromHeightmapHole2x2()
     {
-        var hMap = new DummyDimension((5, 5), 7);
+        var hMap = new HeightMap((5, 5), 7);
         hMap.SetHeight((0, 0), 4);
         hMap.SetHeight((1, 0), 4);
 
@@ -66,7 +66,7 @@ public class DistanceMapTest
     [Test]
     public void simpleShaderRun()
     {
-        DummyDimension dimension = new DummyDimension((5, 7), 17);
+        HeightMap dimension = new HeightMap((5, 7), 17);
         DistanceMap distanceMap = new DistanceMap(dimension);
         for (int x = 0; x < dimension.Bounds().x; x++)
             distanceMap.SetDistanceToEdge((x, 2), new DistanceMap.DistancePoint(10, true));
@@ -211,7 +211,7 @@ public class DistanceMapTest
     [Test]
     public void simpleShaderRunDiagonal()
     {
-        DummyDimension dimension = new DummyDimension((5, 7), 17);
+        HeightMap dimension = new HeightMap((5, 7), 17);
         DistanceMap distanceMap = new DistanceMap(dimension);
 
         distanceMap.SetDistanceToEdge((2, 2), new DistanceMap.DistancePoint(10, true));
@@ -346,7 +346,7 @@ public class DistanceMapTest
     [Test]
     public void MultipleHoles()
     {
-        var hMap = new DummyDimension((5, 5), 7);
+        var hMap = new HeightMap((5, 5), 7);
         hMap.SetHeight((0, 0), 4);
         hMap.SetHeight((4, 4), 4);
 
@@ -374,7 +374,7 @@ public class DistanceMapTest
     [Test]
     public void LargeDistances()
     {
-        var hMap = new DummyDimension((1001, 1001), 7);
+        var hMap = new HeightMap((1001, 1001), 7);
         hMap.SetHeight((0, 1000), 4);
 
         var dMap = new DistanceMap(hMap);

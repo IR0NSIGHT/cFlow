@@ -36,7 +36,7 @@ namespace cFlowAPI.Maps.riverMap
         {
             int startZ = _heightMap.GetHeight(start);
 
-            var shader = FloodPlaneComputer.FromMaps((DummyDimension)_heightMap, lakeMap, startZ);
+            var shader = FloodPlaneComputer.FromMaps((HeightMap)_heightMap, lakeMap, startZ);
             var (floodedMap, escapePoints) = FloodPlaneComputer.ClimbHole(shader, start, maxSurfaceBeforeExceeded, startZ + maxDepth, startZ);
             
             floodedMap.ToImage().Save("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\debug\\floodmap.png");

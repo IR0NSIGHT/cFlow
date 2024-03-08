@@ -30,7 +30,7 @@ namespace unittest
         [Test]
         public void FloodConfinedHoleUpTo()
         {
-            DummyDimension heightMap = new DummyDimension((5, 7), 74);
+            HeightMap heightMap = new HeightMap((5, 7), 74);
             (int x, int y) rectStart = (1, 2);
             (int x, int y) rectEnd = (5, 5);
             //make hole in the middle
@@ -103,7 +103,7 @@ namespace unittest
             */
 
 
-            IHeightMap heightMap = new DummyDimension((50, 50), 74);
+            IHeightMap heightMap = new HeightMap((50, 50), 74);
             (int x, int y) rectStart = (10, 20);
             (int x, int y) rectEnd = (30, 40);
             //make hole in the middle
@@ -159,7 +159,7 @@ namespace unittest
             */
 
 
-            IHeightMap heightMap = new DummyDimension((50, 50), 74);
+            IHeightMap heightMap = new HeightMap((50, 50), 74);
             (int x, int y) rectStart = (10, 20);
             (int x, int y) rectEnd = (30, 40);
             //make hole in the middle
@@ -195,7 +195,7 @@ namespace unittest
             */
 
 
-            IHeightMap heightMap = new DummyDimension((50, 50), 74);
+            IHeightMap heightMap = new HeightMap((50, 50), 74);
             (int x, int y) rectStart = (10, 20);
             (int x, int y) rectEnd = (30, 40);
             //make hole in the middle
@@ -230,7 +230,7 @@ namespace unittest
             */
 
 
-            DummyDimension heightMap = new DummyDimension((5, 4), 7);
+            HeightMap heightMap = new HeightMap((5, 4), 7);
             heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7},
                 { 7, 3, 4, 7, 3},
@@ -254,7 +254,7 @@ namespace unittest
         [Test]
         public void CanEscapeHoleWideBottom()
         {
-            DummyDimension heightMap = new DummyDimension((5, 4), 7);
+            HeightMap heightMap = new HeightMap((5, 4), 7);
             heightMap.FromGPUdata(new int[,] {
                 { 7, 7, 7, 7, 7},
                 { 7, 3, 3, 7, 3},
@@ -285,7 +285,7 @@ namespace unittest
             */
 
 
-            IHeightMap heightMap = new DummyDimension((50, 50), 74);
+            IHeightMap heightMap = new HeightMap((50, 50), 74);
             (int x, int y) rectStart = (10, 20);
             (int x, int y) rectEnd = (30, 40);
             //make hole in the middle
@@ -315,7 +315,7 @@ namespace unittest
             */
 
 
-            IHeightMap heightMap = new DummyDimension((1000, 1000), 74);
+            IHeightMap heightMap = new HeightMap((1000, 1000), 74);
             (int x, int y) rectStart = (30, 20);
             (int x, int y) rectEnd = (40, 30);
 
@@ -360,7 +360,7 @@ namespace unittest
         [Test]
         public void LargeAreaFloodPerformanceDebugger()
         {
-            DummyDimension heightMap = new DummyDimension((10000, 10000), 74);
+            HeightMap heightMap = new HeightMap((10000, 10000), 74);
 
             var riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
 

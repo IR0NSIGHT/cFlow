@@ -22,7 +22,7 @@ namespace cFlowAPI.Maps.Shader
             return didChange;
         }
 
-        public static Shader FromMaps(DummyDimension heightMap, BooleanMap floodMap, int height)
+        public static Shader FromMaps(HeightMap heightMap, BooleanMap floodMap, int height)
         {
             var changedBuffer = GraphicsDevice.GetDefault().AllocateReadWriteBuffer<int>(new int[1]);
 

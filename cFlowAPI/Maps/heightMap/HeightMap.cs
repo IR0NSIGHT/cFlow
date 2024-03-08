@@ -6,35 +6,67 @@ using cFlowAPI.Maps.Shader;
 
 namespace cFlowApi.Heightmap
 {
-    public class DummyDimension : IHeightMap
+    public class HeightMap : IHeightMap
     {
         public static readonly int chunkSize = 10000;
         private Map2dIterator _iterator;
         private Bitmap _thumbNail;
-        public DummyDimension((int x, int y) size, ushort height)
+        public HeightMap((int x, int y) size, ushort height)
         {
             heightMap = filledHeightmap(size, height);
             _iterator = new Map2dIterator(size);
+        }
+        /// <summary>
+        /// will add two maps, one shifted by offset onto the other map.
+        /// new map is guaranteed to fit both maps, including shift offset into it. no points are lost.
+        /// height is added up, and capped to never overflow
+        /// </summary>
+        /// <param name="staticMap"></param> MUST be bigger than addition
+        /// <param name="shifted"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public static HeightMap Merge(HeightMap staticMap, HeightMap shifted, (int x, int y) offset)
+        {
+            (int x, int y) bounds = (
+                Math.Max(staticMap.Bounds().x, shifted.Bounds().x + offset.x),
+                Math.Max(staticMap.Bounds().y, shifted.Bounds().y + offset.y));
+            var outMap = new HeightMap(bounds, 0);
+            for ( int y = 0; y < bounds.y; y++)
+            {
+                for (int x = 0; x < bounds.x; x++)
+                {
+                    (int x, int y) shiftedPoint = (x - offset.x, y - offset.y);
+
+                    var aHeight = staticMap.inBounds(x, y) ? staticMap.GetHeight((x,y)) : 0;
+                    var bHeight = shifted.inBounds(shiftedPoint.x, shiftedPoint.y) ? shifted.GetHeight(shiftedPoint) : 0;
+                    int newHeight = Math.Min(ushort.MaxValue, aHeight + bHeight);
+                    outMap.SetHeight((x, y), (ushort)newHeight);
+
+                    Debug.Assert(newHeight >= aHeight && newHeight >= bHeight);
+                }
+            }
+
+            return outMap;
         }
 
         public static bool hasLowerNeighbours((int x, int y) point, IHeightMap heightMap)
         {
             var height = heightMap.GetHeight(point);
-            var dim = (DummyDimension)heightMap;
+            var dim = (HeightMap)heightMap;
             return dim.inBounds(Point.Up(point)) && heightMap.GetHeight(Point.Up(point)) < height ||
                    dim.inBounds(Point.Down(point)) && heightMap.GetHeight(Point.Down(point)) < height ||
                    dim.inBounds(Point.Left(point)) && heightMap.GetHeight(Point.Left(point)) < height ||
                    dim.inBounds(Point.Right(point)) && heightMap.GetHeight(Point.Right(point)) < height;
         }
 
-        public static DummyDimension ImportFromFile(string filePath)
+        public static HeightMap ImportFromFile(string filePath)
         {
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             using var image = Image.FromStream(fs, false, false);
             var width = image.Width;
             var height = image.Height;
 
-            var dim = new DummyDimension((width, height), 0);
+            var dim = new HeightMap((width, height), 0);
 
             var dataArray = dim.heightMap;
             
@@ -221,7 +253,7 @@ namespace cFlowApi.Heightmap
 
         public override bool Equals(object? obj)
         {
-            if (obj is DummyDimension dim)
+            if (obj is HeightMap dim)
             {
                 if (Bounds() != dim.Bounds())
                     return false;
@@ -235,5 +267,7 @@ namespace cFlowApi.Heightmap
 
             return false;
         }
+
+
     }
 }

@@ -10,7 +10,7 @@ public class LargeImageTest
     public void LargeImgTest()
     {
         string imagePath = "C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\30x30_testmap.png";
-        DummyDimension.ImportFromFile(imagePath);
+        HeightMap.ImportFromFile(imagePath);
     }
 
     [Test]
@@ -22,7 +22,7 @@ public class LargeImageTest
             bmp.SetPixel(i,i,Color.FromArgb(255,19,15,27));
         }
 
-        var data = DummyDimension.pixel16bitHeighmapArray(bmp);
+        var data = HeightMap.pixel16bitHeighmapArray(bmp);
         for (int i = 0; i < bmp.Width; i++)
         {
             Assert.That(data[i][i], Is.EqualTo(27));
@@ -40,9 +40,9 @@ public class LargeImageTest
 
         int widthOffset = 20;
         int heightOffset = 30;
-        var data = DummyDimension.arrayOfSize<ushort>(100, 100);
+        var data = HeightMap.arrayOfSize<ushort>(100, 100);
 
-        DummyDimension.pixel16bitHeighmapArray(bmp, data, widthOffset, heightOffset);
+        HeightMap.pixel16bitHeighmapArray(bmp, data, widthOffset, heightOffset);
         for (int i = 0; i < bmp.Width; i++)
         {
             Assert.That(data[i+heightOffset][i+widthOffset], Is.EqualTo( 27));
