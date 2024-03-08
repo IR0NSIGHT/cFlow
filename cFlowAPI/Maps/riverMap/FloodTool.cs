@@ -32,12 +32,12 @@ namespace cFlowAPI.Maps.riverMap
         /// <param name="maxDepth"></param>
         /// <param name="maxSurfaceBeforeExceeded"></param>
         /// <returns>escape points</returns>
-        public List<(int x, int y)> FloodArea((int x, int y) start, RiverMap targetRiverMap, BooleanMap lakeMap, int maxDepth = 10, int maxSurfaceBeforeExceeded = 100000)
+        public List<(int x, int y)> FloodArea((int x, int y) start, RiverMap targetRiverMap, BooleanMap lakeMap, int maxDepth, int maxSurfaceBeforeExceeded)
         {
             int startZ = _heightMap.GetHeight(start);
 
             var shader = FloodPlaneComputer.FromMaps((DummyDimension)_heightMap, lakeMap, startZ);
-            var (floodedMap, escapePoints) = FloodPlaneComputer.ClimbHole(shader, start, (int)Math.Sqrt(maxSurfaceBeforeExceeded), startZ + maxDepth, startZ);
+            var (floodedMap, escapePoints) = FloodPlaneComputer.ClimbHole(shader, start, maxSurfaceBeforeExceeded, startZ + maxDepth, startZ);
             
             floodedMap.ToImage().Save("C:\\Users\\Max1M\\OneDrive\\Bilder\\cFlow\\debug\\floodmap.png");
             foreach(var point in floodedMap.iterator().Points())

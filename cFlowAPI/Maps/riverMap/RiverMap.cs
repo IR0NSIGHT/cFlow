@@ -9,6 +9,9 @@ namespace src.Maps.riverMap
 {
     public class RiverMap : Map2d
     {
+        public Action<Bitmap> OnMapChanged { get; set; }
+
+
         private readonly bool[][] map;
         private readonly DistanceMap _distanceMap;
         private Map2dIterator _iterator;
@@ -54,7 +57,7 @@ namespace src.Maps.riverMap
             return map[x][y];
         }
 
-        private void AddRiverFrom((int x, int y) pos, BooleanMap lakeMap, int branchEveryX = 100)
+        private void AddRiverFrom((int x, int y) pos, BooleanMap lakeMap, int branchEveryX = 100, int remainingOverflows = 0)
         {
 
             Random random = new Random();
@@ -84,18 +87,24 @@ namespace src.Maps.riverMap
                 stopped = stop;
             }
 
+            if (OnMapChanged != null)
+                OnMapChanged(this.ToImage());
+
             //FIXME smart way to escape flooded area an continue river
-            if (stopped)
+            if (stopped && remainingOverflows != 0)
             {
-                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this, lakeMap, 100);
-                escapePoints.ForEach(p => AddRiverFrom(p, lakeMap, -1));
+                //FIXME can i recycle on efloodtool per rivermap? saves translation to/from gpu data
+                var escapePoints = new FloodTool(_heightMap).FloodArea(start, this, lakeMap, 100, 1000000);
+                if (escapePoints.Count > 0)
+                    AddRiverFrom(escapePoints[0], lakeMap, -1, remainingOverflows -1);
+            //TODO    escapePoints.ForEach(p => AddRiverFrom(p, lakeMap, -1));
             }
         }
 
         public void AddRiverFrom((int x, int y) pos, int branchEveryX = 100)
         {
             var myLakeMap = new BooleanMap(this.Bounds());
-            AddRiverFrom(pos, myLakeMap, branchEveryX);
+            AddRiverFrom(pos, myLakeMap, branchEveryX, 10);
         }
 
         /// <summary>

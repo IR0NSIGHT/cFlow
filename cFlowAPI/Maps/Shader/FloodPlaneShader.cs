@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +15,9 @@ namespace cFlowAPI.Maps.Shader
 
     public partial class FloodPlaneComputer
     {
-        public static bool didChangeAndReset(Shader shader)
+        public static int getAmountChangedAndReset(Shader shader)
         {
-            var didChange = shader.changed.ToArray()[0] == 1;
+            var didChange = shader.changed.ToArray()[0];
             shader.changed.CopyFrom(new int[1]);
             return didChange;
         }
@@ -46,19 +47,22 @@ namespace cFlowAPI.Maps.Shader
             return booleanMap;
         }
 
-        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader floodShader, (int x, int y) source, int maxIterations = 10000, int maxDepth = 255, int startDepth = 0)
+        public static (BooleanMap marked, (int x, int y)[] escapes) ClimbHole(Shader floodShader, (int x, int y) source, int maxLakeSurface = 10000, int maxDepth = 255, int startDepth = 0)
         {
+            Debug.WriteLine($"climb hole from {source}");
             //prime beforeMarkedTexture with the start positions
             var startMap = new BooleanMap((floodShader.heightTexture.Width, floodShader.heightTexture.Height));
             startMap.setMarked(source.x, source.y);
             floodShader.MarkedTexture.CopyFrom(startMap.ToGpuData());
-
+            var totalChanged = 0;
             //Run shader
             for (int i = startDepth; i < maxDepth; i++)
             {
                 floodShader.currentHeight.CopyFrom(new int[] { i });
 
-                RunUntilEscapeFoundOrPlaneDone(floodShader, maxIterations);
+                var changed = RunUntilEscapeFoundOrPlaneDone(floodShader, maxLakeSurface - totalChanged);
+                totalChanged += changed;
+
                 if (GetFoundEscapePoints(floodShader).Length != 0)
                 {
                     //TODO: remove currentheight marked points => this plane was not fully flooded.
@@ -71,25 +75,40 @@ namespace cFlowAPI.Maps.Shader
                     GraphicsDevice.GetDefault().For(floodShader.heightTexture.Width, floodShader.heightTexture.Height, cleaner);
                     return (MarkedMapFromShader(floodShader), GetFoundEscapePoints(floodShader));
                 }
+
+                if (maxLakeSurface < totalChanged)
+                {
+                    Debug.WriteLine("lake exceeded maximum surface. abort now");
+                    break;
+                }
             }
             return (MarkedMapFromShader(floodShader), []);
         }
 
-        public static BooleanMap RunUntilEscapeFoundOrPlaneDone(Shader shader, int maxIterations = 10000)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="maxNewSurface"></param>
+        /// <returns>marked map and total points changed</returns>
+        private static int RunUntilEscapeFoundOrPlaneDone(Shader shader, int maxNewSurface)
         {
             var currentShader = shader;
-
-            for (int i = 0; i < maxIterations; i++)
+            var totalChanged = 0;
+            for (int i = 0; i < 100000/*safety margin*/; i++)
             {
                 GraphicsDevice.GetDefault().For(shader.heightTexture.Width, shader.heightTexture.Height, currentShader);
-                var didChange = didChangeAndReset(currentShader);
-                if (!didChange)
-                    break;
+                var didChange = getAmountChangedAndReset(currentShader);
+                totalChanged += didChange;
+                if (totalChanged > maxNewSurface)
+                    return totalChanged;
+                if (didChange == 0)
+                    return totalChanged;
                 if (shader.escapeIdx.ToArray()[0] != 0)
-                    break;
+                    return totalChanged;
             }
 
-            return MarkedMapFromShader(currentShader);
+            throw new Exception("safety margin stopped infinte loop for floodplane shader");
         }
 
         public static (int x, int y)[] GetFoundEscapePoints(Shader shader)
@@ -165,7 +184,7 @@ namespace cFlowAPI.Maps.Shader
                     {
                         MarkedTexture[XY] = 1;
                         didChangeMarkingTexture[XY] = 1;
-                        changed[0] = 1;
+                        Hlsl.InterlockedAdd(ref changed[0], 1);
                     }
                     else if (ownHeight < currentHeight[0] && ignoredEscapes[XY] != 1)
                     {

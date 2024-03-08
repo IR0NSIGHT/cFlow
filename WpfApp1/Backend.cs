@@ -83,6 +83,9 @@ public class Backend
             }
             FireLoadingEvent(true);
 
+            heightmapApi.RiverMap.OnMapChanged = (img) => backendChannel.RaiseRivermapChanged(new ImageEventArgs(img, MapType.RiverMap));
+
+
             heightmapApi.RiverMap.AddRiverFrom(e.pos, e.splitEveryXBlocks);  //TODO use branching probability
             backendChannel.RaiseRivermapChanged(new ImageEventArgs(heightmapApi.RiverMap.ToImage(), MapType.RiverMap));
             FireLoadingEvent(false);

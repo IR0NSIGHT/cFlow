@@ -241,7 +241,7 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var escapePoints = flood.FloodArea((1, 1), riverMap);
+            var escapePoints = flood.FloodArea((1, 1), riverMap, new BooleanMap(riverMap.Bounds()),10,100);
             escapePoints.Sort();
 
             var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1), (1, 3), (2, 3) };
@@ -265,7 +265,7 @@ namespace unittest
 
 
             var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
-            var escapePoints = flood.FloodArea((1, 1), riverMap);
+            var escapePoints = flood.FloodArea((1, 1), riverMap, new BooleanMap(riverMap.Bounds()), 10, 100);
             escapePoints.Sort();
 
             var shouldBeEscapePoints = new List<(int x, int y)>() { (4, 1) };
@@ -336,6 +336,7 @@ namespace unittest
             flood.FloodArea(
                 (35, 25),
                 riverMap,
+                new BooleanMap(riverMap.Bounds()),
                 100,
                 500 //big enough for small hole, to small for middle hole
                 );
@@ -354,6 +355,31 @@ namespace unittest
                     Assert.That(riverMap.IsRiver(point.x, point.y), Is.False, $"incorreclty marked point: {point}");
                 }
             }
+        }
+
+        [Test]
+        public void LargeAreaFloodPerformanceDebugger()
+        {
+            DummyDimension heightMap = new DummyDimension((10000, 10000), 74);
+
+            var riverMap = new RiverMap(new DistanceMap(heightMap), heightMap);
+
+            (int x, int y) rectStart = (50, 100);
+            (int x, int y) rectEnd = (150, 200);
+            //make a large hole: 100x100 size
+            foreach (var point in iterateRect(rectStart, rectEnd))
+            {
+                heightMap.SetHeight(point, 25);
+            }
+
+            var flood = new cFlowAPI.Maps.riverMap.FloodTool(heightMap);
+            flood.FloodArea(
+                (35, 25),
+                riverMap,
+                new BooleanMap(riverMap.Bounds()),
+                100,
+                100000
+                );
         }
     }
 }
